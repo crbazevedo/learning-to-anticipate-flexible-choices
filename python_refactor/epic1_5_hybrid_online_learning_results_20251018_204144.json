@@ -1,0 +1,3187 @@
+{
+  "experiment_results": {
+    "experiment_name": "hybrid_online_learning_experiment",
+    "data_shape": [
+      200,
+      2
+    ],
+    "system_updates": [
+      {
+        "timestep": 0,
+        "regime": "bull_market",
+        "regime_confidence": 0.6590022169223263,
+        "regret_bounds": {
+          "regime_detection": 1.6651092223153954,
+          "parameter_adaptation": 0.007089243081025656,
+          "kalman_optimization": 11.090354888959125
+        }
+      },
+      {
+        "timestep": 1,
+        "regime": "bear_market",
+        "regime_confidence": 0.6659508456856816,
+        "regret_bounds": {
+          "regime_detection": 2.9646076147350224,
+          "parameter_adaptation": 0.00934047715431247,
+          "kalman_optimization": 17.577796618689757
+        }
+      },
+      {
+        "timestep": 2,
+        "regime": "sideways_market",
+        "regime_confidence": 0.6509021122969055,
+        "regret_bounds": {
+          "regime_detection": 4.078667960675236,
+          "parameter_adaptation": 0.009424455528946017,
+          "kalman_optimization": 22.18070977791825
+        }
+      },
+      {
+        "timestep": 3,
+        "regime": "bull_market",
+        "regime_confidence": 0.6915289307326211,
+        "regret_bounds": {
+          "regime_detection": 5.074544964718078,
+          "parameter_adaptation": 0.011259120562335054,
+          "kalman_optimization": 25.751006598945605
+        }
+      },
+      {
+        "timestep": 4,
+        "regime": "bear_market",
+        "regime_confidence": 0.67327671130926,
+        "regret_bounds": {
+          "regime_detection": 5.986250026900071,
+          "parameter_adaptation": 0.011413879809462178,
+          "kalman_optimization": 28.66815150764888
+        }
+      },
+      {
+        "timestep": 5,
+        "regime": "bull_market",
+        "regime_confidence": 0.6453370717198809,
+        "regret_bounds": {
+          "regime_detection": 6.833874711854726,
+          "parameter_adaptation": 0.011435621367117448,
+          "kalman_optimization": 31.13456238488501
+        }
+      },
+      {
+        "timestep": 6,
+        "regime": "sideways_market",
+        "regime_confidence": 0.6232393526603414,
+        "regret_bounds": {
+          "regime_detection": 7.630489051629351,
+          "parameter_adaptation": 0.011560029186075373,
+          "kalman_optimization": 33.27106466687737
+        }
+      },
+      {
+        "timestep": 7,
+        "regime": "sideways_market",
+        "regime_confidence": 0.6779971537711069,
+        "regret_bounds": {
+          "regime_detection": 8.38517659174564,
+          "parameter_adaptation": 0.012232644575209716,
+          "kalman_optimization": 35.15559323737951
+        }
+      },
+      {
+        "timestep": 8,
+        "regime": "bear_market",
+        "regime_confidence": 0.6134222019599229,
+        "regret_bounds": {
+          "regime_detection": 9.104562776310878,
+          "parameter_adaptation": 0.012351401847761068,
+          "kalman_optimization": 36.841361487904734
+        }
+      },
+      {
+        "timestep": 9,
+        "regime": "bull_market",
+        "regime_confidence": 0.5955301808848041,
+        "regret_bounds": {
+          "regime_detection": 9.79366177238804,
+          "parameter_adaptation": 0.012354866375991744,
+          "kalman_optimization": 38.36632436477393
+        }
+      },
+      {
+        "timestep": 10,
+        "regime": "bull_market",
+        "regime_confidence": 0.6441841634845928,
+        "regret_bounds": {
+          "regime_detection": 10.45638047273874,
+          "parameter_adaptation": 0.013584615727479998,
+          "kalman_optimization": 39.758506396608006
+        }
+      },
+      {
+        "timestep": 11,
+        "regime": "bull_market",
+        "regime_confidence": 0.5847753063973169,
+        "regret_bounds": {
+          "regime_detection": 11.095835667409363,
+          "parameter_adaptation": 0.013623099627082259,
+          "kalman_optimization": 41.03918971938459
+        }
+      },
+      {
+        "timestep": 12,
+        "regime": "bull_market",
+        "regime_confidence": 0.5842364290746097,
+        "regret_bounds": {
+          "regime_detection": 11.714562780573308,
+          "parameter_adaptation": 0.013678713724627863,
+          "kalman_optimization": 42.224917273844135
+        }
+      },
+      {
+        "timestep": 13,
+        "regime": "bull_market",
+        "regime_confidence": 0.5435461627236466,
+        "regret_bounds": {
+          "regime_detection": 12.31465838997265,
+          "parameter_adaptation": 0.013905021312309392,
+          "kalman_optimization": 43.32880321763536
+        }
+      },
+      {
+        "timestep": 14,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5292652476065398,
+        "regret_bounds": {
+          "regime_detection": 12.89788057528782,
+          "parameter_adaptation": 0.013906114573430634,
+          "kalman_optimization": 44.3614195558365
+        }
+      },
+      {
+        "timestep": 15,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5228582750052404,
+        "regret_bounds": {
+          "regime_detection": 13.465721444452868,
+          "parameter_adaptation": 0.013958787463632211,
+          "kalman_optimization": 45.33141350489946
+        }
+      },
+      {
+        "timestep": 16,
+        "regime": "bear_market",
+        "regime_confidence": 0.5223208195674863,
+        "regret_bounds": {
+          "regime_detection": 14.019460743442993,
+          "parameter_adaptation": 0.014048558581892589,
+          "kalman_optimization": 46.24594812633863
+        }
+      },
+      {
+        "timestep": 17,
+        "regime": "bull_market",
+        "regime_confidence": 0.5734661553806362,
+        "regret_bounds": {
+          "regime_detection": 14.560206265708729,
+          "parameter_adaptation": 0.014393142191391683,
+          "kalman_optimization": 47.111023666663044
+        }
+      },
+      {
+        "timestep": 18,
+        "regime": "bull_market",
+        "regime_confidence": 0.5553732792178429,
+        "regret_bounds": {
+          "regime_detection": 15.088924838771756,
+          "parameter_adaptation": 0.014438647857054556,
+          "kalman_optimization": 47.931716376863854
+        }
+      },
+      {
+        "timestep": 19,
+        "regime": "bull_market",
+        "regime_confidence": 0.5911898282263843,
+        "regret_bounds": {
+          "regime_detection": 15.606466448811334,
+          "parameter_adaptation": 0.014911169692760714,
+          "kalman_optimization": 48.71235900357477
+        }
+      },
+      {
+        "timestep": 20,
+        "regime": "bear_market",
+        "regime_confidence": 0.55960585684257,
+        "regret_bounds": {
+          "regime_detection": 16.113583278777522,
+          "parameter_adaptation": 0.015134167270619135,
+          "kalman_optimization": 49.45667925373306
+        }
+      },
+      {
+        "timestep": 21,
+        "regime": "bear_market",
+        "regime_confidence": 0.5402623627383715,
+        "regret_bounds": {
+          "regime_detection": 16.610944915981307,
+          "parameter_adaptation": 0.015135287177378555,
+          "kalman_optimization": 50.167907454866395
+        }
+      },
+      {
+        "timestep": 22,
+        "regime": "bear_market",
+        "regime_confidence": 0.5679947712767403,
+        "regret_bounds": {
+          "regime_detection": 17.099150633642918,
+          "parameter_adaptation": 0.015441570173159775,
+          "kalman_optimization": 50.84886128556713
+        }
+      },
+      {
+        "timestep": 23,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5323917664156019,
+        "regret_bounds": {
+          "regime_detection": 17.578739408369056,
+          "parameter_adaptation": 0.0154572365177217,
+          "kalman_optimization": 51.50201319789121
+        }
+      },
+      {
+        "timestep": 24,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5390552112433769,
+        "regret_bounds": {
+          "regime_detection": 18.050198165176695,
+          "parameter_adaptation": 0.015595032448045998,
+          "kalman_optimization": 52.129544608343714
+        }
+      },
+      {
+        "timestep": 25,
+        "regime": "sideways_market",
+        "regime_confidence": 0.552168015923182,
+        "regret_bounds": {
+          "regime_detection": 18.513968620056865,
+          "parameter_adaptation": 0.015658774220506613,
+          "kalman_optimization": 52.733389856069266
+        }
+      },
+      {
+        "timestep": 26,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5489359346321351,
+        "regret_bounds": {
+          "regime_detection": 18.97045300194284,
+          "parameter_adaptation": 0.015775368303155273,
+          "kalman_optimization": 53.31527216280326
+        }
+      },
+      {
+        "timestep": 27,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5790912307247476,
+        "regret_bounds": {
+          "regime_detection": 19.420018871218563,
+          "parameter_adaptation": 0.016075649661702905,
+          "kalman_optimization": 53.876733279783586
+        }
+      },
+      {
+        "timestep": 28,
+        "regime": "sideways_market",
+        "regime_confidence": 0.541223271041732,
+        "regret_bounds": {
+          "regime_detection": 19.86300320376579,
+          "parameter_adaptation": 0.016235768169429635,
+          "kalman_optimization": 54.41915810659449
+        }
+      },
+      {
+        "timestep": 29,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5476812361727214,
+        "regret_bounds": {
+          "regime_detection": 20.29971587333718,
+          "parameter_adaptation": 0.016253535921278296,
+          "kalman_optimization": 54.94379527176234
+        }
+      },
+      {
+        "timestep": 30,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5349659440453262,
+        "regret_bounds": {
+          "regime_detection": 20.730442637511775,
+          "parameter_adaptation": 0.0162897419317163,
+          "kalman_optimization": 55.451774444795625
+        }
+      },
+      {
+        "timestep": 31,
+        "regime": "sideways_market",
+        "regime_confidence": 0.534103745398685,
+        "regret_bounds": {
+          "regime_detection": 21.155447711351076,
+          "parameter_adaptation": 0.016378406521766427,
+          "kalman_optimization": 55.944120983463684
+        }
+      },
+      {
+        "timestep": 32,
+        "regime": "bull_market",
+        "regime_confidence": 0.5590303475801123,
+        "regret_bounds": {
+          "regime_detection": 21.574975996494953,
+          "parameter_adaptation": 0.016627590887584982,
+          "kalman_optimization": 56.421768393858585
+        }
+      },
+      {
+        "timestep": 33,
+        "regime": "bull_market",
+        "regime_confidence": 0.5655358926823287,
+        "regret_bounds": {
+          "regime_detection": 21.98925502063588,
+          "parameter_adaptation": 0.016645844071911112,
+          "kalman_optimization": 56.885568983830616
+        }
+      },
+      {
+        "timestep": 34,
+        "regime": "bull_market",
+        "regime_confidence": 0.5469086494132901,
+        "regret_bounds": {
+          "regime_detection": 22.398496632226355,
+          "parameter_adaptation": 0.016692962718476173,
+          "kalman_optimization": 57.33630301529776
+        }
+      },
+      {
+        "timestep": 35,
+        "regime": "bull_market",
+        "regime_confidence": 0.5508549201945346,
+        "regret_bounds": {
+          "regime_detection": 22.80289848727061,
+          "parameter_adaptation": 0.01669393540148709,
+          "kalman_optimization": 57.77468660230759
+        }
+      },
+      {
+        "timestep": 36,
+        "regime": "bull_market",
+        "regime_confidence": 0.5665596306346228,
+        "regret_bounds": {
+          "regime_detection": 23.2026453586548,
+          "parameter_adaptation": 0.016749526755387028,
+          "kalman_optimization": 58.20137855562217
+        }
+      },
+      {
+        "timestep": 37,
+        "regime": "bull_market",
+        "regime_confidence": 0.6628299937430809,
+        "regret_bounds": {
+          "regime_detection": 23.597910293322716,
+          "parameter_adaptation": 0.01831750319236834,
+          "kalman_optimization": 58.61698633807434
+        }
+      },
+      {
+        "timestep": 38,
+        "regime": "bear_market",
+        "regime_confidence": 0.5371981808592082,
+        "regret_bounds": {
+          "regime_detection": 23.98885563843707,
+          "parameter_adaptation": 0.018455954938759782,
+          "kalman_optimization": 59.02207126582298
+        }
+      },
+      {
+        "timestep": 39,
+        "regime": "bear_market",
+        "regime_confidence": 0.5389522668296606,
+        "regret_bounds": {
+          "regime_detection": 24.37563395427264,
+          "parameter_adaptation": 0.01853879940533032,
+          "kalman_optimization": 59.41715306726893
+        }
+      },
+      {
+        "timestep": 40,
+        "regime": "bear_market",
+        "regime_confidence": 0.5577643657427959,
+        "regret_bounds": {
+          "regime_detection": 24.75838882880856,
+          "parameter_adaptation": 0.018539412016482685,
+          "kalman_optimization": 59.802713892533895
+        }
+      },
+      {
+        "timestep": 41,
+        "regime": "bear_market",
+        "regime_confidence": 0.6119681697562039,
+        "regret_bounds": {
+          "regime_detection": 25.137255606698965,
+          "parameter_adaptation": 0.019046462737763475,
+          "kalman_optimization": 60.179201851097
+        }
+      },
+      {
+        "timestep": 42,
+        "regime": "bear_market",
+        "regime_confidence": 0.5559389497327533,
+        "regret_bounds": {
+          "regime_detection": 25.512362043408306,
+          "parameter_adaptation": 0.019164888505229707,
+          "kalman_optimization": 60.547034142692176
+        }
+      },
+      {
+        "timestep": 43,
+        "regime": "bear_market",
+        "regime_confidence": 0.5716172993898261,
+        "regret_bounds": {
+          "regime_detection": 25.8838288937239,
+          "parameter_adaptation": 0.019295574701482687,
+          "kalman_optimization": 60.906599836325114
+        }
+      },
+      {
+        "timestep": 44,
+        "regime": "bear_market",
+        "regime_confidence": 0.5542450256925575,
+        "regret_bounds": {
+          "regime_detection": 26.251770442544196,
+          "parameter_adaptation": 0.019410792328145944,
+          "kalman_optimization": 61.25826234382552
+        }
+      },
+      {
+        "timestep": 45,
+        "regime": "bull_market",
+        "regime_confidence": 0.5535391350978246,
+        "regret_bounds": {
+          "regime_detection": 26.616294984739156,
+          "parameter_adaptation": 0.019410794121326673,
+          "kalman_optimization": 61.602361627360935
+        }
+      },
+      {
+        "timestep": 46,
+        "regime": "bull_market",
+        "regime_confidence": 0.5483242319463313,
+        "regret_bounds": {
+          "regime_detection": 26.977505259950995,
+          "parameter_adaptation": 0.01945115471317121,
+          "kalman_optimization": 61.93921617452626
+        }
+      },
+      {
+        "timestep": 47,
+        "regime": "bear_market",
+        "regime_confidence": 0.5443327621518022,
+        "regret_bounds": {
+          "regime_detection": 27.335498847418904,
+          "parameter_adaptation": 0.01945180416029864,
+          "kalman_optimization": 62.26912476977002
+        }
+      },
+      {
+        "timestep": 48,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5500046796911292,
+        "regret_bounds": {
+          "regime_detection": 27.69036852524568,
+          "parameter_adaptation": 0.019490606075824184,
+          "kalman_optimization": 62.592368086850335
+        }
+      },
+      {
+        "timestep": 49,
+        "regime": "sideways_market",
+        "regime_confidence": 0.563127622477402,
+        "regret_bounds": {
+          "regime_detection": 28.04220259795698,
+          "parameter_adaptation": 0.019492679881746872,
+          "kalman_optimization": 62.90921012358921
+        }
+      },
+      {
+        "timestep": 50,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5823210388642261,
+        "regret_bounds": {
+          "regime_detection": 28.391085195719644,
+          "parameter_adaptation": 0.019690132835160603,
+          "kalman_optimization": 63.21989949730284
+        }
+      },
+      {
+        "timestep": 51,
+        "regime": "bull_market",
+        "regime_confidence": 0.5201691208617554,
+        "regret_bounds": {
+          "regime_detection": 28.73709654816995,
+          "parameter_adaptation": 0.019695670325266704,
+          "kalman_optimization": 63.52467061683395
+        }
+      },
+      {
+        "timestep": 52,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5242237178288222,
+        "regret_bounds": {
+          "regime_detection": 29.08031323544549,
+          "parameter_adaptation": 0.019700493797570728,
+          "kalman_optimization": 63.82374474502839
+        }
+      },
+      {
+        "timestep": 53,
+        "regime": "bear_market",
+        "regime_confidence": 0.6412834983158567,
+        "regret_bounds": {
+          "regime_detection": 29.4208084187062,
+          "parameter_adaptation": 0.020360164570948244,
+          "kalman_optimization": 64.11733096371954
+        }
+      },
+      {
+        "timestep": 54,
+        "regime": "bear_market",
+        "regime_confidence": 0.5407261122528795,
+        "regret_bounds": {
+          "regime_detection": 29.75865205216347,
+          "parameter_adaptation": 0.02036140735133212,
+          "kalman_optimization": 64.4056270517624
+        }
+      },
+      {
+        "timestep": 55,
+        "regime": "bear_market",
+        "regime_confidence": 0.6045403912054307,
+        "regret_bounds": {
+          "regime_detection": 30.09391107840487,
+          "parameter_adaptation": 0.020898633680654227,
+          "kalman_optimization": 64.6888202853528
+        }
+      },
+      {
+        "timestep": 56,
+        "regime": "bull_market",
+        "regime_confidence": 0.5416670282691987,
+        "regret_bounds": {
+          "regime_detection": 30.426649608601068,
+          "parameter_adaptation": 0.02090238049156456,
+          "kalman_optimization": 64.9670881687427
+        }
+      },
+      {
+        "timestep": 57,
+        "regime": "bull_market",
+        "regime_confidence": 0.5545473137842376,
+        "regret_bounds": {
+          "regime_detection": 30.75692908900573,
+          "parameter_adaptation": 0.02090299012093281,
+          "kalman_optimization": 65.24059910249152
+        }
+      },
+      {
+        "timestep": 58,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5407621903255716,
+        "regret_bounds": {
+          "regime_detection": 31.08480845500605,
+          "parameter_adaptation": 0.020912036929123634,
+          "kalman_optimization": 65.5095129955536
+        }
+      },
+      {
+        "timestep": 59,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5742034055344748,
+        "regret_bounds": {
+          "regime_detection": 31.410344273847027,
+          "parameter_adaptation": 0.0210886398742342,
+          "kalman_optimization": 65.77398182677298
+        }
+      },
+      {
+        "timestep": 60,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5742120469514508,
+        "regret_bounds": {
+          "regime_detection": 31.733590877034423,
+          "parameter_adaptation": 0.022539791813287198,
+          "kalman_optimization": 66.03415016072147
+        }
+      },
+      {
+        "timestep": 61,
+        "regime": "bear_market",
+        "regime_confidence": 0.5579048747020118,
+        "regret_bounds": {
+          "regime_detection": 32.05460048331752,
+          "parameter_adaptation": 0.022550235983113693,
+          "kalman_optimization": 66.29015562226452
+        }
+      },
+      {
+        "timestep": 62,
+        "regime": "bear_market",
+        "regime_confidence": 0.5914786248237969,
+        "regret_bounds": {
+          "regime_detection": 32.37342331306093,
+          "parameter_adaptation": 0.02529259655522185,
+          "kalman_optimization": 66.54212933375474
+        }
+      },
+      {
+        "timestep": 63,
+        "regime": "bull_market",
+        "regime_confidence": 0.7231627157880975,
+        "regret_bounds": {
+          "regime_detection": 32.69010769473363,
+          "parameter_adaptation": 0.02930417682517197,
+          "kalman_optimization": 66.79019631833019
+        }
+      },
+      {
+        "timestep": 64,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5966037415807642,
+        "regret_bounds": {
+          "regime_detection": 33.00470016417163,
+          "parameter_adaptation": 0.029385449661100512,
+          "kalman_optimization": 67.0344758724228
+        }
+      },
+      {
+        "timestep": 65,
+        "regime": "bear_market",
+        "regime_confidence": 0.7340233802182429,
+        "regret_bounds": {
+          "regime_detection": 33.31724555720678,
+          "parameter_adaptation": 0.032690175096772536,
+          "kalman_optimization": 67.27508191025545
+        }
+      },
+      {
+        "timestep": 66,
+        "regime": "sideways_market",
+        "regime_confidence": 0.6653184400629018,
+        "regret_bounds": {
+          "regime_detection": 33.62778709619764,
+          "parameter_adaptation": 0.033123995290197404,
+          "kalman_optimization": 67.51212328281771
+        }
+      },
+      {
+        "timestep": 67,
+        "regime": "bull_market",
+        "regime_confidence": 0.5861893018212727,
+        "regret_bounds": {
+          "regime_detection": 33.936366470947576,
+          "parameter_adaptation": 0.03314845771821953,
+          "kalman_optimization": 67.74570407355615
+        }
+      },
+      {
+        "timestep": 68,
+        "regime": "bear_market",
+        "regime_confidence": 0.546711001805787,
+        "regret_bounds": {
+          "regime_detection": 34.24302391445042,
+          "parameter_adaptation": 0.03316274734692832,
+          "kalman_optimization": 67.97592387278975
+        }
+      },
+      {
+        "timestep": 69,
+        "regime": "sideways_market",
+        "regime_confidence": 0.48453217650442476,
+        "regret_bounds": {
+          "regime_detection": 34.547798273863535,
+          "parameter_adaptation": 0.03472519115850703,
+          "kalman_optimization": 68.20287803266105
+        }
+      },
+      {
+        "timestep": 70,
+        "regime": "sideways_market",
+        "regime_confidence": 0.4592026900157571,
+        "regret_bounds": {
+          "regime_detection": 34.850727077072,
+          "parameter_adaptation": 0.0350812203362698,
+          "kalman_optimization": 68.42665790425688
+        }
+      },
+      {
+        "timestep": 71,
+        "regime": "sideways_market",
+        "regime_confidence": 0.4181754528636324,
+        "regret_bounds": {
+          "regime_detection": 35.15184659517529,
+          "parameter_adaptation": 0.037546476584972864,
+          "kalman_optimization": 68.64735105837426
+        }
+      },
+      {
+        "timestep": 72,
+        "regime": "bear_market",
+        "regime_confidence": 0.41214131434708506,
+        "regret_bounds": {
+          "regime_detection": 35.45119190119872,
+          "parameter_adaptation": 0.038315388059285,
+          "kalman_optimization": 68.86504149126672
+        }
+      },
+      {
+        "timestep": 73,
+        "regime": "bear_market",
+        "regime_confidence": 0.3700188582758493,
+        "regret_bounds": {
+          "regime_detection": 35.74879692530572,
+          "parameter_adaptation": 0.03908065236128092,
+          "kalman_optimization": 69.07980981658096
+        }
+      },
+      {
+        "timestep": 74,
+        "regime": "bull_market",
+        "regime_confidence": 0.4322248536105347,
+        "regret_bounds": {
+          "regime_detection": 36.04469450676339,
+          "parameter_adaptation": 0.04015358457572073,
+          "kalman_optimization": 69.2917334445813
+        }
+      },
+      {
+        "timestep": 75,
+        "regime": "bull_market",
+        "regime_confidence": 0.40879906644680636,
+        "regret_bounds": {
+          "regime_detection": 36.33891644289246,
+          "parameter_adaptation": 0.04033370622623018,
+          "kalman_optimization": 69.50088674965895
+        }
+      },
+      {
+        "timestep": 76,
+        "regime": "bull_market",
+        "regime_confidence": 0.39391284876270666,
+        "regret_bounds": {
+          "regime_detection": 36.63149353521358,
+          "parameter_adaptation": 0.04064097984973687,
+          "kalman_optimization": 69.70734122703347
+        }
+      },
+      {
+        "timestep": 77,
+        "regime": "sideways_market",
+        "regime_confidence": 0.38528178413489717,
+        "regret_bounds": {
+          "regime_detection": 36.92245563298452,
+          "parameter_adaptation": 0.040795004265094206,
+          "kalman_optimization": 69.91116563947234
+        }
+      },
+      {
+        "timestep": 78,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5417382779738057,
+        "regret_bounds": {
+          "regime_detection": 37.21183167430685,
+          "parameter_adaptation": 0.04367175366670518,
+          "kalman_optimization": 70.1124261547821
+        }
+      },
+      {
+        "timestep": 79,
+        "regime": "bull_market",
+        "regime_confidence": 0.4076122004722829,
+        "regret_bounds": {
+          "regime_detection": 37.49964972496651,
+          "parameter_adaptation": 0.04574455823190699,
+          "kalman_optimization": 70.31118647475903
+        }
+      },
+      {
+        "timestep": 80,
+        "regime": "bear_market",
+        "regime_confidence": 0.43242813096465016,
+        "regret_bounds": {
+          "regime_detection": 37.78593701515973,
+          "parameter_adaptation": 0.04631432647684556,
+          "kalman_optimization": 70.50750795622805
+        }
+      },
+      {
+        "timestep": 81,
+        "regime": "sideways_market",
+        "regime_confidence": 0.4337641715954319,
+        "regret_bounds": {
+          "regime_detection": 38.07071997424378,
+          "parameter_adaptation": 0.04723537198254813,
+          "kalman_optimization": 70.70144972474557
+        }
+      },
+      {
+        "timestep": 82,
+        "regime": "sideways_market",
+        "regime_confidence": 0.47705365250087006,
+        "regret_bounds": {
+          "regime_detection": 38.35402426364123,
+          "parameter_adaptation": 0.04768020359863183,
+          "kalman_optimization": 70.89306878149301
+        }
+      },
+      {
+        "timestep": 83,
+        "regime": "sideways_market",
+        "regime_confidence": 0.44737976065052093,
+        "regret_bounds": {
+          "regime_detection": 38.63587480801679,
+          "parameter_adaptation": 0.04787115031939528,
+          "kalman_optimization": 71.08242010384507
+        }
+      },
+      {
+        "timestep": 84,
+        "regime": "bull_market",
+        "regime_confidence": 0.42887012288647963,
+        "regret_bounds": {
+          "regime_detection": 38.916295824836574,
+          "parameter_adaptation": 0.04817613003089299,
+          "kalman_optimization": 71.26955674005612
+        }
+      },
+      {
+        "timestep": 85,
+        "regime": "bear_market",
+        "regime_confidence": 0.40032089985587943,
+        "regret_bounds": {
+          "regime_detection": 39.19531085241163,
+          "parameter_adaptation": 0.048835581083231404,
+          "kalman_optimization": 71.45452989847334
+        }
+      },
+      {
+        "timestep": 86,
+        "regime": "sideways_market",
+        "regime_confidence": 0.46585560693816863,
+        "regret_bounds": {
+          "regime_detection": 39.472942776519915,
+          "parameter_adaptation": 0.048836154517541086,
+          "kalman_optimization": 71.63738903165131
+        }
+      },
+      {
+        "timestep": 87,
+        "regime": "bull_market",
+        "regime_confidence": 0.46337303653855727,
+        "regret_bounds": {
+          "regime_detection": 39.749213855694215,
+          "parameter_adaptation": 0.04892678152118167,
+          "kalman_optimization": 71.81818191571423
+        }
+      },
+      {
+        "timestep": 88,
+        "regime": "sideways_market",
+        "regime_confidence": 0.41521976356591717,
+        "regret_bounds": {
+          "regime_detection": 40.024145745257,
+          "parameter_adaptation": 0.04892686475194718,
+          "kalman_optimization": 71.99695472528424
+        }
+      },
+      {
+        "timestep": 89,
+        "regime": "bear_market",
+        "regime_confidence": 0.3111793837578527,
+        "regret_bounds": {
+          "regime_detection": 40.29775952017762,
+          "parameter_adaptation": 0.048957046566656,
+          "kalman_optimization": 72.1737521042696
+        }
+      },
+      {
+        "timestep": 90,
+        "regime": "sideways_market",
+        "regime_confidence": 0.26598286314252306,
+        "regret_bounds": {
+          "regime_detection": 40.570075696821796,
+          "parameter_adaptation": 0.04912573571751853,
+          "kalman_optimization": 72.34861723278465
+        }
+      },
+      {
+        "timestep": 91,
+        "regime": "sideways_market",
+        "regime_confidence": 0.3453007123077518,
+        "regret_bounds": {
+          "regime_detection": 40.84111425365863,
+          "parameter_adaptation": 0.05000490707859352,
+          "kalman_optimization": 72.5215918904521
+        }
+      },
+      {
+        "timestep": 92,
+        "regime": "sideways_market",
+        "regime_confidence": 0.2536457100132339,
+        "regret_bounds": {
+          "regime_detection": 41.11089465098566,
+          "parameter_adaptation": 0.05002281460599594,
+          "kalman_optimization": 72.69271651632006
+        }
+      },
+      {
+        "timestep": 93,
+        "regime": "bear_market",
+        "regime_confidence": 0.1938213881870538,
+        "regret_bounds": {
+          "regime_detection": 41.37943584972859,
+          "parameter_adaptation": 0.05026449595144688,
+          "kalman_optimization": 72.86203026560865
+        }
+      },
+      {
+        "timestep": 94,
+        "regime": "bear_market",
+        "regime_confidence": 0.18148897507811057,
+        "regret_bounds": {
+          "regime_detection": 41.64675632936829,
+          "parameter_adaptation": 0.05062320138356769,
+          "kalman_optimization": 73.02957106348538
+        }
+      },
+      {
+        "timestep": 95,
+        "regime": "sideways_market",
+        "regime_confidence": 0.16116099658610145,
+        "regret_bounds": {
+          "regime_detection": 41.912874105044374,
+          "parameter_adaptation": 0.050623700297187595,
+          "kalman_optimization": 73.19537565605413
+        }
+      },
+      {
+        "timestep": 96,
+        "regime": "bull_market",
+        "regime_confidence": 0.16969276256425594,
+        "regret_bounds": {
+          "regime_detection": 42.1778067438811,
+          "parameter_adaptation": 0.05071415263160379,
+          "kalman_optimization": 73.35947965872916
+        }
+      },
+      {
+        "timestep": 97,
+        "regime": "bull_market",
+        "regime_confidence": 0.17621996435188025,
+        "regret_bounds": {
+          "regime_detection": 42.44157138057873,
+          "parameter_adaptation": 0.05077015242627121,
+          "kalman_optimization": 73.52191760215344
+        }
+      },
+      {
+        "timestep": 98,
+        "regime": "bull_market",
+        "regime_confidence": 0.166813714821621,
+        "regret_bounds": {
+          "regime_detection": 42.7041847323103,
+          "parameter_adaptation": 0.051135538192409874,
+          "kalman_optimization": 73.68272297580947
+        }
+      },
+      {
+        "timestep": 99,
+        "regime": "bear_market",
+        "regime_confidence": 0.18229689848446973,
+        "regret_bounds": {
+          "regime_detection": 42.96566311296154,
+          "parameter_adaptation": 0.05117682978329367,
+          "kalman_optimization": 73.84192826946015
+        }
+      },
+      {
+        "timestep": 100,
+        "regime": "bear_market",
+        "regime_confidence": 0.21075566069507687,
+        "regret_bounds": {
+          "regime_detection": 43.22602244674896,
+          "parameter_adaptation": 0.05135233265007552,
+          "kalman_optimization": 73.99956501254833
+        }
+      },
+      {
+        "timestep": 101,
+        "regime": "sideways_market",
+        "regime_confidence": 0.34205664584945594,
+        "regret_bounds": {
+          "regime_detection": 43.48527828124929,
+          "parameter_adaptation": 0.05186926676589526,
+          "kalman_optimization": 74.15566381167417
+        }
+      },
+      {
+        "timestep": 102,
+        "regime": "sideways_market",
+        "regime_confidence": 0.32762289970278274,
+        "regret_bounds": {
+          "regime_detection": 43.743445799870926,
+          "parameter_adaptation": 0.05317002740574347,
+          "kalman_optimization": 74.31025438626196
+        }
+      },
+      {
+        "timestep": 103,
+        "regime": "bull_market",
+        "regime_confidence": 0.2818728844324351,
+        "regret_bounds": {
+          "regime_detection": 44.000539833796694,
+          "parameter_adaptation": 0.0533583958867068,
+          "kalman_optimization": 74.46336560252037
+        }
+      },
+      {
+        "timestep": 104,
+        "regime": "bull_market",
+        "regime_confidence": 0.2800688789612359,
+        "regret_bounds": {
+          "regime_detection": 44.256574873424945,
+          "parameter_adaptation": 0.0535533929141412,
+          "kalman_optimization": 74.61502550579307
+        }
+      },
+      {
+        "timestep": 105,
+        "regime": "bear_market",
+        "regime_confidence": 0.2687930798556234,
+        "regret_bounds": {
+          "regime_detection": 44.511565079334694,
+          "parameter_adaptation": 0.053563364888721286,
+          "kalman_optimization": 74.76526135139049
+        }
+      },
+      {
+        "timestep": 106,
+        "regime": "bull_market",
+        "regime_confidence": 0.3052514402100876,
+        "regret_bounds": {
+          "regime_detection": 44.76552429279887,
+          "parameter_adaptation": 0.05364141843644515,
+          "kalman_optimization": 74.91409963398752
+        }
+      },
+      {
+        "timestep": 107,
+        "regime": "bear_market",
+        "regime_confidence": 0.2991615517977086,
+        "regret_bounds": {
+          "regime_detection": 45.01846604586822,
+          "parameter_adaptation": 0.05413284835406587,
+          "kalman_optimization": 75.0615661156663
+        }
+      },
+      {
+        "timestep": 108,
+        "regime": "bull_market",
+        "regime_confidence": 0.28350256194690027,
+        "regret_bounds": {
+          "regime_detection": 45.27040357104732,
+          "parameter_adaptation": 0.05445958201481037,
+          "kalman_optimization": 75.20768585267867
+        }
+      },
+      {
+        "timestep": 109,
+        "regime": "sideways_market",
+        "regime_confidence": 0.2515841853878833,
+        "regret_bounds": {
+          "regime_detection": 45.52134981058258,
+          "parameter_adaptation": 0.05447038632897083,
+          "kalman_optimization": 75.35248322099734
+        }
+      },
+      {
+        "timestep": 110,
+        "regime": "bear_market",
+        "regime_confidence": 0.5242259556037386,
+        "regret_bounds": {
+          "regime_detection": 45.77131742538138,
+          "parameter_adaptation": 0.05630730773160516,
+          "kalman_optimization": 75.4959819407215
+        }
+      },
+      {
+        "timestep": 111,
+        "regime": "bull_market",
+        "regime_confidence": 0.44262863795746127,
+        "regret_bounds": {
+          "regime_detection": 46.02031880357988,
+          "parameter_adaptation": 0.05631104875576706,
+          "kalman_optimization": 75.63820509939745
+        }
+      },
+      {
+        "timestep": 112,
+        "regime": "bear_market",
+        "regime_confidence": 0.34268075796985653,
+        "regret_bounds": {
+          "regime_detection": 46.26836606877654,
+          "parameter_adaptation": 0.05669679757484712,
+          "kalman_optimization": 75.77917517431193
+        }
+      },
+      {
+        "timestep": 113,
+        "regime": "bull_market",
+        "regime_confidence": 0.38634360825401515,
+        "regret_bounds": {
+          "regime_detection": 46.51547108794709,
+          "parameter_adaptation": 0.05669811324323013,
+          "kalman_optimization": 75.918914053812
+        }
+      },
+      {
+        "timestep": 114,
+        "regime": "bear_market",
+        "regime_confidence": 0.3143315541851879,
+        "regret_bounds": {
+          "regime_detection": 46.7616454790561,
+          "parameter_adaptation": 0.05687299499568481,
+          "kalman_optimization": 76.05744305770183
+        }
+      },
+      {
+        "timestep": 115,
+        "regime": "sideways_market",
+        "regime_confidence": 0.28899157636862466,
+        "regret_bounds": {
+          "regime_detection": 47.00690061837899,
+          "parameter_adaptation": 0.05692618018313192,
+          "kalman_optimization": 76.1947829567641
+        }
+      },
+      {
+        "timestep": 116,
+        "regime": "bull_market",
+        "regime_confidence": 0.37894433560861285,
+        "regret_bounds": {
+          "regime_detection": 47.25124764754822,
+          "parameter_adaptation": 0.05697277808724126,
+          "kalman_optimization": 76.33095399145064
+        }
+      },
+      {
+        "timestep": 117,
+        "regime": "bear_market",
+        "regime_confidence": 0.540548387956431,
+        "regret_bounds": {
+          "regime_detection": 47.49469748033608,
+          "parameter_adaptation": 0.058610840203880785,
+          "kalman_optimization": 76.46597588978447
+        }
+      },
+      {
+        "timestep": 118,
+        "regime": "sideways_market",
+        "regime_confidence": 0.47232526512377065,
+        "regret_bounds": {
+          "regime_detection": 47.73726080918609,
+          "parameter_adaptation": 0.06031284194182218,
+          "kalman_optimization": 76.59986788451273
+        }
+      },
+      {
+        "timestep": 119,
+        "regime": "bull_market",
+        "regime_confidence": 0.4015082777198663,
+        "regret_bounds": {
+          "regime_detection": 47.978948111504444,
+          "parameter_adaptation": 0.06033832728011898,
+          "kalman_optimization": 76.73264872954786
+        }
+      },
+      {
+        "timestep": 120,
+        "regime": "sideways_market",
+        "regime_confidence": 0.3462228016738188,
+        "regret_bounds": {
+          "regime_detection": 48.21976965572208,
+          "parameter_adaptation": 0.06036253161089647,
+          "kalman_optimization": 76.86433671573211
+        }
+      },
+      {
+        "timestep": 121,
+        "regime": "bear_market",
+        "regime_confidence": 0.3521430726428717,
+        "regret_bounds": {
+          "regime_detection": 48.45973550713767,
+          "parameter_adaptation": 0.06065413892104434,
+          "kalman_optimization": 76.99494968595867
+        }
+      },
+      {
+        "timestep": 122,
+        "regime": "sideways_market",
+        "regime_confidence": 0.41929759524293186,
+        "regret_bounds": {
+          "regime_detection": 48.698855533551075,
+          "parameter_adaptation": 0.06068076007046981,
+          "kalman_optimization": 77.1245050496806
+        }
+      },
+      {
+        "timestep": 123,
+        "regime": "bear_market",
+        "regime_confidence": 0.38913599716057995,
+        "regret_bounds": {
+          "regime_detection": 48.93713941069647,
+          "parameter_adaptation": 0.06068750472898988,
+          "kalman_optimization": 77.25301979683682
+        }
+      },
+      {
+        "timestep": 124,
+        "regime": "bear_market",
+        "regime_confidence": 0.511219227206938,
+        "regret_bounds": {
+          "regime_detection": 49.17459662748378,
+          "parameter_adaptation": 0.061193803573454934,
+          "kalman_optimization": 77.38051051122365
+        }
+      },
+      {
+        "timestep": 125,
+        "regime": "bear_market",
+        "regime_confidence": 0.4286308188790749,
+        "regret_bounds": {
+          "regime_detection": 49.41123649105667,
+          "parameter_adaptation": 0.06132317606343638,
+          "kalman_optimization": 77.50699338333746
+        }
+      },
+      {
+        "timestep": 126,
+        "regime": "bull_market",
+        "regime_confidence": 0.4987867797932937,
+        "regret_bounds": {
+          "regime_detection": 49.647068131674864,
+          "parameter_adaptation": 0.06182781790992027,
+          "kalman_optimization": 77.63248422271387
+        }
+      },
+      {
+        "timestep": 127,
+        "regime": "bull_market",
+        "regime_confidence": 0.4437754297822434,
+        "regret_bounds": {
+          "regime_detection": 49.88210050742828,
+          "parameter_adaptation": 0.06203044284005099,
+          "kalman_optimization": 77.75699846978675
+        }
+      },
+      {
+        "timestep": 128,
+        "regime": "bull_market",
+        "regime_confidence": 0.464594535961268,
+        "regret_bounds": {
+          "regime_detection": 50.11634240878997,
+          "parameter_adaptation": 0.062123365451322014,
+          "kalman_optimization": 77.88055120728932
+        }
+      },
+      {
+        "timestep": 129,
+        "regime": "bull_market",
+        "regime_confidence": 0.4839985508916582,
+        "regret_bounds": {
+          "regime_detection": 50.349802463014676,
+          "parameter_adaptation": 0.062125886596759654,
+          "kalman_optimization": 78.00315717121842
+        }
+      },
+      {
+        "timestep": 130,
+        "regime": "bull_market",
+        "regime_confidence": 0.41896856609402827,
+        "regret_bounds": {
+          "regime_detection": 50.582489138389164,
+          "parameter_adaptation": 0.062200272123824736,
+          "kalman_optimization": 78.12483076138193
+        }
+      },
+      {
+        "timestep": 131,
+        "regime": "bear_market",
+        "regime_confidence": 0.5395971217824574,
+        "regret_bounds": {
+          "regime_detection": 50.81441074834073,
+          "parameter_adaptation": 0.0626448126016994,
+          "kalman_optimization": 78.24558605154806
+        }
+      },
+      {
+        "timestep": 132,
+        "regime": "bull_market",
+        "regime_confidence": 0.5203338466795514,
+        "regret_bounds": {
+          "regime_detection": 51.045575455409306,
+          "parameter_adaptation": 0.06265337285626273,
+          "kalman_optimization": 78.36543679921458
+        }
+      },
+      {
+        "timestep": 133,
+        "regime": "bull_market",
+        "regime_confidence": 0.4630789938710156,
+        "regret_bounds": {
+          "regime_detection": 51.27599127508895,
+          "parameter_adaptation": 0.06283006410685758,
+          "kalman_optimization": 78.48439645501487
+        }
+      },
+      {
+        "timestep": 134,
+        "regime": "sideways_market",
+        "regime_confidence": 0.4966226249086823,
+        "regret_bounds": {
+          "regime_detection": 51.5056660795438,
+          "parameter_adaptation": 0.06283295987435977,
+          "kalman_optimization": 78.60247817177684
+        }
+      },
+      {
+        "timestep": 135,
+        "regime": "bull_market",
+        "regime_confidence": 0.45731978583651833,
+        "regret_bounds": {
+          "regime_detection": 51.73460760120347,
+          "parameter_adaptation": 0.06291546982288033,
+          "kalman_optimization": 78.71969481325
+        }
+      },
+      {
+        "timestep": 136,
+        "regime": "bull_market",
+        "regime_confidence": 0.48481589027600636,
+        "regret_bounds": {
+          "regime_detection": 51.96282343624284,
+          "parameter_adaptation": 0.06295243049806785,
+          "kalman_optimization": 78.83605896251528
+        }
+      },
+      {
+        "timestep": 137,
+        "regime": "bull_market",
+        "regime_confidence": 0.4352291112482264,
+        "regret_bounds": {
+          "regime_detection": 52.19032104795047,
+          "parameter_adaptation": 0.0630365482898082,
+          "kalman_optimization": 78.95158293009106
+        }
+      },
+      {
+        "timestep": 138,
+        "regime": "bull_market",
+        "regime_confidence": 0.4572379153610493,
+        "regret_bounds": {
+          "regime_detection": 52.41710776999026,
+          "parameter_adaptation": 0.06303753464883192,
+          "kalman_optimization": 79.06627876174886
+        }
+      },
+      {
+        "timestep": 139,
+        "regime": "bear_market",
+        "regime_confidence": 0.47482700129487565,
+        "regret_bounds": {
+          "regime_detection": 52.6431908095603,
+          "parameter_adaptation": 0.06303753808859144,
+          "kalman_optimization": 79.1801582460507
+        }
+      },
+      {
+        "timestep": 140,
+        "regime": "bull_market",
+        "regime_confidence": 0.518546667844994,
+        "regret_bounds": {
+          "regime_detection": 52.86857725045295,
+          "parameter_adaptation": 0.0630376627725203,
+          "kalman_optimization": 79.29323292162017
+        }
+      },
+      {
+        "timestep": 141,
+        "regime": "bull_market",
+        "regime_confidence": 0.4938233762574163,
+        "regret_bounds": {
+          "regime_detection": 53.09327405601982,
+          "parameter_adaptation": 0.06309930350008856,
+          "kalman_optimization": 79.40551408415851
+        }
+      },
+      {
+        "timestep": 142,
+        "regime": "bull_market",
+        "regime_confidence": 0.5371503633613749,
+        "regret_bounds": {
+          "regime_detection": 53.31728807204538,
+          "parameter_adaptation": 0.06315775930500209,
+          "kalman_optimization": 79.51701279321601
+        }
+      },
+      {
+        "timestep": 143,
+        "regime": "bull_market",
+        "regime_confidence": 0.46512172986948375,
+        "regret_bounds": {
+          "regime_detection": 53.54062602953248,
+          "parameter_adaptation": 0.06322471698614868,
+          "kalman_optimization": 79.62773987872919
+        }
+      },
+      {
+        "timestep": 144,
+        "regime": "sideways_market",
+        "regime_confidence": 0.47421117147894853,
+        "regret_bounds": {
+          "regime_detection": 53.763294547403206,
+          "parameter_adaptation": 0.06322799442240831,
+          "kalman_optimization": 79.73770594733338
+        }
+      },
+      {
+        "timestep": 145,
+        "regime": "bull_market",
+        "regime_confidence": 0.42805983553597626,
+        "regret_bounds": {
+          "regime_detection": 53.985300135118095,
+          "parameter_adaptation": 0.06324209166939666,
+          "kalman_optimization": 79.84692138845978
+        }
+      },
+      {
+        "timestep": 146,
+        "regime": "bull_market",
+        "regime_confidence": 0.40551968705950486,
+        "regret_bounds": {
+          "regime_detection": 54.20664919521681,
+          "parameter_adaptation": 0.06326411533382101,
+          "kalman_optimization": 79.95539638022584
+        }
+      },
+      {
+        "timestep": 147,
+        "regime": "bull_market",
+        "regime_confidence": 0.4459280002713704,
+        "regret_bounds": {
+          "regime_detection": 54.42734802578307,
+          "parameter_adaptation": 0.06327073905619907,
+          "kalman_optimization": 80.06314089512735
+        }
+      },
+      {
+        "timestep": 148,
+        "regime": "bull_market",
+        "regime_confidence": 0.43800005331574343,
+        "regret_bounds": {
+          "regime_detection": 54.64740282283659,
+          "parameter_adaptation": 0.06329569325890949,
+          "kalman_optimization": 80.17016470554009
+        }
+      },
+      {
+        "timestep": 149,
+        "regime": "bull_market",
+        "regime_confidence": 0.4567136119393457,
+        "regret_bounds": {
+          "regime_detection": 54.866819682654786,
+          "parameter_adaptation": 0.06329903991861893,
+          "kalman_optimization": 80.27647738903879
+        }
+      },
+      {
+        "timestep": 150,
+        "regime": "bull_market",
+        "regime_confidence": 0.46380479332332003,
+        "regret_bounds": {
+          "regime_detection": 55.08560460402655,
+          "parameter_adaptation": 0.0633615847644893,
+          "kalman_optimization": 80.38208833354042
+        }
+      },
+      {
+        "timestep": 151,
+        "regime": "sideways_market",
+        "regime_confidence": 0.40321759333295343,
+        "regret_bounds": {
+          "regime_detection": 55.30376349044069,
+          "parameter_adaptation": 0.06338561135066441,
+          "kalman_optimization": 80.48700674227896
+        }
+      },
+      {
+        "timestep": 152,
+        "regime": "sideways_market",
+        "regime_confidence": 0.3346689872316338,
+        "regret_bounds": {
+          "regime_detection": 55.521302152211284,
+          "parameter_adaptation": 0.06339123355334045,
+          "kalman_optimization": 80.59124163861807
+        }
+      },
+      {
+        "timestep": 153,
+        "regime": "bull_market",
+        "regime_confidence": 0.42752079067296833,
+        "regret_bounds": {
+          "regime_detection": 55.73822630854211,
+          "parameter_adaptation": 0.06342503151428888,
+          "kalman_optimization": 80.69480187070795
+        }
+      },
+      {
+        "timestep": 154,
+        "regime": "bull_market",
+        "regime_confidence": 0.3935369823100843,
+        "regret_bounds": {
+          "regime_detection": 55.95454158953242,
+          "parameter_adaptation": 0.06342651095086262,
+          "kalman_optimization": 80.7976961159926
+        }
+      },
+      {
+        "timestep": 155,
+        "regime": "bull_market",
+        "regime_confidence": 0.37858938441494644,
+        "regret_bounds": {
+          "regime_detection": 56.17025353812589,
+          "parameter_adaptation": 0.06345608870969832,
+          "kalman_optimization": 80.89993288557292
+        }
+      },
+      {
+        "timestep": 156,
+        "regime": "bull_market",
+        "regime_confidence": 0.4074649198459616,
+        "regret_bounds": {
+          "regime_detection": 56.385367612004934,
+          "parameter_adaptation": 0.0634767101334909,
+          "kalman_optimization": 81.00152052843147
+        }
+      },
+      {
+        "timestep": 157,
+        "regime": "bull_market",
+        "regime_confidence": 0.4444377115562566,
+        "regret_bounds": {
+          "regime_detection": 56.59988918543204,
+          "parameter_adaptation": 0.06349037040595723,
+          "kalman_optimization": 81.1024672355237
+        }
+      },
+      {
+        "timestep": 158,
+        "regime": "bull_market",
+        "regime_confidence": 0.4311662572338033,
+        "regret_bounds": {
+          "regime_detection": 56.81382355104005,
+          "parameter_adaptation": 0.06349489465800595,
+          "kalman_optimization": 81.20278104374123
+        }
+      },
+      {
+        "timestep": 159,
+        "regime": "bull_market",
+        "regime_confidence": 0.44035392232088927,
+        "regret_bounds": {
+          "regime_detection": 57.02717592157319,
+          "parameter_adaptation": 0.06350126911570884,
+          "kalman_optimization": 81.30246983975141
+        }
+      },
+      {
+        "timestep": 160,
+        "regime": "bull_market",
+        "regime_confidence": 0.41444311378312526,
+        "regret_bounds": {
+          "regime_detection": 57.23995143158016,
+          "parameter_adaptation": 0.0635061405474932,
+          "kalman_optimization": 81.40154136371814
+        }
+      },
+      {
+        "timestep": 161,
+        "regime": "bull_market",
+        "regime_confidence": 0.4531394476987255,
+        "regret_bounds": {
+          "regime_detection": 57.452155139061425,
+          "parameter_adaptation": 0.06354331048019796,
+          "kalman_optimization": 81.5000032129082
+        }
+      },
+      {
+        "timestep": 162,
+        "regime": "bull_market",
+        "regime_confidence": 0.4349142634739449,
+        "regret_bounds": {
+          "regime_detection": 57.6637920270717,
+          "parameter_adaptation": 0.06354896804629759,
+          "kalman_optimization": 81.59786284518718
+        }
+      },
+      {
+        "timestep": 163,
+        "regime": "sideways_market",
+        "regime_confidence": 0.39972062606318637,
+        "regret_bounds": {
+          "regime_detection": 57.87486700527942,
+          "parameter_adaptation": 0.06372591544539438,
+          "kalman_optimization": 81.69512758240928
+        }
+      },
+      {
+        "timestep": 164,
+        "regime": "bear_market",
+        "regime_confidence": 0.40256532043671905,
+        "regret_bounds": {
+          "regime_detection": 58.08538491148457,
+          "parameter_adaptation": 0.06372591805661725,
+          "kalman_optimization": 81.7918046137047
+        }
+      },
+      {
+        "timestep": 165,
+        "regime": "sideways_market",
+        "regime_confidence": 0.3868108412620339,
+        "regret_bounds": {
+          "regime_detection": 58.29535051309603,
+          "parameter_adaptation": 0.06373504375994218,
+          "kalman_optimization": 81.88790099866809
+        }
+      },
+      {
+        "timestep": 166,
+        "regime": "sideways_market",
+        "regime_confidence": 0.38006488606886035,
+        "regret_bounds": {
+          "regime_detection": 58.50476850857011,
+          "parameter_adaptation": 0.06373531107231543,
+          "kalman_optimization": 81.98342367045214
+        }
+      },
+      {
+        "timestep": 167,
+        "regime": "sideways_market",
+        "regime_confidence": 0.3617352529350226,
+        "regret_bounds": {
+          "regime_detection": 58.71364352881113,
+          "parameter_adaptation": 0.06375553048955734,
+          "kalman_optimization": 82.07837943876918
+        }
+      },
+      {
+        "timestep": 168,
+        "regime": "sideways_market",
+        "regime_confidence": 0.32816202682696255,
+        "regret_bounds": {
+          "regime_detection": 58.921980138535545,
+          "parameter_adaptation": 0.0638120193605263,
+          "kalman_optimization": 82.1727749928042
+        }
+      },
+      {
+        "timestep": 169,
+        "regime": "bear_market",
+        "regime_confidence": 0.3372102878511704,
+        "regret_bounds": {
+          "regime_detection": 59.12978283760062,
+          "parameter_adaptation": 0.06382292303139356,
+          "kalman_optimization": 82.26661690404256
+        }
+      },
+      {
+        "timestep": 170,
+        "regime": "sideways_market",
+        "regime_confidence": 0.3080449482553478,
+        "regret_bounds": {
+          "regime_detection": 59.33705606229889,
+          "parameter_adaptation": 0.06384459960429205,
+          "kalman_optimization": 82.35991162901524
+        }
+      },
+      {
+        "timestep": 171,
+        "regime": "bear_market",
+        "regime_confidence": 0.3832477718622686,
+        "regret_bounds": {
+          "regime_detection": 59.54380418661938,
+          "parameter_adaptation": 0.06385551494837323,
+          "kalman_optimization": 82.45266551196447
+        }
+      },
+      {
+        "timestep": 172,
+        "regime": "sideways_market",
+        "regime_confidence": 0.32044490330904013,
+        "regret_bounds": {
+          "regime_detection": 59.75003152347666,
+          "parameter_adaptation": 0.0638596119464085,
+          "kalman_optimization": 82.54488478743247
+        }
+      },
+      {
+        "timestep": 173,
+        "regime": "bull_market",
+        "regime_confidence": 0.3527155524519521,
+        "regret_bounds": {
+          "regime_detection": 59.95574232590875,
+          "parameter_adaptation": 0.06388108957343207,
+          "kalman_optimization": 82.63657558277623
+        }
+      },
+      {
+        "timestep": 174,
+        "regime": "bear_market",
+        "regime_confidence": 0.22639363202663174,
+        "regret_bounds": {
+          "regime_detection": 60.16094078824488,
+          "parameter_adaptation": 0.06388442099161923,
+          "kalman_optimization": 82.72774392061042
+        }
+      },
+      {
+        "timestep": 175,
+        "regime": "bear_market",
+        "regime_confidence": 0.24488850411626908,
+        "regret_bounds": {
+          "regime_detection": 60.36563104724389,
+          "parameter_adaptation": 0.0639303119965389,
+          "kalman_optimization": 82.81839572118126
+        }
+      },
+      {
+        "timestep": 176,
+        "regime": "bull_market",
+        "regime_confidence": 0.3006467690081773,
+        "regret_bounds": {
+          "regime_detection": 60.56981718320434,
+          "parameter_adaptation": 0.06393600863484993,
+          "kalman_optimization": 82.90853680467336
+        }
+      },
+      {
+        "timestep": 177,
+        "regime": "bear_market",
+        "regime_confidence": 0.28092683800653817,
+        "regret_bounds": {
+          "regime_detection": 60.77350322104706,
+          "parameter_adaptation": 0.06394378417766004,
+          "kalman_optimization": 82.99817289345208
+        }
+      },
+      {
+        "timestep": 178,
+        "regime": "bear_market",
+        "regime_confidence": 0.2762395130551805,
+        "regret_bounds": {
+          "regime_detection": 60.97669313137103,
+          "parameter_adaptation": 0.06394457425981706,
+          "kalman_optimization": 83.08730961424337
+        }
+      },
+      {
+        "timestep": 179,
+        "regime": "bull_market",
+        "regime_confidence": 0.2739239327120016,
+        "regret_bounds": {
+          "regime_detection": 61.179390831483396,
+          "parameter_adaptation": 0.06394583876501686,
+          "kalman_optimization": 83.17595250025322
+        }
+      },
+      {
+        "timestep": 180,
+        "regime": "sideways_market",
+        "regime_confidence": 0.27479984862473145,
+        "regret_bounds": {
+          "regime_detection": 61.38160018640439,
+          "parameter_adaptation": 0.0639475301435497,
+          "kalman_optimization": 83.26410699322872
+        }
+      },
+      {
+        "timestep": 181,
+        "regime": "bear_market",
+        "regime_confidence": 0.3181902287963399,
+        "regret_bounds": {
+          "regime_detection": 61.583325009847876,
+          "parameter_adaptation": 0.06395690110520098,
+          "kalman_optimization": 83.35177844546274
+        }
+      },
+      {
+        "timestep": 182,
+        "regime": "bull_market",
+        "regime_confidence": 0.3717870805813746,
+        "regret_bounds": {
+          "regime_detection": 61.78456906517822,
+          "parameter_adaptation": 0.06396776133744407,
+          "kalman_optimization": 83.43897212174377
+        }
+      },
+      {
+        "timestep": 183,
+        "regime": "bull_market",
+        "regime_confidence": 0.3577746013651464,
+        "regret_bounds": {
+          "regime_detection": 61.985336066344324,
+          "parameter_adaptation": 0.06397230576371102,
+          "kalman_optimization": 83.52569320125319
+        }
+      },
+      {
+        "timestep": 184,
+        "regime": "sideways_market",
+        "regime_confidence": 0.32175910188300116,
+        "regret_bounds": {
+          "regime_detection": 62.185629678791294,
+          "parameter_adaptation": 0.06397248195567194,
+          "kalman_optimization": 83.61194677941123
+        }
+      },
+      {
+        "timestep": 185,
+        "regime": "sideways_market",
+        "regime_confidence": 0.31031532918570953,
+        "regret_bounds": {
+          "regime_detection": 62.3854535203505,
+          "parameter_adaptation": 0.06397248424319871,
+          "kalman_optimization": 83.69773786967339
+        }
+      },
+      {
+        "timestep": 186,
+        "regime": "bull_market",
+        "regime_confidence": 0.4516209275926046,
+        "regret_bounds": {
+          "regime_detection": 62.58481116210867,
+          "parameter_adaptation": 0.06401472283226112,
+          "kalman_optimization": 83.78307140527919
+        }
+      },
+      {
+        "timestep": 187,
+        "regime": "bull_market",
+        "regime_confidence": 0.5323191792939235,
+        "regret_bounds": {
+          "regime_detection": 62.783706129256586,
+          "parameter_adaptation": 0.0640155730830099,
+          "kalman_optimization": 83.86795224095428
+        }
+      },
+      {
+        "timestep": 188,
+        "regime": "bull_market",
+        "regime_confidence": 0.45273771562114007,
+        "regret_bounds": {
+          "regime_detection": 62.98214190191794,
+          "parameter_adaptation": 0.06404783776943208,
+          "kalman_optimization": 83.95238515456778
+        }
+      },
+      {
+        "timestep": 189,
+        "regime": "bull_market",
+        "regime_confidence": 0.5369372410750692,
+        "regret_bounds": {
+          "regime_detection": 63.18012191595897,
+          "parameter_adaptation": 0.06408134341132926,
+          "kalman_optimization": 84.03637484874608
+        }
+      },
+      {
+        "timestep": 190,
+        "regime": "sideways_market",
+        "regime_confidence": 0.501075685514307,
+        "regret_bounds": {
+          "regime_detection": 63.377649563779386,
+          "parameter_adaptation": 0.06419126288168799,
+          "kalman_optimization": 84.1199259524445
+        }
+      },
+      {
+        "timestep": 191,
+        "regime": "bull_market",
+        "regime_confidence": 0.5548178102384135,
+        "regret_bounds": {
+          "regime_detection": 63.57472819508513,
+          "parameter_adaptation": 0.06423736762715795,
+          "kalman_optimization": 84.20304302247817
+        }
+      },
+      {
+        "timestep": 192,
+        "regime": "bear_market",
+        "regime_confidence": 0.43125698998724765,
+        "regret_bounds": {
+          "regime_detection": 63.771361117643465,
+          "parameter_adaptation": 0.0642469268107502,
+          "kalman_optimization": 84.28573054501325
+        }
+      },
+      {
+        "timestep": 193,
+        "regime": "sideways_market",
+        "regime_confidence": 0.5075843352063265,
+        "regret_bounds": {
+          "regime_detection": 63.96755159802091,
+          "parameter_adaptation": 0.06427788476175651,
+          "kalman_optimization": 84.36799293701995
+        }
+      },
+      {
+        "timestep": 194,
+        "regime": "bull_market",
+        "regime_confidence": 0.4810874209345585,
+        "regret_bounds": {
+          "regime_detection": 64.16330286230442,
+          "parameter_adaptation": 0.06427920502733796,
+          "kalman_optimization": 84.44983454768827
+        }
+      },
+      {
+        "timestep": 195,
+        "regime": "bear_market",
+        "regime_confidence": 0.4320254963307999,
+        "regret_bounds": {
+          "regime_detection": 64.35861809680645,
+          "parameter_adaptation": 0.06431004002853642,
+          "kalman_optimization": 84.53125965980782
+        }
+      },
+      {
+        "timestep": 196,
+        "regime": "sideways_market",
+        "regime_confidence": 0.39953847355907385,
+        "regret_bounds": {
+          "regime_detection": 64.55350044875408,
+          "parameter_adaptation": 0.06431131519687855,
+          "kalman_optimization": 84.61227249111256
+        }
+      },
+      {
+        "timestep": 197,
+        "regime": "bull_market",
+        "regime_confidence": 0.37144740255517866,
+        "regret_bounds": {
+          "regime_detection": 64.74795302696293,
+          "parameter_adaptation": 0.0643513999255982,
+          "kalman_optimization": 84.69287719559188
+        }
+      },
+      {
+        "timestep": 198,
+        "regime": "bear_market",
+        "regime_confidence": 0.342197323081073,
+        "regret_bounds": {
+          "regime_detection": 64.94197890249602,
+          "parameter_adaptation": 0.06440846858593025,
+          "kalman_optimization": 84.77307786476858
+        }
+      },
+      {
+        "timestep": 199,
+        "regime": "bull_market",
+        "regime_confidence": 0.2864931107810461,
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521
+        }
+      }
+    ],
+    "performance_metrics": {
+      "total_rewards": 200,
+      "average_reward": 0.21,
+      "reward_std": 0.5033885179461288,
+      "cumulative_reward": 42.0
+    },
+    "regret_analysis": {
+      "final_regret_bounds": {
+        "regime_detection": 65.13558110930815,
+        "parameter_adaptation": 0.06443098187522721,
+        "kalman_optimization": 84.85287852894521
+      },
+      "total_regret": 150.0528906201286,
+      "regime_detection_accuracy": 0.4623115577889447
+    }
+  },
+  "performance_metrics": {
+    "system_overview": {
+      "total_updates": 200,
+      "average_performance": 0.21,
+      "confidence_level": 0.95,
+      "window_size": 10
+    },
+    "regime_detection": {
+      "regime_detection": {
+        "current_regime": "bull_market",
+        "confidence": 0.2864931107810461,
+        "regret_bound": 65.13558110930815
+      },
+      "bandit_performance": {
+        "total_pulls": 200,
+        "regime_distribution": {
+          "bull_market": 0.425,
+          "bear_market": 0.27,
+          "sideways_market": 0.305
+        },
+        "average_rewards": {
+          "bull_market": 0.29411764705882354,
+          "bear_market": 0.14814814814814814,
+          "sideways_market": 0.14754098360655737
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.555
+      },
+      "data_processing": {
+        "total_samples": 200,
+        "window_size": 10,
+        "confidence_level": 0.95
+      },
+      "performance_tracking": {
+        "total_rewards": 200,
+        "average_reward": 0.21,
+        "reward_std": 0.5033885179461288
+      }
+    },
+    "parameter_adaptation": {
+      "optimizer_performance": {
+        "total_updates": 200,
+        "average_gradient_norm": 0.003115487760730711,
+        "regret_bound": 0.06443098187522721,
+        "parameter_stability": 0.9822385803261345,
+        "learning_rate_adaptation": 7114.117913702589
+      },
+      "regime_adaptations": {
+        "bull_market": {
+          "adaptations_count": 85,
+          "parameter_means": {
+            "process_noise": 0.03097977542098084,
+            "measurement_noise": 0.018306658030792494,
+            "adaptation_rate": 0.0313095516968073,
+            "forgetting_factor": 0.008609060950132577,
+            "uncertainty_weight": 0.445199287551426,
+            "regime_threshold": 0.00971499769602651
+          },
+          "parameter_stds": {
+            "process_noise": 0.01780153572418645,
+            "measurement_noise": 0.03191534770489954,
+            "adaptation_rate": 0.03223708900315823,
+            "forgetting_factor": 0.03091515566489602,
+            "uncertainty_weight": 0.22467935999848798,
+            "regime_threshold": 0.031772951224834076
+          }
+        },
+        "bear_market": {
+          "adaptations_count": 54,
+          "parameter_means": {
+            "process_noise": 0.049801073038615466,
+            "measurement_noise": 0.018744017142614502,
+            "adaptation_rate": 0.02049347487534868,
+            "forgetting_factor": 0.009966716873333859,
+            "uncertainty_weight": 0.5049082210665498,
+            "regime_threshold": 0.00986424780704834
+          },
+          "parameter_stds": {
+            "process_noise": 0.03398633611816403,
+            "measurement_noise": 0.03747560580937538,
+            "adaptation_rate": 0.025918107536202124,
+            "forgetting_factor": 0.03762085363261325,
+            "uncertainty_weight": 0.28498302696472083,
+            "regime_threshold": 0.03574020125521933
+          }
+        },
+        "sideways_market": {
+          "adaptations_count": 61,
+          "parameter_means": {
+            "process_noise": 0.039418252724375366,
+            "measurement_noise": 0.019438180961111877,
+            "adaptation_rate": 0.025881020289586606,
+            "forgetting_factor": 0.009915422631182518,
+            "uncertainty_weight": 0.41304860118191705,
+            "regime_threshold": 0.009482246121992924
+          },
+          "parameter_stds": {
+            "process_noise": 0.02475098632662078,
+            "measurement_noise": 0.03704677612936939,
+            "adaptation_rate": 0.031899156612749974,
+            "forgetting_factor": 0.037318578537520464,
+            "uncertainty_weight": 0.24125076830318581,
+            "regime_threshold": 0.03600550631878245
+          }
+        }
+      },
+      "total_adaptations": 200,
+      "system_parameters": {
+        "learning_rate": 0.01,
+        "beta": 0.9,
+        "parameter_count": 6
+      }
+    },
+    "kalman_optimization": {
+      "optimizer_performance": {
+        "total_updates": 201,
+        "regret_bound": 84.85287852894521,
+        "hessian_condition": 2319.976207366346,
+        "parameter_stability": 0.001728758647470367
+      },
+      "current_matrices": {
+        "F": "[[0. 0.]\n [0. 0.]]",
+        "H": "[[0. 0.]\n [0. 0.]]",
+        "Q": "[[57744.97456966     0.        ]\n [    0.         57744.97456966]]",
+        "R": "[[57744.97456966     0.        ]\n [    0.         57744.97456966]]"
+      },
+      "total_optimizations": 200,
+      "system_parameters": {
+        "learning_rate": 0.01,
+        "regularization": 0.001,
+        "parameter_count": 16
+      }
+    },
+    "regret_bounds": {
+      "regime_detection": 65.13558110930815,
+      "parameter_adaptation": 0.06443098187522721,
+      "kalman_optimization": 84.85287852894521,
+      "total_regret": 150.0528906201286
+    },
+    "experiment_metrics": {
+      "total_rewards": 200,
+      "average_reward": 0.21,
+      "reward_std": 0.5033885179461288,
+      "cumulative_reward": 42.0
+    },
+    "regret_analysis": {
+      "final_regret_bounds": {
+        "regime_detection": 65.13558110930815,
+        "parameter_adaptation": 0.06443098187522721,
+        "kalman_optimization": 84.85287852894521
+      },
+      "total_regret": 150.0528906201286,
+      "regime_detection_accuracy": 0.4623115577889447
+    },
+    "regime_stability": 0.4623115577889447,
+    "regret_progression": [
+      {
+        "regime_detection": 1.6651092223153954,
+        "parameter_adaptation": 0.007089243081025656,
+        "kalman_optimization": 11.090354888959125
+      },
+      {
+        "regime_detection": 2.9646076147350224,
+        "parameter_adaptation": 0.00934047715431247,
+        "kalman_optimization": 17.577796618689757
+      },
+      {
+        "regime_detection": 4.078667960675236,
+        "parameter_adaptation": 0.009424455528946017,
+        "kalman_optimization": 22.18070977791825
+      },
+      {
+        "regime_detection": 5.074544964718078,
+        "parameter_adaptation": 0.011259120562335054,
+        "kalman_optimization": 25.751006598945605
+      },
+      {
+        "regime_detection": 5.986250026900071,
+        "parameter_adaptation": 0.011413879809462178,
+        "kalman_optimization": 28.66815150764888
+      },
+      {
+        "regime_detection": 6.833874711854726,
+        "parameter_adaptation": 0.011435621367117448,
+        "kalman_optimization": 31.13456238488501
+      },
+      {
+        "regime_detection": 7.630489051629351,
+        "parameter_adaptation": 0.011560029186075373,
+        "kalman_optimization": 33.27106466687737
+      },
+      {
+        "regime_detection": 8.38517659174564,
+        "parameter_adaptation": 0.012232644575209716,
+        "kalman_optimization": 35.15559323737951
+      },
+      {
+        "regime_detection": 9.104562776310878,
+        "parameter_adaptation": 0.012351401847761068,
+        "kalman_optimization": 36.841361487904734
+      },
+      {
+        "regime_detection": 9.79366177238804,
+        "parameter_adaptation": 0.012354866375991744,
+        "kalman_optimization": 38.36632436477393
+      },
+      {
+        "regime_detection": 10.45638047273874,
+        "parameter_adaptation": 0.013584615727479998,
+        "kalman_optimization": 39.758506396608006
+      },
+      {
+        "regime_detection": 11.095835667409363,
+        "parameter_adaptation": 0.013623099627082259,
+        "kalman_optimization": 41.03918971938459
+      },
+      {
+        "regime_detection": 11.714562780573308,
+        "parameter_adaptation": 0.013678713724627863,
+        "kalman_optimization": 42.224917273844135
+      },
+      {
+        "regime_detection": 12.31465838997265,
+        "parameter_adaptation": 0.013905021312309392,
+        "kalman_optimization": 43.32880321763536
+      },
+      {
+        "regime_detection": 12.89788057528782,
+        "parameter_adaptation": 0.013906114573430634,
+        "kalman_optimization": 44.3614195558365
+      },
+      {
+        "regime_detection": 13.465721444452868,
+        "parameter_adaptation": 0.013958787463632211,
+        "kalman_optimization": 45.33141350489946
+      },
+      {
+        "regime_detection": 14.019460743442993,
+        "parameter_adaptation": 0.014048558581892589,
+        "kalman_optimization": 46.24594812633863
+      },
+      {
+        "regime_detection": 14.560206265708729,
+        "parameter_adaptation": 0.014393142191391683,
+        "kalman_optimization": 47.111023666663044
+      },
+      {
+        "regime_detection": 15.088924838771756,
+        "parameter_adaptation": 0.014438647857054556,
+        "kalman_optimization": 47.931716376863854
+      },
+      {
+        "regime_detection": 15.606466448811334,
+        "parameter_adaptation": 0.014911169692760714,
+        "kalman_optimization": 48.71235900357477
+      },
+      {
+        "regime_detection": 16.113583278777522,
+        "parameter_adaptation": 0.015134167270619135,
+        "kalman_optimization": 49.45667925373306
+      },
+      {
+        "regime_detection": 16.610944915981307,
+        "parameter_adaptation": 0.015135287177378555,
+        "kalman_optimization": 50.167907454866395
+      },
+      {
+        "regime_detection": 17.099150633642918,
+        "parameter_adaptation": 0.015441570173159775,
+        "kalman_optimization": 50.84886128556713
+      },
+      {
+        "regime_detection": 17.578739408369056,
+        "parameter_adaptation": 0.0154572365177217,
+        "kalman_optimization": 51.50201319789121
+      },
+      {
+        "regime_detection": 18.050198165176695,
+        "parameter_adaptation": 0.015595032448045998,
+        "kalman_optimization": 52.129544608343714
+      },
+      {
+        "regime_detection": 18.513968620056865,
+        "parameter_adaptation": 0.015658774220506613,
+        "kalman_optimization": 52.733389856069266
+      },
+      {
+        "regime_detection": 18.97045300194284,
+        "parameter_adaptation": 0.015775368303155273,
+        "kalman_optimization": 53.31527216280326
+      },
+      {
+        "regime_detection": 19.420018871218563,
+        "parameter_adaptation": 0.016075649661702905,
+        "kalman_optimization": 53.876733279783586
+      },
+      {
+        "regime_detection": 19.86300320376579,
+        "parameter_adaptation": 0.016235768169429635,
+        "kalman_optimization": 54.41915810659449
+      },
+      {
+        "regime_detection": 20.29971587333718,
+        "parameter_adaptation": 0.016253535921278296,
+        "kalman_optimization": 54.94379527176234
+      },
+      {
+        "regime_detection": 20.730442637511775,
+        "parameter_adaptation": 0.0162897419317163,
+        "kalman_optimization": 55.451774444795625
+      },
+      {
+        "regime_detection": 21.155447711351076,
+        "parameter_adaptation": 0.016378406521766427,
+        "kalman_optimization": 55.944120983463684
+      },
+      {
+        "regime_detection": 21.574975996494953,
+        "parameter_adaptation": 0.016627590887584982,
+        "kalman_optimization": 56.421768393858585
+      },
+      {
+        "regime_detection": 21.98925502063588,
+        "parameter_adaptation": 0.016645844071911112,
+        "kalman_optimization": 56.885568983830616
+      },
+      {
+        "regime_detection": 22.398496632226355,
+        "parameter_adaptation": 0.016692962718476173,
+        "kalman_optimization": 57.33630301529776
+      },
+      {
+        "regime_detection": 22.80289848727061,
+        "parameter_adaptation": 0.01669393540148709,
+        "kalman_optimization": 57.77468660230759
+      },
+      {
+        "regime_detection": 23.2026453586548,
+        "parameter_adaptation": 0.016749526755387028,
+        "kalman_optimization": 58.20137855562217
+      },
+      {
+        "regime_detection": 23.597910293322716,
+        "parameter_adaptation": 0.01831750319236834,
+        "kalman_optimization": 58.61698633807434
+      },
+      {
+        "regime_detection": 23.98885563843707,
+        "parameter_adaptation": 0.018455954938759782,
+        "kalman_optimization": 59.02207126582298
+      },
+      {
+        "regime_detection": 24.37563395427264,
+        "parameter_adaptation": 0.01853879940533032,
+        "kalman_optimization": 59.41715306726893
+      },
+      {
+        "regime_detection": 24.75838882880856,
+        "parameter_adaptation": 0.018539412016482685,
+        "kalman_optimization": 59.802713892533895
+      },
+      {
+        "regime_detection": 25.137255606698965,
+        "parameter_adaptation": 0.019046462737763475,
+        "kalman_optimization": 60.179201851097
+      },
+      {
+        "regime_detection": 25.512362043408306,
+        "parameter_adaptation": 0.019164888505229707,
+        "kalman_optimization": 60.547034142692176
+      },
+      {
+        "regime_detection": 25.8838288937239,
+        "parameter_adaptation": 0.019295574701482687,
+        "kalman_optimization": 60.906599836325114
+      },
+      {
+        "regime_detection": 26.251770442544196,
+        "parameter_adaptation": 0.019410792328145944,
+        "kalman_optimization": 61.25826234382552
+      },
+      {
+        "regime_detection": 26.616294984739156,
+        "parameter_adaptation": 0.019410794121326673,
+        "kalman_optimization": 61.602361627360935
+      },
+      {
+        "regime_detection": 26.977505259950995,
+        "parameter_adaptation": 0.01945115471317121,
+        "kalman_optimization": 61.93921617452626
+      },
+      {
+        "regime_detection": 27.335498847418904,
+        "parameter_adaptation": 0.01945180416029864,
+        "kalman_optimization": 62.26912476977002
+      },
+      {
+        "regime_detection": 27.69036852524568,
+        "parameter_adaptation": 0.019490606075824184,
+        "kalman_optimization": 62.592368086850335
+      },
+      {
+        "regime_detection": 28.04220259795698,
+        "parameter_adaptation": 0.019492679881746872,
+        "kalman_optimization": 62.90921012358921
+      },
+      {
+        "regime_detection": 28.391085195719644,
+        "parameter_adaptation": 0.019690132835160603,
+        "kalman_optimization": 63.21989949730284
+      },
+      {
+        "regime_detection": 28.73709654816995,
+        "parameter_adaptation": 0.019695670325266704,
+        "kalman_optimization": 63.52467061683395
+      },
+      {
+        "regime_detection": 29.08031323544549,
+        "parameter_adaptation": 0.019700493797570728,
+        "kalman_optimization": 63.82374474502839
+      },
+      {
+        "regime_detection": 29.4208084187062,
+        "parameter_adaptation": 0.020360164570948244,
+        "kalman_optimization": 64.11733096371954
+      },
+      {
+        "regime_detection": 29.75865205216347,
+        "parameter_adaptation": 0.02036140735133212,
+        "kalman_optimization": 64.4056270517624
+      },
+      {
+        "regime_detection": 30.09391107840487,
+        "parameter_adaptation": 0.020898633680654227,
+        "kalman_optimization": 64.6888202853528
+      },
+      {
+        "regime_detection": 30.426649608601068,
+        "parameter_adaptation": 0.02090238049156456,
+        "kalman_optimization": 64.9670881687427
+      },
+      {
+        "regime_detection": 30.75692908900573,
+        "parameter_adaptation": 0.02090299012093281,
+        "kalman_optimization": 65.24059910249152
+      },
+      {
+        "regime_detection": 31.08480845500605,
+        "parameter_adaptation": 0.020912036929123634,
+        "kalman_optimization": 65.5095129955536
+      },
+      {
+        "regime_detection": 31.410344273847027,
+        "parameter_adaptation": 0.0210886398742342,
+        "kalman_optimization": 65.77398182677298
+      },
+      {
+        "regime_detection": 31.733590877034423,
+        "parameter_adaptation": 0.022539791813287198,
+        "kalman_optimization": 66.03415016072147
+      },
+      {
+        "regime_detection": 32.05460048331752,
+        "parameter_adaptation": 0.022550235983113693,
+        "kalman_optimization": 66.29015562226452
+      },
+      {
+        "regime_detection": 32.37342331306093,
+        "parameter_adaptation": 0.02529259655522185,
+        "kalman_optimization": 66.54212933375474
+      },
+      {
+        "regime_detection": 32.69010769473363,
+        "parameter_adaptation": 0.02930417682517197,
+        "kalman_optimization": 66.79019631833019
+      },
+      {
+        "regime_detection": 33.00470016417163,
+        "parameter_adaptation": 0.029385449661100512,
+        "kalman_optimization": 67.0344758724228
+      },
+      {
+        "regime_detection": 33.31724555720678,
+        "parameter_adaptation": 0.032690175096772536,
+        "kalman_optimization": 67.27508191025545
+      },
+      {
+        "regime_detection": 33.62778709619764,
+        "parameter_adaptation": 0.033123995290197404,
+        "kalman_optimization": 67.51212328281771
+      },
+      {
+        "regime_detection": 33.936366470947576,
+        "parameter_adaptation": 0.03314845771821953,
+        "kalman_optimization": 67.74570407355615
+      },
+      {
+        "regime_detection": 34.24302391445042,
+        "parameter_adaptation": 0.03316274734692832,
+        "kalman_optimization": 67.97592387278975
+      },
+      {
+        "regime_detection": 34.547798273863535,
+        "parameter_adaptation": 0.03472519115850703,
+        "kalman_optimization": 68.20287803266105
+      },
+      {
+        "regime_detection": 34.850727077072,
+        "parameter_adaptation": 0.0350812203362698,
+        "kalman_optimization": 68.42665790425688
+      },
+      {
+        "regime_detection": 35.15184659517529,
+        "parameter_adaptation": 0.037546476584972864,
+        "kalman_optimization": 68.64735105837426
+      },
+      {
+        "regime_detection": 35.45119190119872,
+        "parameter_adaptation": 0.038315388059285,
+        "kalman_optimization": 68.86504149126672
+      },
+      {
+        "regime_detection": 35.74879692530572,
+        "parameter_adaptation": 0.03908065236128092,
+        "kalman_optimization": 69.07980981658096
+      },
+      {
+        "regime_detection": 36.04469450676339,
+        "parameter_adaptation": 0.04015358457572073,
+        "kalman_optimization": 69.2917334445813
+      },
+      {
+        "regime_detection": 36.33891644289246,
+        "parameter_adaptation": 0.04033370622623018,
+        "kalman_optimization": 69.50088674965895
+      },
+      {
+        "regime_detection": 36.63149353521358,
+        "parameter_adaptation": 0.04064097984973687,
+        "kalman_optimization": 69.70734122703347
+      },
+      {
+        "regime_detection": 36.92245563298452,
+        "parameter_adaptation": 0.040795004265094206,
+        "kalman_optimization": 69.91116563947234
+      },
+      {
+        "regime_detection": 37.21183167430685,
+        "parameter_adaptation": 0.04367175366670518,
+        "kalman_optimization": 70.1124261547821
+      },
+      {
+        "regime_detection": 37.49964972496651,
+        "parameter_adaptation": 0.04574455823190699,
+        "kalman_optimization": 70.31118647475903
+      },
+      {
+        "regime_detection": 37.78593701515973,
+        "parameter_adaptation": 0.04631432647684556,
+        "kalman_optimization": 70.50750795622805
+      },
+      {
+        "regime_detection": 38.07071997424378,
+        "parameter_adaptation": 0.04723537198254813,
+        "kalman_optimization": 70.70144972474557
+      },
+      {
+        "regime_detection": 38.35402426364123,
+        "parameter_adaptation": 0.04768020359863183,
+        "kalman_optimization": 70.89306878149301
+      },
+      {
+        "regime_detection": 38.63587480801679,
+        "parameter_adaptation": 0.04787115031939528,
+        "kalman_optimization": 71.08242010384507
+      },
+      {
+        "regime_detection": 38.916295824836574,
+        "parameter_adaptation": 0.04817613003089299,
+        "kalman_optimization": 71.26955674005612
+      },
+      {
+        "regime_detection": 39.19531085241163,
+        "parameter_adaptation": 0.048835581083231404,
+        "kalman_optimization": 71.45452989847334
+      },
+      {
+        "regime_detection": 39.472942776519915,
+        "parameter_adaptation": 0.048836154517541086,
+        "kalman_optimization": 71.63738903165131
+      },
+      {
+        "regime_detection": 39.749213855694215,
+        "parameter_adaptation": 0.04892678152118167,
+        "kalman_optimization": 71.81818191571423
+      },
+      {
+        "regime_detection": 40.024145745257,
+        "parameter_adaptation": 0.04892686475194718,
+        "kalman_optimization": 71.99695472528424
+      },
+      {
+        "regime_detection": 40.29775952017762,
+        "parameter_adaptation": 0.048957046566656,
+        "kalman_optimization": 72.1737521042696
+      },
+      {
+        "regime_detection": 40.570075696821796,
+        "parameter_adaptation": 0.04912573571751853,
+        "kalman_optimization": 72.34861723278465
+      },
+      {
+        "regime_detection": 40.84111425365863,
+        "parameter_adaptation": 0.05000490707859352,
+        "kalman_optimization": 72.5215918904521
+      },
+      {
+        "regime_detection": 41.11089465098566,
+        "parameter_adaptation": 0.05002281460599594,
+        "kalman_optimization": 72.69271651632006
+      },
+      {
+        "regime_detection": 41.37943584972859,
+        "parameter_adaptation": 0.05026449595144688,
+        "kalman_optimization": 72.86203026560865
+      },
+      {
+        "regime_detection": 41.64675632936829,
+        "parameter_adaptation": 0.05062320138356769,
+        "kalman_optimization": 73.02957106348538
+      },
+      {
+        "regime_detection": 41.912874105044374,
+        "parameter_adaptation": 0.050623700297187595,
+        "kalman_optimization": 73.19537565605413
+      },
+      {
+        "regime_detection": 42.1778067438811,
+        "parameter_adaptation": 0.05071415263160379,
+        "kalman_optimization": 73.35947965872916
+      },
+      {
+        "regime_detection": 42.44157138057873,
+        "parameter_adaptation": 0.05077015242627121,
+        "kalman_optimization": 73.52191760215344
+      },
+      {
+        "regime_detection": 42.7041847323103,
+        "parameter_adaptation": 0.051135538192409874,
+        "kalman_optimization": 73.68272297580947
+      },
+      {
+        "regime_detection": 42.96566311296154,
+        "parameter_adaptation": 0.05117682978329367,
+        "kalman_optimization": 73.84192826946015
+      },
+      {
+        "regime_detection": 43.22602244674896,
+        "parameter_adaptation": 0.05135233265007552,
+        "kalman_optimization": 73.99956501254833
+      },
+      {
+        "regime_detection": 43.48527828124929,
+        "parameter_adaptation": 0.05186926676589526,
+        "kalman_optimization": 74.15566381167417
+      },
+      {
+        "regime_detection": 43.743445799870926,
+        "parameter_adaptation": 0.05317002740574347,
+        "kalman_optimization": 74.31025438626196
+      },
+      {
+        "regime_detection": 44.000539833796694,
+        "parameter_adaptation": 0.0533583958867068,
+        "kalman_optimization": 74.46336560252037
+      },
+      {
+        "regime_detection": 44.256574873424945,
+        "parameter_adaptation": 0.0535533929141412,
+        "kalman_optimization": 74.61502550579307
+      },
+      {
+        "regime_detection": 44.511565079334694,
+        "parameter_adaptation": 0.053563364888721286,
+        "kalman_optimization": 74.76526135139049
+      },
+      {
+        "regime_detection": 44.76552429279887,
+        "parameter_adaptation": 0.05364141843644515,
+        "kalman_optimization": 74.91409963398752
+      },
+      {
+        "regime_detection": 45.01846604586822,
+        "parameter_adaptation": 0.05413284835406587,
+        "kalman_optimization": 75.0615661156663
+      },
+      {
+        "regime_detection": 45.27040357104732,
+        "parameter_adaptation": 0.05445958201481037,
+        "kalman_optimization": 75.20768585267867
+      },
+      {
+        "regime_detection": 45.52134981058258,
+        "parameter_adaptation": 0.05447038632897083,
+        "kalman_optimization": 75.35248322099734
+      },
+      {
+        "regime_detection": 45.77131742538138,
+        "parameter_adaptation": 0.05630730773160516,
+        "kalman_optimization": 75.4959819407215
+      },
+      {
+        "regime_detection": 46.02031880357988,
+        "parameter_adaptation": 0.05631104875576706,
+        "kalman_optimization": 75.63820509939745
+      },
+      {
+        "regime_detection": 46.26836606877654,
+        "parameter_adaptation": 0.05669679757484712,
+        "kalman_optimization": 75.77917517431193
+      },
+      {
+        "regime_detection": 46.51547108794709,
+        "parameter_adaptation": 0.05669811324323013,
+        "kalman_optimization": 75.918914053812
+      },
+      {
+        "regime_detection": 46.7616454790561,
+        "parameter_adaptation": 0.05687299499568481,
+        "kalman_optimization": 76.05744305770183
+      },
+      {
+        "regime_detection": 47.00690061837899,
+        "parameter_adaptation": 0.05692618018313192,
+        "kalman_optimization": 76.1947829567641
+      },
+      {
+        "regime_detection": 47.25124764754822,
+        "parameter_adaptation": 0.05697277808724126,
+        "kalman_optimization": 76.33095399145064
+      },
+      {
+        "regime_detection": 47.49469748033608,
+        "parameter_adaptation": 0.058610840203880785,
+        "kalman_optimization": 76.46597588978447
+      },
+      {
+        "regime_detection": 47.73726080918609,
+        "parameter_adaptation": 0.06031284194182218,
+        "kalman_optimization": 76.59986788451273
+      },
+      {
+        "regime_detection": 47.978948111504444,
+        "parameter_adaptation": 0.06033832728011898,
+        "kalman_optimization": 76.73264872954786
+      },
+      {
+        "regime_detection": 48.21976965572208,
+        "parameter_adaptation": 0.06036253161089647,
+        "kalman_optimization": 76.86433671573211
+      },
+      {
+        "regime_detection": 48.45973550713767,
+        "parameter_adaptation": 0.06065413892104434,
+        "kalman_optimization": 76.99494968595867
+      },
+      {
+        "regime_detection": 48.698855533551075,
+        "parameter_adaptation": 0.06068076007046981,
+        "kalman_optimization": 77.1245050496806
+      },
+      {
+        "regime_detection": 48.93713941069647,
+        "parameter_adaptation": 0.06068750472898988,
+        "kalman_optimization": 77.25301979683682
+      },
+      {
+        "regime_detection": 49.17459662748378,
+        "parameter_adaptation": 0.061193803573454934,
+        "kalman_optimization": 77.38051051122365
+      },
+      {
+        "regime_detection": 49.41123649105667,
+        "parameter_adaptation": 0.06132317606343638,
+        "kalman_optimization": 77.50699338333746
+      },
+      {
+        "regime_detection": 49.647068131674864,
+        "parameter_adaptation": 0.06182781790992027,
+        "kalman_optimization": 77.63248422271387
+      },
+      {
+        "regime_detection": 49.88210050742828,
+        "parameter_adaptation": 0.06203044284005099,
+        "kalman_optimization": 77.75699846978675
+      },
+      {
+        "regime_detection": 50.11634240878997,
+        "parameter_adaptation": 0.062123365451322014,
+        "kalman_optimization": 77.88055120728932
+      },
+      {
+        "regime_detection": 50.349802463014676,
+        "parameter_adaptation": 0.062125886596759654,
+        "kalman_optimization": 78.00315717121842
+      },
+      {
+        "regime_detection": 50.582489138389164,
+        "parameter_adaptation": 0.062200272123824736,
+        "kalman_optimization": 78.12483076138193
+      },
+      {
+        "regime_detection": 50.81441074834073,
+        "parameter_adaptation": 0.0626448126016994,
+        "kalman_optimization": 78.24558605154806
+      },
+      {
+        "regime_detection": 51.045575455409306,
+        "parameter_adaptation": 0.06265337285626273,
+        "kalman_optimization": 78.36543679921458
+      },
+      {
+        "regime_detection": 51.27599127508895,
+        "parameter_adaptation": 0.06283006410685758,
+        "kalman_optimization": 78.48439645501487
+      },
+      {
+        "regime_detection": 51.5056660795438,
+        "parameter_adaptation": 0.06283295987435977,
+        "kalman_optimization": 78.60247817177684
+      },
+      {
+        "regime_detection": 51.73460760120347,
+        "parameter_adaptation": 0.06291546982288033,
+        "kalman_optimization": 78.71969481325
+      },
+      {
+        "regime_detection": 51.96282343624284,
+        "parameter_adaptation": 0.06295243049806785,
+        "kalman_optimization": 78.83605896251528
+      },
+      {
+        "regime_detection": 52.19032104795047,
+        "parameter_adaptation": 0.0630365482898082,
+        "kalman_optimization": 78.95158293009106
+      },
+      {
+        "regime_detection": 52.41710776999026,
+        "parameter_adaptation": 0.06303753464883192,
+        "kalman_optimization": 79.06627876174886
+      },
+      {
+        "regime_detection": 52.6431908095603,
+        "parameter_adaptation": 0.06303753808859144,
+        "kalman_optimization": 79.1801582460507
+      },
+      {
+        "regime_detection": 52.86857725045295,
+        "parameter_adaptation": 0.0630376627725203,
+        "kalman_optimization": 79.29323292162017
+      },
+      {
+        "regime_detection": 53.09327405601982,
+        "parameter_adaptation": 0.06309930350008856,
+        "kalman_optimization": 79.40551408415851
+      },
+      {
+        "regime_detection": 53.31728807204538,
+        "parameter_adaptation": 0.06315775930500209,
+        "kalman_optimization": 79.51701279321601
+      },
+      {
+        "regime_detection": 53.54062602953248,
+        "parameter_adaptation": 0.06322471698614868,
+        "kalman_optimization": 79.62773987872919
+      },
+      {
+        "regime_detection": 53.763294547403206,
+        "parameter_adaptation": 0.06322799442240831,
+        "kalman_optimization": 79.73770594733338
+      },
+      {
+        "regime_detection": 53.985300135118095,
+        "parameter_adaptation": 0.06324209166939666,
+        "kalman_optimization": 79.84692138845978
+      },
+      {
+        "regime_detection": 54.20664919521681,
+        "parameter_adaptation": 0.06326411533382101,
+        "kalman_optimization": 79.95539638022584
+      },
+      {
+        "regime_detection": 54.42734802578307,
+        "parameter_adaptation": 0.06327073905619907,
+        "kalman_optimization": 80.06314089512735
+      },
+      {
+        "regime_detection": 54.64740282283659,
+        "parameter_adaptation": 0.06329569325890949,
+        "kalman_optimization": 80.17016470554009
+      },
+      {
+        "regime_detection": 54.866819682654786,
+        "parameter_adaptation": 0.06329903991861893,
+        "kalman_optimization": 80.27647738903879
+      },
+      {
+        "regime_detection": 55.08560460402655,
+        "parameter_adaptation": 0.0633615847644893,
+        "kalman_optimization": 80.38208833354042
+      },
+      {
+        "regime_detection": 55.30376349044069,
+        "parameter_adaptation": 0.06338561135066441,
+        "kalman_optimization": 80.48700674227896
+      },
+      {
+        "regime_detection": 55.521302152211284,
+        "parameter_adaptation": 0.06339123355334045,
+        "kalman_optimization": 80.59124163861807
+      },
+      {
+        "regime_detection": 55.73822630854211,
+        "parameter_adaptation": 0.06342503151428888,
+        "kalman_optimization": 80.69480187070795
+      },
+      {
+        "regime_detection": 55.95454158953242,
+        "parameter_adaptation": 0.06342651095086262,
+        "kalman_optimization": 80.7976961159926
+      },
+      {
+        "regime_detection": 56.17025353812589,
+        "parameter_adaptation": 0.06345608870969832,
+        "kalman_optimization": 80.89993288557292
+      },
+      {
+        "regime_detection": 56.385367612004934,
+        "parameter_adaptation": 0.0634767101334909,
+        "kalman_optimization": 81.00152052843147
+      },
+      {
+        "regime_detection": 56.59988918543204,
+        "parameter_adaptation": 0.06349037040595723,
+        "kalman_optimization": 81.1024672355237
+      },
+      {
+        "regime_detection": 56.81382355104005,
+        "parameter_adaptation": 0.06349489465800595,
+        "kalman_optimization": 81.20278104374123
+      },
+      {
+        "regime_detection": 57.02717592157319,
+        "parameter_adaptation": 0.06350126911570884,
+        "kalman_optimization": 81.30246983975141
+      },
+      {
+        "regime_detection": 57.23995143158016,
+        "parameter_adaptation": 0.0635061405474932,
+        "kalman_optimization": 81.40154136371814
+      },
+      {
+        "regime_detection": 57.452155139061425,
+        "parameter_adaptation": 0.06354331048019796,
+        "kalman_optimization": 81.5000032129082
+      },
+      {
+        "regime_detection": 57.6637920270717,
+        "parameter_adaptation": 0.06354896804629759,
+        "kalman_optimization": 81.59786284518718
+      },
+      {
+        "regime_detection": 57.87486700527942,
+        "parameter_adaptation": 0.06372591544539438,
+        "kalman_optimization": 81.69512758240928
+      },
+      {
+        "regime_detection": 58.08538491148457,
+        "parameter_adaptation": 0.06372591805661725,
+        "kalman_optimization": 81.7918046137047
+      },
+      {
+        "regime_detection": 58.29535051309603,
+        "parameter_adaptation": 0.06373504375994218,
+        "kalman_optimization": 81.88790099866809
+      },
+      {
+        "regime_detection": 58.50476850857011,
+        "parameter_adaptation": 0.06373531107231543,
+        "kalman_optimization": 81.98342367045214
+      },
+      {
+        "regime_detection": 58.71364352881113,
+        "parameter_adaptation": 0.06375553048955734,
+        "kalman_optimization": 82.07837943876918
+      },
+      {
+        "regime_detection": 58.921980138535545,
+        "parameter_adaptation": 0.0638120193605263,
+        "kalman_optimization": 82.1727749928042
+      },
+      {
+        "regime_detection": 59.12978283760062,
+        "parameter_adaptation": 0.06382292303139356,
+        "kalman_optimization": 82.26661690404256
+      },
+      {
+        "regime_detection": 59.33705606229889,
+        "parameter_adaptation": 0.06384459960429205,
+        "kalman_optimization": 82.35991162901524
+      },
+      {
+        "regime_detection": 59.54380418661938,
+        "parameter_adaptation": 0.06385551494837323,
+        "kalman_optimization": 82.45266551196447
+      },
+      {
+        "regime_detection": 59.75003152347666,
+        "parameter_adaptation": 0.0638596119464085,
+        "kalman_optimization": 82.54488478743247
+      },
+      {
+        "regime_detection": 59.95574232590875,
+        "parameter_adaptation": 0.06388108957343207,
+        "kalman_optimization": 82.63657558277623
+      },
+      {
+        "regime_detection": 60.16094078824488,
+        "parameter_adaptation": 0.06388442099161923,
+        "kalman_optimization": 82.72774392061042
+      },
+      {
+        "regime_detection": 60.36563104724389,
+        "parameter_adaptation": 0.0639303119965389,
+        "kalman_optimization": 82.81839572118126
+      },
+      {
+        "regime_detection": 60.56981718320434,
+        "parameter_adaptation": 0.06393600863484993,
+        "kalman_optimization": 82.90853680467336
+      },
+      {
+        "regime_detection": 60.77350322104706,
+        "parameter_adaptation": 0.06394378417766004,
+        "kalman_optimization": 82.99817289345208
+      },
+      {
+        "regime_detection": 60.97669313137103,
+        "parameter_adaptation": 0.06394457425981706,
+        "kalman_optimization": 83.08730961424337
+      },
+      {
+        "regime_detection": 61.179390831483396,
+        "parameter_adaptation": 0.06394583876501686,
+        "kalman_optimization": 83.17595250025322
+      },
+      {
+        "regime_detection": 61.38160018640439,
+        "parameter_adaptation": 0.0639475301435497,
+        "kalman_optimization": 83.26410699322872
+      },
+      {
+        "regime_detection": 61.583325009847876,
+        "parameter_adaptation": 0.06395690110520098,
+        "kalman_optimization": 83.35177844546274
+      },
+      {
+        "regime_detection": 61.78456906517822,
+        "parameter_adaptation": 0.06396776133744407,
+        "kalman_optimization": 83.43897212174377
+      },
+      {
+        "regime_detection": 61.985336066344324,
+        "parameter_adaptation": 0.06397230576371102,
+        "kalman_optimization": 83.52569320125319
+      },
+      {
+        "regime_detection": 62.185629678791294,
+        "parameter_adaptation": 0.06397248195567194,
+        "kalman_optimization": 83.61194677941123
+      },
+      {
+        "regime_detection": 62.3854535203505,
+        "parameter_adaptation": 0.06397248424319871,
+        "kalman_optimization": 83.69773786967339
+      },
+      {
+        "regime_detection": 62.58481116210867,
+        "parameter_adaptation": 0.06401472283226112,
+        "kalman_optimization": 83.78307140527919
+      },
+      {
+        "regime_detection": 62.783706129256586,
+        "parameter_adaptation": 0.0640155730830099,
+        "kalman_optimization": 83.86795224095428
+      },
+      {
+        "regime_detection": 62.98214190191794,
+        "parameter_adaptation": 0.06404783776943208,
+        "kalman_optimization": 83.95238515456778
+      },
+      {
+        "regime_detection": 63.18012191595897,
+        "parameter_adaptation": 0.06408134341132926,
+        "kalman_optimization": 84.03637484874608
+      },
+      {
+        "regime_detection": 63.377649563779386,
+        "parameter_adaptation": 0.06419126288168799,
+        "kalman_optimization": 84.1199259524445
+      },
+      {
+        "regime_detection": 63.57472819508513,
+        "parameter_adaptation": 0.06423736762715795,
+        "kalman_optimization": 84.20304302247817
+      },
+      {
+        "regime_detection": 63.771361117643465,
+        "parameter_adaptation": 0.0642469268107502,
+        "kalman_optimization": 84.28573054501325
+      },
+      {
+        "regime_detection": 63.96755159802091,
+        "parameter_adaptation": 0.06427788476175651,
+        "kalman_optimization": 84.36799293701995
+      },
+      {
+        "regime_detection": 64.16330286230442,
+        "parameter_adaptation": 0.06427920502733796,
+        "kalman_optimization": 84.44983454768827
+      },
+      {
+        "regime_detection": 64.35861809680645,
+        "parameter_adaptation": 0.06431004002853642,
+        "kalman_optimization": 84.53125965980782
+      },
+      {
+        "regime_detection": 64.55350044875408,
+        "parameter_adaptation": 0.06431131519687855,
+        "kalman_optimization": 84.61227249111256
+      },
+      {
+        "regime_detection": 64.74795302696293,
+        "parameter_adaptation": 0.0643513999255982,
+        "kalman_optimization": 84.69287719559188
+      },
+      {
+        "regime_detection": 64.94197890249602,
+        "parameter_adaptation": 0.06440846858593025,
+        "kalman_optimization": 84.77307786476858
+      },
+      {
+        "regime_detection": 65.13558110930815,
+        "parameter_adaptation": 0.06443098187522721,
+        "kalman_optimization": 84.85287852894521
+      }
+    ]
+  },
+  "comparison_report": "EPIC 1.5: Hybrid Online Learning Experiment Report\n============================================================\nTimestamp: 2025-10-18T20:41:16.316752\n\n\ud83d\udd27 SYSTEM OVERVIEW\n------------------------------\nTotal Updates: 200\nAverage Performance: 0.2100\nConfidence Level: 95.00%\nWindow Size: 10\n\n\ud83c\udfaf REGIME DETECTION PERFORMANCE\n------------------------------\nCurrent Regime: bull_market\nRegime Confidence: 28.65%\nRegret Bound: 65.1356\nTotal Pulls: 200\nRegime Distribution: {'bull_market': 0.425, 'bear_market': 0.27, 'sideways_market': 0.305}\nExploration Rate: 55.50%\n\n\u2699\ufe0f PARAMETER ADAPTATION PERFORMANCE\n------------------------------\nTotal Updates: 200\nAverage Gradient Norm: 0.0031\nRegret Bound: 0.0644\nParameter Stability: 0.9822\nLearning Rate Adaptation: 7114.1179\n\n\ud83d\udd0d KALMAN OPTIMIZATION PERFORMANCE\n------------------------------\nTotal Optimizations: 201\nRegret Bound: 84.8529\nHessian Condition: 2319.9762\nParameter Stability: 0.0017\n\n\ud83d\udcca REGRET BOUNDS ANALYSIS\n------------------------------\nRegime Detection Regret: 65.1356\nParameter Adaptation Regret: 0.0644\nKalman Optimization Regret: 84.8529\nTotal Regret: 150.0529\n\n\ud83c\udfc6 THEORETICAL GUARANTEES\n------------------------------\nRegime Detection Theoretical: 65.1356\nRegime Detection Actual: 65.1356\nRegime Detection Ratio: 1.0000\nParameter Adaptation Theoretical: 0.0441\nParameter Adaptation Actual: 0.0644\nParameter Adaptation Ratio: 1.4624\nKalman Optimization Theoretical: 84.8529\nKalman Optimization Actual: 84.8529\nKalman Optimization Ratio: 1.0000\n\n\ud83c\udfaf SUCCESS METRICS\n------------------------------\n  \u2705 Regime detection regret within theoretical bound\n  \u274c Parameter adaptation regret exceeds theoretical bound\n  \u2705 Kalman optimization regret within theoretical bound\n  \u2705 System shows positive average performance\n  \u274c Regime detection shows poor stability\n\n\ud83c\udfc6 OVERALL ASSESSMENT\n------------------------------\nSuccess Rate: 60.0% (3/5)\nStatus: \u2705 GOOD - Significant theoretical guarantees achieved!\n\n============================================================\nEnd of Hybrid Online Learning Experiment Report",
+  "hybrid_system": "<algorithms.hybrid_online_learning_system.HybridOnlineLearningSystem object at 0x104866bd0>",
+  "timestamp": "2025-10-18T20:41:44.643357"
+}
