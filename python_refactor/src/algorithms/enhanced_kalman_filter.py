@@ -671,6 +671,72 @@ class EnhancedKalmanFilter:
         self.prediction_history.clear()
         self.update_history.clear()
         logger.info("Reset enhanced Kalman filter history")
+    
+    def predict(self, horizon: int = 1) -> np.ndarray:
+        """
+        Standard predict method for compatibility with diagnostic experiment.
+        
+        Args:
+            horizon: Prediction horizon
+            
+        Returns:
+            Prediction array [ROI, risk]
+        """
+        try:
+            # Initialize parameters if not done
+            if self.parameters is None:
+                self.initialize_parameters()
+            
+            # Use enhanced prediction
+            result = self.enhanced_prediction(self.current_state, self.regime)
+            
+            # Return just the prediction values for compatibility
+            return result.prediction[:2]  # ROI and risk only
+            
+        except Exception as e:
+            logger.error(f"Enhanced prediction error: {e}")
+            return np.array([0.0, 0.0])
+    
+    def update(self, observation: np.ndarray) -> None:
+        """
+        Standard update method for compatibility with diagnostic experiment.
+        
+        Args:
+            observation: New observation [ROI, risk]
+        """
+        try:
+            # Initialize parameters if not done
+            if self.parameters is None:
+                self.initialize_parameters()
+            
+            # Create a prediction first
+            prediction_result = self.enhanced_prediction(self.current_state, self.regime)
+            
+            # Use adaptive update
+            update_result = self.adaptive_update(observation, prediction_result)
+            
+            # Update current state
+            self.current_state = update_result.updated_state
+            self.current_covariance = update_result.updated_covariance
+            
+        except Exception as e:
+            logger.error(f"Enhanced update error: {e}")
+    
+    def get_current_state(self) -> np.ndarray:
+        """Get current state for diagnostic experiment."""
+        return self.current_state.copy()
+    
+    def get_uncertainty(self) -> np.ndarray:
+        """Get current uncertainty for diagnostic experiment."""
+        if self.current_covariance is not None:
+            return np.sqrt(np.diag(self.current_covariance))
+        return np.array([0.0, 0.0, 0.0, 0.0])
+    
+    def get_confidence(self) -> float:
+        """Get current confidence for diagnostic experiment."""
+        if self.current_covariance is not None:
+            return self._calculate_confidence(self.current_covariance)
+        return 0.0
 
 
 def create_enhanced_kalman_filter(state_dim: int = 4, 
@@ -697,3 +763,6 @@ if __name__ == '__main__':
     print("Enhanced Kalman Filter Module")
     print("This module provides enhanced Kalman filtering with advanced features.")
     print("Use EnhancedKalmanFilter class for enhanced predictions.")
+
+
+

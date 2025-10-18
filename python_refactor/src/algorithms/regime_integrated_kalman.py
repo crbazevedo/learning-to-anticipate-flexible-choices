@@ -427,6 +427,70 @@ class RegimeIntegratedKalmanFilter:
             regime_model.prediction_accuracy.clear()
         
         logger.info("Reset regime-integrated Kalman filter history")
+    
+    def predict(self, horizon: int = 1) -> np.ndarray:
+        """
+        Standard predict method for compatibility with diagnostic experiment.
+        
+        Args:
+            horizon: Prediction horizon
+            
+        Returns:
+            Prediction array [ROI, risk]
+        """
+        try:
+            # Use current state and create dummy market features
+            market_features = np.array([0.0, 0.0, 0.0, 0.0])  # Dummy features
+            
+            # Use regime-aware prediction
+            result = self.regime_aware_prediction(self.current_state, market_features)
+            
+            # Return just the prediction values for compatibility
+            return result.prediction[:2]  # ROI and risk only
+            
+        except Exception as e:
+            logger.error(f"Regime-integrated prediction error: {e}")
+            return np.array([0.0, 0.0])
+    
+    def update(self, observation: np.ndarray) -> None:
+        """
+        Standard update method for compatibility with diagnostic experiment.
+        
+        Args:
+            observation: New observation [ROI, risk]
+        """
+        try:
+            # Create dummy market features from observation
+            market_features = np.array([observation[0], observation[1], 0.0, 0.0])
+            
+            # First get a prediction
+            prediction_result = self.regime_aware_prediction(self.current_state, market_features)
+            
+            # Then use regime-aware update
+            result = self.regime_aware_update(observation, prediction_result)
+            
+            # Update current state
+            self.current_state = result.updated_state
+            self.current_covariance = result.updated_covariance
+            
+        except Exception as e:
+            logger.error(f"Regime-integrated update error: {e}")
+    
+    def get_current_state(self) -> np.ndarray:
+        """Get current state for diagnostic experiment."""
+        return self.current_state.copy()
+    
+    def get_uncertainty(self) -> np.ndarray:
+        """Get current uncertainty for diagnostic experiment."""
+        if self.current_covariance is not None:
+            return np.sqrt(np.diag(self.current_covariance))
+        return np.array([0.0, 0.0, 0.0, 0.0])
+    
+    def get_confidence(self) -> float:
+        """Get current confidence for diagnostic experiment."""
+        if self.regime_history:
+            return self.regime_history[-1].confidence
+        return 0.0
 
 
 def create_regime_integrated_kalman(regime_detector: MarketRegimeDetectionBNN) -> RegimeIntegratedKalmanFilter:
@@ -447,3 +511,6 @@ if __name__ == '__main__':
     print("Regime-Integrated Kalman Filter Module")
     print("This module provides regime-aware Kalman filtering.")
     print("Use RegimeIntegratedKalmanFilter class for regime-aware predictions.")
+
+
+

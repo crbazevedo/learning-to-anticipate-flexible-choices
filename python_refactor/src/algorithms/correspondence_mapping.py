@@ -380,3 +380,6 @@ class CorrespondenceMapping:
                 'end': self.population_metadata[-1]['current_time'] if self.population_metadata else None
             }
         }
+
+
+

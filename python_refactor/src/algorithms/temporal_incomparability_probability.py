@@ -294,3 +294,6 @@ class TemporalIncomparabilityCalculator:
             'max': np.max(tips_array),
             'trend': self.get_historical_tip_trend()
         }
+
+
+

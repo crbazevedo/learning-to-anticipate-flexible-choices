@@ -387,3 +387,6 @@ if __name__ == '__main__':
     print("Belief Coefficient Self-Adjustment Module")
     print("This module provides belief coefficient calculation functionality.")
     print("Use BeliefCoefficientCalculator class for belief coefficient calculations.")
+
+
+
