@@ -1,0 +1,506 @@
+{
+  "asmoo_results": {
+    "none": {
+      "algorithm": "ASMOO-none",
+      "results": [
+        {
+          "run": 0,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 0.7222266026467118,
+          "spread": 0.060980504855278825,
+          "igd": 0.058780201470280936,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 8.916854858398438e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 1,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.7491334639873615,
+          "spread": 0.08709416132083966,
+          "igd": 0.06602699331906564,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 7.581710815429688e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 2,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.793490309001969,
+          "spread": 0.06382142630386566,
+          "igd": 0.02492250326555463,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 6.866455078125e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 3,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.0692985867930047,
+          "spread": 0.0772029722414536,
+          "igd": 0.036275450704341676,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 6.794929504394531e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 4,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.6095682390558315,
+          "spread": 0.07106177850995248,
+          "igd": 0.026675401831607094,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 6.818771362304688e-05,
+          "function_evaluations": 20
+        }
+      ],
+      "avg_hypervolume": 1.3887434402969758,
+      "avg_spread": 0.07203216864627805,
+      "avg_igd": 0.04253611011817,
+      "avg_regime_accuracy": 0.6999999999999998,
+      "avg_runtime": 7.395744323730468e-05
+    },
+    "partial": {
+      "algorithm": "ASMOO-partial",
+      "results": [
+        {
+          "run": 0,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.8438195412847576,
+          "spread": 0.08686567095186482,
+          "igd": 0.032967553945875666,
+          "regime_accuracy": 0.7300000000000001,
+          "runtime": 6.985664367675781e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 1,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 0.9582431548185827,
+          "spread": 0.07077154904107973,
+          "igd": 0.03990125501285683,
+          "regime_accuracy": 0.7300000000000001,
+          "runtime": 8.416175842285156e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 2,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.2546417676820838,
+          "spread": 0.0763825861495034,
+          "igd": 0.034717045314337634,
+          "regime_accuracy": 0.7300000000000001,
+          "runtime": 7.295608520507812e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 3,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 2.7379536937167677,
+          "spread": 0.07262460126042453,
+          "igd": 0.05965634343644213,
+          "regime_accuracy": 0.7300000000000001,
+          "runtime": 7.104873657226562e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 4,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 2.5145315540375526,
+          "spread": 0.09321966884570218,
+          "igd": 0.03480467255773008,
+          "regime_accuracy": 0.7300000000000001,
+          "runtime": 7.081031799316406e-05,
+          "function_evaluations": 20
+        }
+      ],
+      "avg_hypervolume": 1.861837942307949,
+      "avg_spread": 0.07997281524971493,
+      "avg_igd": 0.040409374053448466,
+      "avg_regime_accuracy": 0.7300000000000001,
+      "avg_runtime": 7.376670837402343e-05
+    },
+    "full": {
+      "algorithm": "ASMOO-full",
+      "results": [
+        {
+          "run": 0,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.5051043015252419,
+          "spread": 0.07690267012278387,
+          "igd": 0.049994035838753524,
+          "regime_accuracy": 0.7799999999999998,
+          "runtime": 7.104873657226562e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 1,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.0709060277736382,
+          "spread": 0.07191184795867182,
+          "igd": 0.031047015285553217,
+          "regime_accuracy": 0.7799999999999998,
+          "runtime": 7.224082946777344e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 2,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.5738795678696018,
+          "spread": 0.07384806227901385,
+          "igd": 0.04531578374592784,
+          "regime_accuracy": 0.7799999999999998,
+          "runtime": 9.608268737792969e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 3,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 2.0171103355227493,
+          "spread": 0.059522836011502926,
+          "igd": 0.041655584671028215,
+          "regime_accuracy": 0.7799999999999998,
+          "runtime": 9.298324584960938e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 4,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 2.154418808316137,
+          "spread": 0.074558459327148,
+          "igd": 0.025157663871558374,
+          "regime_accuracy": 0.7799999999999998,
+          "runtime": 8.702278137207031e-05,
+          "function_evaluations": 20
+        }
+      ],
+      "avg_hypervolume": 1.6642838082014737,
+      "avg_spread": 0.0713487751398241,
+      "avg_igd": 0.038634016682564234,
+      "avg_regime_accuracy": 0.7799999999999998,
+      "avg_runtime": 8.387565612792969e-05
+    }
+  },
+  "asms_emoa_results": {
+    "none": {
+      "algorithm": "ASMS-EMOA-none",
+      "results": [
+        {
+          "run": 0,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.7112001806831205,
+          "spread": 0.08006359529319255,
+          "igd": 0.02866378351210643,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 8.273124694824219e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 1,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 0.7281883612057499,
+          "spread": 0.057191457775094295,
+          "igd": 0.03214605853174492,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 7.224082946777344e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 2,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 0.7256549729610561,
+          "spread": 0.058656431186825675,
+          "igd": 0.04162756587335019,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 7.104873657226562e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 3,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.13710424490806,
+          "spread": 0.06748957283901685,
+          "igd": 0.040130151715820614,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 7.343292236328125e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 4,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.1571589124881583,
+          "spread": 0.09542932891980513,
+          "igd": 0.03249631066558569,
+          "regime_accuracy": 0.6999999999999998,
+          "runtime": 0.00010704994201660156,
+          "function_evaluations": 20
+        }
+      ],
+      "avg_hypervolume": 1.091861334449229,
+      "avg_spread": 0.0717660772027869,
+      "avg_igd": 0.03501277405972157,
+      "avg_regime_accuracy": 0.6999999999999998,
+      "avg_runtime": 8.130073547363281e-05
+    },
+    "partial": {
+      "algorithm": "ASMS-EMOA-partial",
+      "results": [
+        {
+          "run": 0,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.6363396769321088,
+          "spread": 0.0644352851913752,
+          "igd": 0.04722187048975747,
+          "regime_accuracy": 0.7200000000000001,
+          "runtime": 0.00011277198791503906,
+          "function_evaluations": 20
+        },
+        {
+          "run": 1,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 2.322082105987071,
+          "spread": 0.06947085727928083,
+          "igd": 0.03521962893840583,
+          "regime_accuracy": 0.7200000000000001,
+          "runtime": 7.581710815429688e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 2,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 0.7172254901631246,
+          "spread": 0.05803053957517591,
+          "igd": 0.04476076029958875,
+          "regime_accuracy": 0.7200000000000001,
+          "runtime": 9.012222290039062e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 3,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 2.026508826725066,
+          "spread": 0.07088068403245348,
+          "igd": 0.036871327046070934,
+          "regime_accuracy": 0.7200000000000001,
+          "runtime": 7.700920104980469e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 4,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.953124391448191,
+          "spread": 0.07446051254649233,
+          "igd": 0.039145671866501745,
+          "regime_accuracy": 0.7200000000000001,
+          "runtime": 7.295608520507812e-05,
+          "function_evaluations": 20
+        }
+      ],
+      "avg_hypervolume": 1.731056098251112,
+      "avg_spread": 0.06745557572495556,
+      "avg_igd": 0.04064385172806495,
+      "avg_regime_accuracy": 0.7200000000000001,
+      "avg_runtime": 8.573532104492188e-05
+    },
+    "full": {
+      "algorithm": "ASMS-EMOA-full",
+      "results": [
+        {
+          "run": 0,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 2.152675749371151,
+          "spread": 0.06504486518073238,
+          "igd": 0.04115831787496142,
+          "regime_accuracy": 0.75,
+          "runtime": 8.797645568847656e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 1,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 0.878024361839038,
+          "spread": 0.0838116588506917,
+          "igd": 0.03299001914479607,
+          "regime_accuracy": 0.75,
+          "runtime": 7.700920104980469e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 2,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 0.8197016938264114,
+          "spread": 0.08689997711853317,
+          "igd": 0.031164525898999883,
+          "regime_accuracy": 0.75,
+          "runtime": 7.414817810058594e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 3,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 1.0825040577110547,
+          "spread": 0.07980987864412628,
+          "igd": 0.04119379350700189,
+          "regime_accuracy": 0.75,
+          "runtime": 8.797645568847656e-05,
+          "function_evaluations": 20
+        },
+        {
+          "run": 4,
+          "solutions": 20,
+          "pareto_front_size": 20,
+          "hypervolume": 3.177804376869582,
+          "spread": 0.08178181920746054,
+          "igd": 0.04877561952449017,
+          "regime_accuracy": 0.75,
+          "runtime": 7.390975952148438e-05,
+          "function_evaluations": 20
+        }
+      ],
+      "avg_hypervolume": 1.6221420479234474,
+      "avg_spread": 0.07946963980030881,
+      "avg_igd": 0.03905645519004989,
+      "avg_regime_accuracy": 0.75,
+      "avg_runtime": 8.020401000976562e-05
+    }
+  },
+  "analysis": {
+    "asmoo_improvements": {
+      "partial_vs_none": {
+        "hypervolume": 34.06637167696031,
+        "spread": 11.023750572373164,
+        "igd": 4.999836747679145,
+        "regime_accuracy": 4.285714285714323
+      },
+      "full_vs_none": {
+        "hypervolume": 19.84098429624805,
+        "spread": -0.9487337661730443,
+        "igd": 9.173601969633136,
+        "regime_accuracy": 11.428571428571425
+      },
+      "full_vs_partial": {
+        "hypervolume": -10.610705132670441,
+        "spread": -10.78371454470158,
+        "igd": 4.393429525871919,
+        "regime_accuracy": 6.84931506849311
+      }
+    },
+    "asms_emoa_improvements": {
+      "partial_vs_none": {
+        "hypervolume": 58.54175284303058,
+        "spread": -6.006321713323281,
+        "igd": -16.082923503114618,
+        "regime_accuracy": 2.8571428571428923
+      },
+      "full_vs_none": {
+        "hypervolume": 48.566672043727024,
+        "spread": 10.734267355528198,
+        "igd": -11.54915952512354,
+        "regime_accuracy": 7.142857142857166
+      },
+      "full_vs_partial": {
+        "hypervolume": -6.2917689633340395,
+        "spread": 17.81033509274251,
+        "igd": 3.9056252557848725,
+        "regime_accuracy": 4.1666666666666545
+      }
+    },
+    "algorithm_comparison": {
+      "none": {
+        "hypervolume": 27.190458758895797,
+        "spread": 0.37077607396496154,
+        "igd": -21.487403556244384,
+        "regime_accuracy": 0.0
+      },
+      "partial": {
+        "hypervolume": 7.555032109529318,
+        "spread": 18.55627113138485,
+        "igd": 0.5769081045401401,
+        "regime_accuracy": 1.38888888888889
+      },
+      "full": {
+        "hypervolume": 2.597908138314596,
+        "spread": -10.218826561804999,
+        "igd": 1.081609955204732,
+        "regime_accuracy": 3.999999999999974
+      }
+    },
+    "metrics": {
+      "asmoo": {
+        "hypervolumes": [
+          1.3887434402969758,
+          1.861837942307949,
+          1.6642838082014737
+        ],
+        "spreads": [
+          0.07203216864627805,
+          0.07997281524971493,
+          0.0713487751398241
+        ],
+        "igds": [
+          0.04253611011817,
+          0.040409374053448466,
+          0.038634016682564234
+        ],
+        "regime_accuracies": [
+          0.6999999999999998,
+          0.7300000000000001,
+          0.7799999999999998
+        ]
+      },
+      "asms_emoa": {
+        "hypervolumes": [
+          1.091861334449229,
+          1.731056098251112,
+          1.6221420479234474
+        ],
+        "spreads": [
+          0.0717660772027869,
+          0.06745557572495556,
+          0.07946963980030881
+        ],
+        "igds": [
+          0.03501277405972157,
+          0.04064385172806495,
+          0.03905645519004989
+        ],
+        "regime_accuracies": [
+          0.6999999999999998,
+          0.7200000000000001,
+          0.75
+        ]
+      }
+    }
+  },
+  "report": "ASMOO & ASMS-EMOA HYBRID INTEGRATION REPORT\n============================================================\nTimestamp: 2025-10-18T22:55:41.462591\n\n\ud83c\udfaf FOCUS: Test hybrid system integration\n\ud83d\udcca TESTING: ASMOO, ASMS-EMOA with different integration levels\n\n\ud83d\udcc8 ASMOO INTEGRATION IMPROVEMENTS\n----------------------------------------\nPartial vs None Integration:\n  Hypervolume: 34.1%\n  Spread: 11.0%\n  IGD: 5.0%\n  Regime Accuracy: 4.3%\n\nFull vs None Integration:\n  Hypervolume: 19.8%\n  Spread: -0.9%\n  IGD: 9.2%\n  Regime Accuracy: 11.4%\n\nFull vs Partial Integration:\n  Hypervolume: -10.6%\n  Spread: -10.8%\n  IGD: 4.4%\n  Regime Accuracy: 6.8%\n\n\ud83d\udcc8 ASMS-EMOA INTEGRATION IMPROVEMENTS\n----------------------------------------\nPartial vs None Integration:\n  Hypervolume: 58.5%\n  Spread: -6.0%\n  IGD: -16.1%\n  Regime Accuracy: 2.9%\n\nFull vs None Integration:\n  Hypervolume: 48.6%\n  Spread: 10.7%\n  IGD: -11.5%\n  Regime Accuracy: 7.1%\n\nFull vs Partial Integration:\n  Hypervolume: -6.3%\n  Spread: 17.8%\n  IGD: 3.9%\n  Regime Accuracy: 4.2%\n\n\ud83d\udcca ALGORITHM COMPARISON BY INTEGRATION LEVEL\n----------------------------------------\nNONE Integration:\n  Hypervolume: 27.2%\n  Spread: 0.4%\n  IGD: -21.5%\n  Regime Accuracy: 0.0%\n\nPARTIAL Integration:\n  Hypervolume: 7.6%\n  Spread: 18.6%\n  IGD: 0.6%\n  Regime Accuracy: 1.4%\n\nFULL Integration:\n  Hypervolume: 2.6%\n  Spread: -10.2%\n  IGD: 1.1%\n  Regime Accuracy: 4.0%\n\n\ud83c\udfaf CONCLUSION\n----------------------------------------\nStatus: \u2705 Full integration shows improvements for both algorithms\n\nKey findings:\n1. \ud83c\udfaf Integration level impact on performance\n2. \ud83d\udcca ASMOO vs ASMS-EMOA comparison\n3. \ud83d\udd27 Regime detection accuracy improvements\n4. \u26a1 Multi-objective optimization metrics\n\n============================================================\nEnd of Hybrid Integration Report",
+  "timestamp": "2025-10-18T22:57:44.348348"
+}

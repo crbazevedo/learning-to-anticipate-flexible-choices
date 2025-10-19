@@ -183,7 +183,7 @@ class DiagnosticExperiment:
                 # Get current state before update
                 if hasattr(model, 'get_current_state'):
                     current_state = model.get_current_state()
-                else:
+            else:
                     current_state = np.array([0.0, 0.0, 0.0, 0.0])
                 
                 # Log state
@@ -207,7 +207,7 @@ class DiagnosticExperiment:
                 # Get state after update
                 if hasattr(model, 'get_current_state'):
                     new_state = model.get_current_state()
-                else:
+            else:
                     new_state = np.array([0.0, 0.0, 0.0, 0.0])
                 
                 # Track state changes
@@ -476,7 +476,7 @@ class DiagnosticExperiment:
                 # Update model
                 try:
                     model.update(data[i])
-                except Exception as e:
+            except Exception as e:
                     print(f"    ⚠️  Update error in {model_name}: {e}")
             
             # Analyze parameter adaptation
@@ -517,7 +517,7 @@ class DiagnosticExperiment:
                     
                     # Update model
                     model.update(data[i])
-                except Exception as e:
+            except Exception as e:
                     print(f"    ⚠️  Uncertainty error in {model_name}: {e}")
                     uncertainty_measures.append(None)
             
@@ -565,7 +565,7 @@ class DiagnosticExperiment:
                             pred = model.predict(horizon=1)
                             regime_specific_predictions.append(pred)
                         
-                    except Exception as e:
+            except Exception as e:
                         print(f"    ⚠️  Regime behavior error in {model_name}: {e}")
                         regime_predictions.append('unknown')
                         regime_specific_predictions.append(np.array([0.0, 0.0]))
