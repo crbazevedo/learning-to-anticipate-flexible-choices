@@ -1,0 +1,4191 @@
+{
+  "baseline_results": {
+    "detector_type": "BaselineRegimeDetector",
+    "results": [
+      {
+        "period": 0,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7756988616645352,
+        "accuracy": 1.0
+      },
+      {
+        "period": 1,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6077834675822374,
+        "accuracy": 1.0
+      },
+      {
+        "period": 2,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.786960592010566,
+        "accuracy": 1.0
+      },
+      {
+        "period": 3,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8355637858804951,
+        "accuracy": 1.0
+      },
+      {
+        "period": 4,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.74134349032237,
+        "accuracy": 1.0
+      },
+      {
+        "period": 5,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8876795812558066,
+        "accuracy": 1.0
+      },
+      {
+        "period": 6,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6226210800896427,
+        "accuracy": 1.0
+      },
+      {
+        "period": 7,
+        "true_regime": "bull_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.4755345296688583,
+        "accuracy": 0.0
+      },
+      {
+        "period": 8,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5221279751095721,
+        "accuracy": 1.0
+      },
+      {
+        "period": 9,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8496044311489183,
+        "accuracy": 1.0
+      },
+      {
+        "period": 10,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7654365656354057,
+        "accuracy": 1.0
+      },
+      {
+        "period": 11,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6944415329089545,
+        "accuracy": 1.0
+      },
+      {
+        "period": 12,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7279968626319819,
+        "accuracy": 1.0
+      },
+      {
+        "period": 13,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5874510952701623,
+        "accuracy": 1.0
+      },
+      {
+        "period": 14,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.9,
+        "accuracy": 1.0
+      },
+      {
+        "period": 15,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7129221181975227,
+        "accuracy": 1.0
+      },
+      {
+        "period": 16,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7109394794604893,
+        "accuracy": 1.0
+      },
+      {
+        "period": 17,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7725766623898692,
+        "accuracy": 1.0
+      },
+      {
+        "period": 18,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7481009231736713,
+        "accuracy": 1.0
+      },
+      {
+        "period": 19,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7223884024279131,
+        "accuracy": 1.0
+      },
+      {
+        "period": 20,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6209525544554688,
+        "accuracy": 1.0
+      },
+      {
+        "period": 21,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7471468357135995,
+        "accuracy": 1.0
+      },
+      {
+        "period": 22,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8882024496475034,
+        "accuracy": 1.0
+      },
+      {
+        "period": 23,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8345420046154978,
+        "accuracy": 1.0
+      },
+      {
+        "period": 24,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8593186626639397,
+        "accuracy": 1.0
+      },
+      {
+        "period": 25,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6488784323568815,
+        "accuracy": 1.0
+      },
+      {
+        "period": 26,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6010395179741419,
+        "accuracy": 1.0
+      },
+      {
+        "period": 27,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6874213079900351,
+        "accuracy": 1.0
+      },
+      {
+        "period": 28,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7055724912288694,
+        "accuracy": 1.0
+      },
+      {
+        "period": 29,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8094191518470948,
+        "accuracy": 1.0
+      },
+      {
+        "period": 30,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.530753537028518,
+        "accuracy": 1.0
+      },
+      {
+        "period": 31,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8529550319460614,
+        "accuracy": 1.0
+      },
+      {
+        "period": 32,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.684199210142101,
+        "accuracy": 1.0
+      },
+      {
+        "period": 33,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6573118930052579,
+        "accuracy": 1.0
+      },
+      {
+        "period": 34,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5987895624739832,
+        "accuracy": 1.0
+      },
+      {
+        "period": 35,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.534514332813423,
+        "accuracy": 1.0
+      },
+      {
+        "period": 36,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7823170583961914,
+        "accuracy": 1.0
+      },
+      {
+        "period": 37,
+        "true_regime": "bull_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.6073317967188404,
+        "accuracy": 0.0
+      },
+      {
+        "period": 38,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5710039100258946,
+        "accuracy": 1.0
+      },
+      {
+        "period": 39,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5704921227936384,
+        "accuracy": 1.0
+      },
+      {
+        "period": 40,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6664215300709871,
+        "accuracy": 1.0
+      },
+      {
+        "period": 41,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8669021525289393,
+        "accuracy": 1.0
+      },
+      {
+        "period": 42,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6740408648636395,
+        "accuracy": 1.0
+      },
+      {
+        "period": 43,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5496857046881893,
+        "accuracy": 1.0
+      },
+      {
+        "period": 44,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6754256935914056,
+        "accuracy": 1.0
+      },
+      {
+        "period": 45,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6727276430252329,
+        "accuracy": 1.0
+      },
+      {
+        "period": 46,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.4303113357058428,
+        "accuracy": 1.0
+      },
+      {
+        "period": 47,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6945705133482187,
+        "accuracy": 1.0
+      },
+      {
+        "period": 48,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6769065469791321,
+        "accuracy": 1.0
+      },
+      {
+        "period": 49,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7696206364813418,
+        "accuracy": 1.0
+      },
+      {
+        "period": 50,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8848956094945345,
+        "accuracy": 1.0
+      },
+      {
+        "period": 51,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8126565029547757,
+        "accuracy": 1.0
+      },
+      {
+        "period": 52,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6731111309445169,
+        "accuracy": 1.0
+      },
+      {
+        "period": 53,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5893474091258329,
+        "accuracy": 1.0
+      },
+      {
+        "period": 54,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.9,
+        "accuracy": 1.0
+      },
+      {
+        "period": 55,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7059218434014488,
+        "accuracy": 1.0
+      },
+      {
+        "period": 56,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7013929291912946,
+        "accuracy": 1.0
+      },
+      {
+        "period": 57,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6975874912889997,
+        "accuracy": 1.0
+      },
+      {
+        "period": 58,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7198084760767854,
+        "accuracy": 1.0
+      },
+      {
+        "period": 59,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6855639588076057,
+        "accuracy": 1.0
+      },
+      {
+        "period": 60,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6426337993119763,
+        "accuracy": 1.0
+      },
+      {
+        "period": 61,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6453141058759607,
+        "accuracy": 1.0
+      },
+      {
+        "period": 62,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6967246729784001,
+        "accuracy": 1.0
+      },
+      {
+        "period": 63,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6456575228866235,
+        "accuracy": 1.0
+      },
+      {
+        "period": 64,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6287154217322836,
+        "accuracy": 1.0
+      },
+      {
+        "period": 65,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7106430227691897,
+        "accuracy": 1.0
+      },
+      {
+        "period": 66,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6745022782579144,
+        "accuracy": 1.0
+      },
+      {
+        "period": 67,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8503992988582688,
+        "accuracy": 1.0
+      },
+      {
+        "period": 68,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.43490301916069873,
+        "accuracy": 1.0
+      },
+      {
+        "period": 69,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8091506851922461,
+        "accuracy": 1.0
+      },
+      {
+        "period": 70,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8246085192497629,
+        "accuracy": 1.0
+      },
+      {
+        "period": 71,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.49266097675918497,
+        "accuracy": 1.0
+      },
+      {
+        "period": 72,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6657312405919651,
+        "accuracy": 1.0
+      },
+      {
+        "period": 73,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6628559134004208,
+        "accuracy": 1.0
+      },
+      {
+        "period": 74,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5592488305282178,
+        "accuracy": 1.0
+      },
+      {
+        "period": 75,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.6222183312409124,
+        "accuracy": 1.0
+      },
+      {
+        "period": 76,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5889424154534171,
+        "accuracy": 1.0
+      },
+      {
+        "period": 77,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8752270443423622,
+        "accuracy": 1.0
+      },
+      {
+        "period": 78,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7935678393147461,
+        "accuracy": 1.0
+      },
+      {
+        "period": 79,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.8271555094994159,
+        "accuracy": 1.0
+      },
+      {
+        "period": 80,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7721672064043235,
+        "accuracy": 1.0
+      },
+      {
+        "period": 81,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.3870948228782771,
+        "accuracy": 0.0
+      },
+      {
+        "period": 82,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.4475479733720226,
+        "accuracy": 0.0
+      },
+      {
+        "period": 83,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5489374561227918,
+        "accuracy": 0.0
+      },
+      {
+        "period": 84,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.5777872191108054,
+        "accuracy": 1.0
+      },
+      {
+        "period": 85,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7712998430172388,
+        "accuracy": 1.0
+      },
+      {
+        "period": 86,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6759674601841865,
+        "accuracy": 1.0
+      },
+      {
+        "period": 87,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6625179192450402,
+        "accuracy": 1.0
+      },
+      {
+        "period": 88,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7710959968203491,
+        "accuracy": 1.0
+      },
+      {
+        "period": 89,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7444263311486039,
+        "accuracy": 1.0
+      },
+      {
+        "period": 90,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.463903383418092,
+        "accuracy": 0.0
+      },
+      {
+        "period": 91,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.8159329803364248,
+        "accuracy": 1.0
+      },
+      {
+        "period": 92,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.5918936672400102,
+        "accuracy": 1.0
+      },
+      {
+        "period": 93,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7615935606944263,
+        "accuracy": 1.0
+      },
+      {
+        "period": 94,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7593101257968383,
+        "accuracy": 1.0
+      },
+      {
+        "period": 95,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6690453560686009,
+        "accuracy": 1.0
+      },
+      {
+        "period": 96,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7326133022242117,
+        "accuracy": 1.0
+      },
+      {
+        "period": 97,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.5748886423614696,
+        "accuracy": 1.0
+      },
+      {
+        "period": 98,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7924027019206901,
+        "accuracy": 1.0
+      },
+      {
+        "period": 99,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.681509786355701,
+        "accuracy": 1.0
+      },
+      {
+        "period": 100,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.647727697948096,
+        "accuracy": 1.0
+      },
+      {
+        "period": 101,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.604900922583689,
+        "accuracy": 0.0
+      },
+      {
+        "period": 102,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.629565630945724,
+        "accuracy": 1.0
+      },
+      {
+        "period": 103,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.559153870363644,
+        "accuracy": 1.0
+      },
+      {
+        "period": 104,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.5443370826476096,
+        "accuracy": 1.0
+      },
+      {
+        "period": 105,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7606009951345639,
+        "accuracy": 1.0
+      },
+      {
+        "period": 106,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.3719570647503717,
+        "accuracy": 0.0
+      },
+      {
+        "period": 107,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.8754794181984364,
+        "accuracy": 1.0
+      },
+      {
+        "period": 108,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.4918070592116277,
+        "accuracy": 1.0
+      },
+      {
+        "period": 109,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.8696456368290038,
+        "accuracy": 1.0
+      },
+      {
+        "period": 110,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5211017467202619,
+        "accuracy": 0.0
+      },
+      {
+        "period": 111,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.49032868881296077,
+        "accuracy": 0.0
+      },
+      {
+        "period": 112,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.645508091319105,
+        "accuracy": 1.0
+      },
+      {
+        "period": 113,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7399136114352071,
+        "accuracy": 1.0
+      },
+      {
+        "period": 114,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6962365297575152,
+        "accuracy": 1.0
+      },
+      {
+        "period": 115,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.8103301882016521,
+        "accuracy": 1.0
+      },
+      {
+        "period": 116,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7114227648662039,
+        "accuracy": 1.0
+      },
+      {
+        "period": 117,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5150301761461877,
+        "accuracy": 0.0
+      },
+      {
+        "period": 118,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6636387787786143,
+        "accuracy": 1.0
+      },
+      {
+        "period": 119,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6943054376278932,
+        "accuracy": 1.0
+      },
+      {
+        "period": 120,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7307801768892058,
+        "accuracy": 1.0
+      },
+      {
+        "period": 121,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.5289831607343374,
+        "accuracy": 1.0
+      },
+      {
+        "period": 122,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.5651814577894286,
+        "accuracy": 1.0
+      },
+      {
+        "period": 123,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7743264094022715,
+        "accuracy": 1.0
+      },
+      {
+        "period": 124,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5170865438127942,
+        "accuracy": 0.0
+      },
+      {
+        "period": 125,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6816016663647321,
+        "accuracy": 1.0
+      },
+      {
+        "period": 126,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5018433933065393,
+        "accuracy": 0.0
+      },
+      {
+        "period": 127,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7347581705361671,
+        "accuracy": 1.0
+      },
+      {
+        "period": 128,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.4460240319690638,
+        "accuracy": 0.0
+      },
+      {
+        "period": 129,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6221695274597687,
+        "accuracy": 1.0
+      },
+      {
+        "period": 130,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7195845255097681,
+        "accuracy": 1.0
+      },
+      {
+        "period": 131,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6021627222384968,
+        "accuracy": 1.0
+      },
+      {
+        "period": 132,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7408252755714472,
+        "accuracy": 1.0
+      },
+      {
+        "period": 133,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.32974163957621594,
+        "accuracy": 0.0
+      },
+      {
+        "period": 134,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.8029155637325643,
+        "accuracy": 1.0
+      },
+      {
+        "period": 135,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5472597482413043,
+        "accuracy": 0.0
+      },
+      {
+        "period": 136,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5256029734313876,
+        "accuracy": 0.0
+      },
+      {
+        "period": 137,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7982690983945513,
+        "accuracy": 1.0
+      },
+      {
+        "period": 138,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.8665474444462576,
+        "accuracy": 1.0
+      },
+      {
+        "period": 139,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.801437006501813,
+        "accuracy": 1.0
+      },
+      {
+        "period": 140,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.5159125768668354,
+        "accuracy": 1.0
+      },
+      {
+        "period": 141,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.37204230332642985,
+        "accuracy": 0.0
+      },
+      {
+        "period": 142,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.4375181422304321,
+        "accuracy": 0.0
+      },
+      {
+        "period": 143,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7026091050210833,
+        "accuracy": 1.0
+      },
+      {
+        "period": 144,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7517659020469123,
+        "accuracy": 1.0
+      },
+      {
+        "period": 145,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6274256186846534,
+        "accuracy": 1.0
+      },
+      {
+        "period": 146,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7186766764477078,
+        "accuracy": 1.0
+      },
+      {
+        "period": 147,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6244617067646677,
+        "accuracy": 1.0
+      },
+      {
+        "period": 148,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.4388482197008052,
+        "accuracy": 0.0
+      },
+      {
+        "period": 149,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.35933389031517776,
+        "accuracy": 0.0
+      },
+      {
+        "period": 150,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6076766753889096,
+        "accuracy": 1.0
+      },
+      {
+        "period": 151,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.5648315394383666,
+        "accuracy": 1.0
+      },
+      {
+        "period": 152,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6024126747022667,
+        "accuracy": 1.0
+      },
+      {
+        "period": 153,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6053641796607839,
+        "accuracy": 0.0
+      },
+      {
+        "period": 154,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6050601111168057,
+        "accuracy": 1.0
+      },
+      {
+        "period": 155,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.9,
+        "accuracy": 1.0
+      },
+      {
+        "period": 156,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.549331790088089,
+        "accuracy": 0.0
+      },
+      {
+        "period": 157,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5184836123694874,
+        "accuracy": 0.0
+      },
+      {
+        "period": 158,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.6141642219818786,
+        "accuracy": 1.0
+      },
+      {
+        "period": 159,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.7700309879408991,
+        "accuracy": 1.0
+      },
+      {
+        "period": 160,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.44243621737622263,
+        "accuracy": 1.0
+      },
+      {
+        "period": 161,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5122009814645362,
+        "accuracy": 1.0
+      },
+      {
+        "period": 162,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.7560084538268794,
+        "accuracy": 1.0
+      },
+      {
+        "period": 163,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.590394010027535,
+        "accuracy": 0.0
+      },
+      {
+        "period": 164,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.7149273326285676,
+        "accuracy": 0.0
+      },
+      {
+        "period": 165,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.42968235748741124,
+        "accuracy": 1.0
+      },
+      {
+        "period": 166,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.49650115095030384,
+        "accuracy": 1.0
+      },
+      {
+        "period": 167,
+        "true_regime": "sideways_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.877080063563551,
+        "accuracy": 0.0
+      },
+      {
+        "period": 168,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.43730329422122327,
+        "accuracy": 1.0
+      },
+      {
+        "period": 169,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.7812448557996928,
+        "accuracy": 0.0
+      },
+      {
+        "period": 170,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5707751935455475,
+        "accuracy": 1.0
+      },
+      {
+        "period": 171,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.5437533224105732,
+        "accuracy": 0.0
+      },
+      {
+        "period": 172,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.563240773905552,
+        "accuracy": 1.0
+      },
+      {
+        "period": 173,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.597255444962673,
+        "accuracy": 1.0
+      },
+      {
+        "period": 174,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5621809962217197,
+        "accuracy": 1.0
+      },
+      {
+        "period": 175,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.44297752801095436,
+        "accuracy": 0.0
+      },
+      {
+        "period": 176,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.5272862824175131,
+        "accuracy": 0.0
+      },
+      {
+        "period": 177,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.47524813644484953,
+        "accuracy": 1.0
+      },
+      {
+        "period": 178,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.49255665708999535,
+        "accuracy": 1.0
+      },
+      {
+        "period": 179,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.6620672097550677,
+        "accuracy": 0.0
+      },
+      {
+        "period": 180,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.6177701000933253,
+        "accuracy": 0.0
+      },
+      {
+        "period": 181,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.3664655641289899,
+        "accuracy": 1.0
+      },
+      {
+        "period": 182,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.6380197851005963,
+        "accuracy": 0.0
+      },
+      {
+        "period": 183,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.6610585745283823,
+        "accuracy": 0.0
+      },
+      {
+        "period": 184,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.555979044793104,
+        "accuracy": 1.0
+      },
+      {
+        "period": 185,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6080780725554622,
+        "accuracy": 1.0
+      },
+      {
+        "period": 186,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.6833922154548904,
+        "accuracy": 0.0
+      },
+      {
+        "period": 187,
+        "true_regime": "sideways_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7459180079228436,
+        "accuracy": 0.0
+      },
+      {
+        "period": 188,
+        "true_regime": "sideways_market",
+        "predicted_regime": "recovery_market",
+        "confidence": 0.5929834288541352,
+        "accuracy": 0.0
+      },
+      {
+        "period": 189,
+        "true_regime": "sideways_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5339039066484008,
+        "accuracy": 0.0
+      },
+      {
+        "period": 190,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5429618219132586,
+        "accuracy": 1.0
+      },
+      {
+        "period": 191,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5207687687163112,
+        "accuracy": 1.0
+      },
+      {
+        "period": 192,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5271578837195373,
+        "accuracy": 1.0
+      },
+      {
+        "period": 193,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.372325142417969,
+        "accuracy": 1.0
+      },
+      {
+        "period": 194,
+        "true_regime": "sideways_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.5918943459591737,
+        "accuracy": 0.0
+      },
+      {
+        "period": 195,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6053152853332904,
+        "accuracy": 1.0
+      },
+      {
+        "period": 196,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.4960444846143345,
+        "accuracy": 1.0
+      },
+      {
+        "period": 197,
+        "true_regime": "sideways_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.7681500697372624,
+        "accuracy": 0.0
+      },
+      {
+        "period": 198,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.502831837613046,
+        "accuracy": 1.0
+      },
+      {
+        "period": 199,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5029756139495744,
+        "accuracy": 1.0
+      }
+    ],
+    "overall_accuracy": 0.795,
+    "mean_confidence": 0.6480709176690082,
+    "confidence_std": 0.1302342412140672,
+    "confidences": [
+      0.7756988616645352,
+      0.6077834675822374,
+      0.786960592010566,
+      0.8355637858804951,
+      0.74134349032237,
+      0.8876795812558066,
+      0.6226210800896427,
+      0.4755345296688583,
+      0.5221279751095721,
+      0.8496044311489183,
+      0.7654365656354057,
+      0.6944415329089545,
+      0.7279968626319819,
+      0.5874510952701623,
+      0.9,
+      0.7129221181975227,
+      0.7109394794604893,
+      0.7725766623898692,
+      0.7481009231736713,
+      0.7223884024279131,
+      0.6209525544554688,
+      0.7471468357135995,
+      0.8882024496475034,
+      0.8345420046154978,
+      0.8593186626639397,
+      0.6488784323568815,
+      0.6010395179741419,
+      0.6874213079900351,
+      0.7055724912288694,
+      0.8094191518470948,
+      0.530753537028518,
+      0.8529550319460614,
+      0.684199210142101,
+      0.6573118930052579,
+      0.5987895624739832,
+      0.534514332813423,
+      0.7823170583961914,
+      0.6073317967188404,
+      0.5710039100258946,
+      0.5704921227936384,
+      0.6664215300709871,
+      0.8669021525289393,
+      0.6740408648636395,
+      0.5496857046881893,
+      0.6754256935914056,
+      0.6727276430252329,
+      0.4303113357058428,
+      0.6945705133482187,
+      0.6769065469791321,
+      0.7696206364813418,
+      0.8848956094945345,
+      0.8126565029547757,
+      0.6731111309445169,
+      0.5893474091258329,
+      0.9,
+      0.7059218434014488,
+      0.7013929291912946,
+      0.6975874912889997,
+      0.7198084760767854,
+      0.6855639588076057,
+      0.6426337993119763,
+      0.6453141058759607,
+      0.6967246729784001,
+      0.6456575228866235,
+      0.6287154217322836,
+      0.7106430227691897,
+      0.6745022782579144,
+      0.8503992988582688,
+      0.43490301916069873,
+      0.8091506851922461,
+      0.8246085192497629,
+      0.49266097675918497,
+      0.6657312405919651,
+      0.6628559134004208,
+      0.5592488305282178,
+      0.6222183312409124,
+      0.5889424154534171,
+      0.8752270443423622,
+      0.7935678393147461,
+      0.8271555094994159,
+      0.7721672064043235,
+      0.3870948228782771,
+      0.4475479733720226,
+      0.5489374561227918,
+      0.5777872191108054,
+      0.7712998430172388,
+      0.6759674601841865,
+      0.6625179192450402,
+      0.7710959968203491,
+      0.7444263311486039,
+      0.463903383418092,
+      0.8159329803364248,
+      0.5918936672400102,
+      0.7615935606944263,
+      0.7593101257968383,
+      0.6690453560686009,
+      0.7326133022242117,
+      0.5748886423614696,
+      0.7924027019206901,
+      0.681509786355701,
+      0.647727697948096,
+      0.604900922583689,
+      0.629565630945724,
+      0.559153870363644,
+      0.5443370826476096,
+      0.7606009951345639,
+      0.3719570647503717,
+      0.8754794181984364,
+      0.4918070592116277,
+      0.8696456368290038,
+      0.5211017467202619,
+      0.49032868881296077,
+      0.645508091319105,
+      0.7399136114352071,
+      0.6962365297575152,
+      0.8103301882016521,
+      0.7114227648662039,
+      0.5150301761461877,
+      0.6636387787786143,
+      0.6943054376278932,
+      0.7307801768892058,
+      0.5289831607343374,
+      0.5651814577894286,
+      0.7743264094022715,
+      0.5170865438127942,
+      0.6816016663647321,
+      0.5018433933065393,
+      0.7347581705361671,
+      0.4460240319690638,
+      0.6221695274597687,
+      0.7195845255097681,
+      0.6021627222384968,
+      0.7408252755714472,
+      0.32974163957621594,
+      0.8029155637325643,
+      0.5472597482413043,
+      0.5256029734313876,
+      0.7982690983945513,
+      0.8665474444462576,
+      0.801437006501813,
+      0.5159125768668354,
+      0.37204230332642985,
+      0.4375181422304321,
+      0.7026091050210833,
+      0.7517659020469123,
+      0.6274256186846534,
+      0.7186766764477078,
+      0.6244617067646677,
+      0.4388482197008052,
+      0.35933389031517776,
+      0.6076766753889096,
+      0.5648315394383666,
+      0.6024126747022667,
+      0.6053641796607839,
+      0.6050601111168057,
+      0.9,
+      0.549331790088089,
+      0.5184836123694874,
+      0.6141642219818786,
+      0.7700309879408991,
+      0.44243621737622263,
+      0.5122009814645362,
+      0.7560084538268794,
+      0.590394010027535,
+      0.7149273326285676,
+      0.42968235748741124,
+      0.49650115095030384,
+      0.877080063563551,
+      0.43730329422122327,
+      0.7812448557996928,
+      0.5707751935455475,
+      0.5437533224105732,
+      0.563240773905552,
+      0.597255444962673,
+      0.5621809962217197,
+      0.44297752801095436,
+      0.5272862824175131,
+      0.47524813644484953,
+      0.49255665708999535,
+      0.6620672097550677,
+      0.6177701000933253,
+      0.3664655641289899,
+      0.6380197851005963,
+      0.6610585745283823,
+      0.555979044793104,
+      0.6080780725554622,
+      0.6833922154548904,
+      0.7459180079228436,
+      0.5929834288541352,
+      0.5339039066484008,
+      0.5429618219132586,
+      0.5207687687163112,
+      0.5271578837195373,
+      0.372325142417969,
+      0.5918943459591737,
+      0.6053152853332904,
+      0.4960444846143345,
+      0.7681500697372624,
+      0.502831837613046,
+      0.5029756139495744
+    ],
+    "accuracies": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0
+    ]
+  },
+  "robust_results": {
+    "detector_type": "RobustRegimeDetector",
+    "results": [
+      {
+        "period": 0,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.82,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 1,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.84,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 2,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.84,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 3,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.96,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 4,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.96,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 5,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.96,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 6,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 7,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 8,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 9,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 10,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 11,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 12,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 13,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 14,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 15,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 16,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 17,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 18,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 19,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 20,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 21,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 22,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 23,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 24,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 25,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 26,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 27,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 28,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 29,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 30,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 31,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 32,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 33,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 34,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 35,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 36,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 37,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 38,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 39,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 40,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 41,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 42,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 43,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 44,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 45,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 46,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 47,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 48,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 49,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 50,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 51,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 52,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 53,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 54,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 55,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 56,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 57,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 58,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 59,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 60,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 61,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 62,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 63,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 64,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 65,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 66,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 67,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 68,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 69,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 70,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 71,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 72,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 73,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 74,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 75,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 76,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 77,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 78,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 79,
+        "true_regime": "bull_market",
+        "predicted_regime": "bull_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 80,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.86,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 81,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.86,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 82,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 83,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 84,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 85,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 86,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 87,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 88,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 89,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 90,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 91,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 92,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 93,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 94,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 95,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 96,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 97,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 98,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 99,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 100,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 101,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.86,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 102,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 103,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 104,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 105,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 106,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.88,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 107,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 108,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 109,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 110,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 0.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 111,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 112,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 113,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 114,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 115,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 116,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 117,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 0.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 118,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 119,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 120,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 121,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 122,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 123,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 124,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 0.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 125,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 126,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 0.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 127,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.88,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 128,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.86,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 129,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 130,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 131,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 132,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 133,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 0.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 134,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 135,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 0.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 136,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.8,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 137,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 138,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 139,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 140,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 141,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 0.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 142,
+        "true_regime": "bear_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 0.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 143,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.9,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 144,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.8200000000000001,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 145,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 146,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 147,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 148,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 149,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 150,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 151,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 152,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 153,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.86,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 154,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.98,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 155,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 1.0,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 156,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 157,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.86,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 158,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 159,
+        "true_regime": "bear_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.92,
+        "accuracy": 1.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 160,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 161,
+        "true_regime": "sideways_market",
+        "predicted_regime": "bear_market",
+        "confidence": 0.88,
+        "accuracy": 0.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 162,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.5,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 163,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 164,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 165,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 166,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 167,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 168,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 169,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 170,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 171,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 172,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 173,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 174,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 175,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 176,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 177,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 178,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 179,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 180,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 181,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 182,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 183,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 184,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 185,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 186,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 187,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 188,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 189,
+        "true_regime": "sideways_market",
+        "predicted_regime": "bull_market",
+        "confidence": 0.74,
+        "accuracy": 0.0,
+        "temporal_consistency": "True"
+      },
+      {
+        "period": 190,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 191,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 192,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 193,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 194,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 195,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 196,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 197,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 198,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      },
+      {
+        "period": 199,
+        "true_regime": "sideways_market",
+        "predicted_regime": "sideways_market",
+        "confidence": 0.6,
+        "accuracy": 1.0,
+        "temporal_consistency": false
+      }
+    ],
+    "overall_accuracy": 0.95,
+    "mean_confidence": 0.8787999999999999,
+    "confidence_std": 0.17163496147347138,
+    "regime_metrics": {
+      "bull_market": {
+        "accuracy": 1.0,
+        "confidence": 0.992,
+        "count": 80
+      },
+      "bear_market": {
+        "accuracy": 0.9,
+        "confidence": 0.9022500000000001,
+        "count": 80
+      },
+      "sideways_market": {
+        "accuracy": 0.95,
+        "confidence": 0.6055,
+        "count": 40
+      }
+    },
+    "confidences": [
+      0.82,
+      0.84,
+      0.84,
+      0.96,
+      0.96,
+      0.96,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.98,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.86,
+      0.86,
+      1.0,
+      0.98,
+      0.98,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.92,
+      0.92,
+      0.86,
+      1.0,
+      0.92,
+      0.92,
+      0.92,
+      0.88,
+      0.92,
+      0.92,
+      0.98,
+      0.5,
+      0.92,
+      0.98,
+      0.92,
+      0.92,
+      0.98,
+      0.92,
+      0.5,
+      1.0,
+      0.98,
+      1.0,
+      0.92,
+      1.0,
+      0.98,
+      0.5,
+      1.0,
+      0.5,
+      0.88,
+      0.86,
+      1.0,
+      1.0,
+      1.0,
+      0.92,
+      0.5,
+      0.92,
+      0.5,
+      0.8,
+      0.92,
+      0.92,
+      0.92,
+      0.92,
+      0.5,
+      0.5,
+      0.9,
+      0.8200000000000001,
+      1.0,
+      0.92,
+      0.98,
+      0.92,
+      0.92,
+      0.92,
+      0.92,
+      1.0,
+      0.86,
+      0.98,
+      1.0,
+      0.92,
+      0.86,
+      0.92,
+      0.92,
+      0.5,
+      0.88,
+      0.5,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.74,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6
+    ],
+    "accuracies": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "improvement_analysis": {
+    "overall": {
+      "accuracy_improvement": 19.496855345911936,
+      "confidence_improvement": 35.602443504313044,
+      "stability_improvement": -31.789427936508208,
+      "baseline_accuracy": 0.795,
+      "robust_accuracy": 0.95,
+      "baseline_confidence": 0.6480709176690082,
+      "robust_confidence": 0.8787999999999999
+    },
+    "regime_specific": {
+      "bull_market": {
+        "accuracy_improvement": 2.5641025641025665,
+        "confidence_improvement": 41.87366121274277,
+        "baseline_accuracy": 0.975,
+        "robust_accuracy": 1.0,
+        "baseline_confidence": 0.6992136465079826,
+        "robust_confidence": 0.992
+      },
+      "bear_market": {
+        "accuracy_improvement": 24.137931034482765,
+        "confidence_improvement": 42.1762367076585,
+        "baseline_accuracy": 0.725,
+        "robust_accuracy": 0.9,
+        "baseline_confidence": 0.6345997199624847,
+        "robust_confidence": 0.9022500000000001
+      },
+      "sideways_market": {
+        "accuracy_improvement": 65.21739130434783,
+        "confidence_improvement": 5.722114663476631,
+        "baseline_accuracy": 0.575,
+        "robust_accuracy": 0.95,
+        "baseline_confidence": 0.5727278554041064,
+        "robust_confidence": 0.6055
+      }
+    },
+    "assessment": {
+      "success_rate": 66.66666666666666,
+      "average_improvement": 13.050026010438751,
+      "positive_improvements": 2,
+      "total_improvements": 3
+    }
+  },
+  "report": "EPIC 1.5: ROBUST REGIME DETECTION TEST REPORT\n============================================================\nTimestamp: 2025-10-18T21:59:32.912542\n\n\ud83c\udfaf FOCUS: Increase regime confidence from 84.54% to 90%+\n\n\ud83d\udcca OVERALL PERFORMANCE COMPARISON\n----------------------------------------\nBaseline Accuracy: 0.7950\nRobust Accuracy: 0.9500\nAccuracy Improvement: 19.5%\n\nBaseline Confidence: 0.6481\nRobust Confidence: 0.8788\nConfidence Improvement: 35.6%\n\n\ud83c\udfaf REGIME-SPECIFIC IMPROVEMENTS\n----------------------------------------\nBULL_MARKET:\n  Accuracy: 0.9750 \u2192 1.0000 (2.6%)\n  Confidence: 0.6992 \u2192 0.9920 (41.9%)\n\nBEAR_MARKET:\n  Accuracy: 0.7250 \u2192 0.9000 (24.1%)\n  Confidence: 0.6346 \u2192 0.9023 (42.2%)\n\nSIDEWAYS_MARKET:\n  Accuracy: 0.5750 \u2192 0.9500 (65.2%)\n  Confidence: 0.5727 \u2192 0.6055 (5.7%)\n\n\ud83c\udfc6 ASSESSMENT\n----------------------------------------\nSuccess Rate: 66.7%\nAverage Improvement: 13.1%\nPositive Improvements: 2/3\n\n\ud83c\udfaf CONCLUSION\n----------------------------------------\nStatus: \u2705 GOOD - Robust regime detection shows notable improvements!\n\nKey improvements:\n1. \ud83c\udfaf Simple but effective feature engineering\n2. \ud83d\udd27 Robust ensemble methods\n3. \ud83d\udcca Temporal consistency checks\n4. \u2699\ufe0f Adaptive confidence thresholds\n5. \ud83d\udcc8 Error handling and fallback mechanisms\n\n============================================================\nEnd of Robust Regime Detection Test Report",
+  "data_used": "[[ 3.39737132e-02  5.86173570e-02]\n [ 3.57462772e-02  7.53302986e-02]\n [ 2.90799423e-02  5.78586304e-02]\n [ 4.46074664e-02  6.79743473e-02]\n [ 2.80564152e-02  6.58256004e-02]\n [ 2.85609496e-02  5.58427025e-02]\n [ 3.50808755e-02  4.14671976e-02]\n [ 1.84932149e-02  5.50771247e-02]\n [ 2.50870861e-02  6.39424733e-02]\n [ 2.64185857e-02  4.67769630e-02]\n [ 4.81908389e-02  5.87422370e-02]\n [ 3.61145067e-02  4.68525181e-02]\n [ 3.09916789e-02  6.23092259e-02]\n [ 2.57957597e-02  6.50569802e-02]\n [ 3.13539963e-02  5.84830625e-02]\n [ 3.17837872e-02  8.00227818e-02]\n [ 3.78704266e-02  5.10228907e-02]\n [ 4.64786856e-02  4.94915635e-02]\n [ 4.10468632e-02  4.22032988e-02]\n [ 2.63509581e-02  6.38686124e-02]\n [ 4.73846658e-02  6.37136828e-02]\n [ 3.93319523e-02  5.90889630e-02]\n [ 2.59190757e-02  5.50015579e-02]\n [ 3.67554207e-02  7.28712223e-02]\n [ 4.55736302e-02  4.47695984e-02]\n [ 4.59028817e-02  5.86491772e-02]\n [ 3.58246268e-02  6.87167629e-02]\n [ 5.45316949e-02  7.20128012e-02]\n [ 3.49364507e-02  5.97078762e-02]\n [ 4.81107714e-02  7.26554513e-02]\n [ 3.97290834e-02  6.11434102e-02]\n [ 3.32196818e-02  5.11379338e-02]\n [ 5.51002892e-02  7.67624003e-02]\n [ 4.56862856e-02  7.33353290e-02]\n [ 5.11226507e-02  5.69488025e-02]\n [ 5.16560495e-02  7.88803657e-02]\n [ 4.75844179e-02  7.92464366e-02]\n [ 1.78489823e-02  7.19190250e-02]\n [ 5.00271554e-02  6.08099265e-02]\n [ 5.05919532e-02  4.40243109e-02]\n [ 4.73639373e-02  6.75711257e-02]\n [ 6.83825179e-02  5.89172978e-02]\n [ 4.11363780e-02  5.91824296e-02]\n [ 6.27594460e-02  6.75875111e-02]\n [ 4.54309735e-02  6.95326743e-02]\n [ 5.37134694e-02  7.41864499e-02]\n [ 4.41541310e-02  6.13233785e-02]\n [ 4.85202265e-02  5.00648505e-02]\n [ 5.77903395e-02  6.74105527e-02]\n [ 5.45659636e-02  6.25541287e-02]\n [ 3.66001804e-02  6.07935468e-02]\n [ 5.10104398e-02  5.70772273e-02]\n [ 5.38710286e-02  6.92405086e-02]\n [ 8.15862725e-02  6.70457781e-02]\n [ 6.04511752e-02  6.46555408e-02]\n [ 3.15965886e-02  6.52348612e-02]\n [ 5.88191309e-02  9.02324211e-02]\n [ 5.58646548e-02  6.87154734e-02]\n [ 5.85209776e-02  5.41132196e-02]\n [ 7.53852371e-02  7.34193303e-02]\n [ 7.10744473e-02  5.69061255e-02]\n [ 8.02793998e-02  5.20814894e-02]\n [ 6.93333707e-02  8.81045563e-02]\n [ 4.73353306e-02  6.06370227e-02]\n [ 6.34349797e-02  6.13652435e-02]\n [ 4.00153802e-02  6.71856297e-02]\n [ 4.74903658e-02  7.13359243e-02]\n [ 4.99844638e-02  8.21993441e-02]\n [ 5.24078513e-02  6.35793848e-02]\n [ 7.66214065e-02  5.45913568e-02]\n [ 6.84118990e-02  8.00714275e-02]\n [ 4.12270032e-02  6.89463386e-02]\n [ 6.99502185e-02  7.50182287e-02]\n [ 4.75746541e-02  5.40954339e-02]\n [ 7.50379001e-02  7.03698467e-02]\n [ 7.13826392e-02  7.09644821e-02]\n [ 5.73916143e-02  6.99225370e-02]\n [ 7.31012378e-02  6.05564858e-02]\n [ 9.84792373e-02  7.25383292e-02]\n [ 5.05582744e-02  7.44655361e-02]\n [-4.43670418e-02  2.73612538e-01]\n [ 8.89660859e-03  2.25579530e-01]\n [ 3.86975368e-03  2.62783428e-01]\n [ 1.44740096e-04  3.07503789e-01]\n [-2.75310134e-02  2.28187915e-01]\n [-4.46273752e-02  2.26525691e-01]\n [-2.38200648e-02  2.61434559e-01]\n [-1.47953629e-02  2.76215497e-01]\n [-2.20541497e-02  2.95206022e-01]\n [-2.97928031e-02  3.33405075e-01]\n [-6.10698161e-03  2.26285273e-01]\n [-5.24282759e-02  2.66674172e-01]\n [-2.97228803e-02  2.73820015e-01]\n [-1.08386416e-02  2.50415133e-01]\n [-4.77408654e-02  2.07354583e-01]\n [-3.70024187e-02  2.78691964e-01]\n [-1.87625564e-02  2.15827837e-01]\n [-2.01816617e-02  2.64959521e-01]\n [-5.06783227e-02  2.58211753e-01]\n [-2.40235889e-02  2.19510891e-01]\n [-1.56241665e-02  2.70823536e-01]\n [ 5.32509630e-03  2.85814062e-01]\n [-6.71034794e-02  2.26265249e-01]\n [-1.16549561e-02  2.70013579e-01]\n [-1.18515789e-02  3.70381945e-01]\n [-1.03732847e-02  2.89066969e-01]\n [ 1.01085326e-03  2.74741738e-01]\n [-3.76841850e-02  2.78169077e-01]\n [-5.20484516e-02  2.48495442e-01]\n [-4.36491973e-02  2.58256224e-01]\n [ 4.27544156e-02  1.99982044e-01]\n [-7.88868206e-03  2.07818524e-01]\n [-4.44186606e-02  2.89068518e-01]\n [-2.78687514e-02  2.24267657e-01]\n [-5.29466580e-02  2.77187932e-01]\n [-5.38717322e-02  2.63493758e-01]\n [-2.93325868e-02  2.37651990e-01]\n [ 3.83637885e-02  2.76417571e-01]\n [-9.74196483e-02  2.63193629e-01]\n [-5.34065960e-02  2.83373000e-01]\n [-5.81531844e-02  2.54557907e-01]\n [-1.55344223e-02  2.84172656e-01]\n [-7.26899000e-02  2.48364963e-01]\n [-4.88581625e-02  2.39000123e-01]\n [ 2.64723533e-02  2.70949451e-01]\n [-7.63700544e-02  2.86535858e-01]\n [ 3.87777419e-02  2.90173958e-01]\n [-8.63663268e-02  2.44872978e-01]\n [ 9.43512576e-03  2.38369916e-01]\n [-1.92550839e-02  2.83039022e-01]\n [-6.74425665e-02  2.58214239e-01]\n [-1.49392610e-01  2.29468371e-01]\n [-4.45409126e-02  2.22966505e-01]\n [ 2.22138424e-02  2.17695759e-01]\n [-5.19535926e-02  2.64722217e-01]\n [ 1.53858384e-02  2.17924135e-01]\n [ 5.30652783e-03  2.61506992e-01]\n [-7.28269149e-02  2.75263104e-01]\n [-3.01144151e-02  2.43593494e-01]\n [-3.51312833e-02  2.50240592e-01]\n [-3.37998582e-02  2.81863920e-01]\n [ 2.06998256e-02  2.25065535e-01]\n [ 4.11754482e-02  2.03837366e-01]\n [-4.46071196e-02  2.80249516e-01]\n [-2.85785074e-02  2.44119014e-01]\n [-4.74086455e-02  2.48209972e-01]\n [-6.23137337e-02  2.88688063e-01]\n [-2.63906053e-02  2.42612712e-01]\n [-5.67544481e-03  2.72818986e-01]\n [-9.16094979e-03  2.82688865e-01]\n [-7.33308054e-02  2.47194569e-01]\n [-1.20060907e-02  2.82511108e-01]\n [-4.24235228e-02  2.67919821e-01]\n [ 8.69552987e-03  2.46852858e-01]\n [-2.04255242e-02  2.58734220e-01]\n [-5.12072481e-02  2.97963306e-01]\n [-9.61826277e-03  2.89605289e-01]\n [ 9.64134381e-03  2.66030115e-01]\n [-1.57127094e-02  2.56291997e-01]\n [-3.04740128e-02  2.61895708e-01]\n [ 9.16395158e-03  1.28927355e-01]\n [-1.88552645e-03  1.51485809e-01]\n [-4.24386003e-03  1.01987171e-01]\n [ 2.22882603e-02  1.32174940e-01]\n [ 1.57955500e-02  1.29825183e-01]\n [ 7.91507922e-03  1.07041184e-01]\n [ 9.03347012e-03  1.10442574e-01]\n [ 2.04707629e-02  1.18494139e-01]\n [-2.47316021e-03  1.15979212e-01]\n [ 1.34243881e-02  1.12444132e-01]\n [-2.58911564e-03  1.24655308e-01]\n [ 1.13087486e-02  1.13495852e-01]\n [ 1.87967913e-03  1.24680749e-01]\n [-1.11666258e-02  1.00188043e-01]\n [-1.54083163e-03  1.18198293e-01]\n [ 1.22750595e-02  1.43630343e-01]\n [ 1.97317172e-02  1.19200922e-01]\n [ 7.79524632e-03  1.06662060e-01]\n [ 7.78725671e-03  1.17470120e-01]\n [ 1.25145358e-02  1.09491536e-01]\n [ 1.52849632e-02  1.44991084e-01]\n [ 6.46564118e-03  1.28125676e-01]\n [ 1.77842701e-02  1.16181693e-01]\n [ 1.11741683e-02  1.22488886e-01]\n [ 9.36228377e-03  1.10804853e-01]\n [ 8.29824139e-03  1.29969974e-01]\n [ 2.91179201e-02  1.36989062e-01]\n [ 3.95729296e-02  1.11189787e-01]\n [ 2.08231878e-02  1.25550130e-01]\n [ 4.05345584e-02  1.10775526e-01]\n [-4.69358064e-03  1.14009110e-01]\n [-2.41706309e-02  1.15213675e-01]\n [-3.63843292e-03  1.25455907e-01]\n [ 1.31316761e-02  1.51442563e-01]\n [ 2.25439456e-02  1.14746445e-01]\n [-6.01132086e-03  1.30878788e-01]\n [-1.26729145e-02  1.51071881e-01]\n [ 2.64502859e-02  1.16662365e-01]\n [-1.91225941e-02  1.44108086e-01]\n [ 6.13684006e-03  1.42467245e-01]\n [-1.75387841e-02  1.15009375e-01]\n [ 8.07114437e-03  1.24804709e-01]\n [ 7.10620752e-04  1.33542749e-01]\n [-9.38560879e-03  1.22164308e-01]\n [ 1.00040025e-02  1.32116583e-01]\n [ 1.97866499e-02  1.07630369e-01]\n [-1.74084513e-02  1.43765152e-01]\n [ 1.36190285e-02  1.13472702e-01]\n [ 3.41387200e-02  1.26535120e-01]\n [ 2.80176891e-02  1.25912777e-01]\n [ 4.31265147e-02  1.51330113e-01]\n [ 3.84063984e-03  1.39673564e-01]\n [ 1.92003207e-02  1.45729473e-01]\n [-8.59363649e-03  1.35590772e-01]\n [ 2.65135751e-02  9.90189077e-02]\n [-1.26147636e-02  9.49115173e-02]\n [ 3.34389960e-03  1.36363134e-01]\n [ 3.46684599e-02  1.26811422e-01]\n [ 3.70556536e-02  1.05098478e-01]\n [-2.24361808e-02  1.25066785e-01]\n [ 1.49543899e-02  1.25509579e-01]\n [-2.93935687e-02  1.24763199e-01]\n [-1.57288995e-02  1.36245088e-01]\n [ 1.47062260e-02  1.12201803e-01]\n [-1.47258396e-03  1.10511797e-01]\n [ 6.80848478e-03  1.40827135e-01]\n [-1.03802581e-02  1.34160698e-01]\n [-1.97434520e-03  1.14806908e-01]\n [ 5.91784176e-03  1.11271365e-01]\n [-2.54384731e-03  1.08931832e-01]\n [ 4.52418079e-02  1.27528953e-01]\n [-5.45884531e-03  1.30309699e-01]\n [ 5.74520782e-03  1.23885456e-01]\n [ 1.97535211e-02  1.38662616e-01]\n [-2.39117752e-03  1.18762726e-01]\n [ 2.53971111e-03  9.29711825e-02]\n [-2.17896777e-02  1.48103114e-01]\n [ 4.03208437e-02  1.23964459e-01]\n [ 1.93396295e-02  1.32468752e-01]\n [ 6.92040629e-02  1.44693624e-01]\n [ 1.30812361e-02  8.85335147e-02]\n [-8.63605017e-03  1.02341564e-01]\n [ 4.40600897e-03  8.27329555e-02]\n [ 6.39537860e-03  8.67214240e-02]\n [ 4.08322679e-02  1.10179677e-01]\n [ 1.63843967e-02  1.17259330e-01]\n [ 1.79141036e-02  8.90645896e-02]\n [ 3.88806743e-02  1.05766921e-01]\n [ 2.67110461e-03  9.69159359e-02]\n [ 5.35378263e-03  8.25064032e-02]\n [ 3.09664857e-02  1.21913000e-01]\n [-1.14008928e-03  1.05655631e-01]\n [ 9.62113255e-03  9.29544954e-02]\n [ 1.07842032e-02  8.83321108e-02]\n [ 1.98598941e-02  8.86285986e-02]\n [ 2.31511671e-02  9.78971427e-02]\n [ 1.65980962e-02  8.75092361e-02]\n [ 1.24289413e-02  1.07364695e-01]\n [ 2.70121069e-02  8.64693371e-02]\n [ 2.20012532e-02  1.07116645e-01]\n [-7.02268655e-04  1.04520322e-01]\n [ 1.27521535e-02  1.04747184e-01]\n [ 1.18302828e-02  7.61414148e-02]\n [ 1.23021104e-03  9.82770194e-02]\n [ 2.54725035e-02  8.67482005e-02]\n [ 3.04824057e-02  7.75617593e-02]\n [ 2.19806105e-02  8.28678056e-02]\n [ 1.50824159e-02  9.78687841e-02]\n [ 1.29029569e-02  9.25853335e-02]\n [ 3.58761430e-02  9.01772976e-02]\n [ 3.40283053e-02  8.34435177e-02]\n [ 3.06046697e-02  1.14198823e-01]\n [-4.56540510e-03  8.72372569e-02]\n [ 3.16517439e-02  9.42634554e-02]\n [ 2.95052921e-02  8.93521778e-02]\n [ 2.64957826e-02  9.46318732e-02]\n [ 3.91127155e-02  9.94530501e-02]\n [ 2.99149101e-02  9.13574764e-02]\n [ 2.09388103e-02  9.10093017e-02]\n [ 3.10784188e-02  9.10481862e-02]\n [ 3.01875234e-02  1.20904810e-01]\n [ 3.67952593e-02  9.19877176e-02]\n [ 4.05731104e-02  9.09030955e-02]\n [ 6.09206747e-03  8.36029643e-02]\n [ 8.36960564e-03  9.13818382e-02]\n [ 2.86933930e-02  1.15617248e-01]\n [ 3.22000447e-02  9.27707937e-02]\n [ 3.76428775e-02  6.87663763e-02]\n [ 3.18032685e-02  1.04450382e-01]\n [ 1.47662789e-02  1.08825049e-01]\n [ 3.33849641e-02  9.00165450e-02]\n [ 3.65645405e-02  1.22148314e-01]\n [ 3.23822893e-02  9.77786470e-02]\n [ 2.64441993e-02  8.45018676e-02]\n [ 3.91712238e-02  8.43269941e-02]\n [ 3.21798793e-02  8.87681106e-02]\n [ 3.63024104e-02  9.84039453e-02]\n [ 4.17491215e-02  8.81798032e-02]\n [ 2.99171506e-02  8.24548354e-02]\n [ 2.86569313e-02  9.86276059e-02]]",
+  "regime_labels": [
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bull_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "bear_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "sideways_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market",
+    "recovery_market"
+  ],
+  "timestamp": "2025-10-18T21:59:51.550873"
+}

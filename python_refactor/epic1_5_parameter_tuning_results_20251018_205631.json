@@ -1,0 +1,2788 @@
+{
+  "parameter_ranges": {
+    "adaptive_mirror_descent": {
+      "learning_rate": [
+        0.001,
+        0.005,
+        0.01,
+        0.02,
+        0.05
+      ],
+      "beta": [
+        0.8,
+        0.85,
+        0.9,
+        0.95,
+        0.99
+      ],
+      "epsilon": [
+        1e-06,
+        1e-05,
+        0.0001,
+        0.001
+      ]
+    },
+    "ucb_confidence": {
+      "confidence": [
+        0.9,
+        0.92,
+        0.95,
+        0.97,
+        0.99
+      ],
+      "alpha": [
+        1.0,
+        1.5,
+        2.0,
+        2.5,
+        3.0
+      ]
+    },
+    "learning_rates": {
+      "regime_detection": [
+        0.005,
+        0.01,
+        0.02,
+        0.05
+      ],
+      "parameter_adaptation": [
+        0.005,
+        0.01,
+        0.02,
+        0.05
+      ],
+      "kalman_optimization": [
+        0.005,
+        0.01,
+        0.02,
+        0.05
+      ]
+    }
+  },
+  "tuning_results": {
+    "adaptive_mirror_descent": [
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.8,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.1369779693811971,
+        "parameter_stability": 0.99805961816436,
+        "learning_rate_adaptation": 7.794425599623145,
+        "total_updates": 200,
+        "performance_score": 0.938792067863787
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.8,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.1369039017076082,
+        "parameter_stability": 0.9980860429412856,
+        "learning_rate_adaptation": 1.3268002770441378,
+        "total_updates": 200,
+        "performance_score": 0.9388339301384814
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.8,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.13646189472293752,
+        "parameter_stability": 0.9982685930647578,
+        "learning_rate_adaptation": 0.3925070206894269,
+        "total_updates": 200,
+        "performance_score": 0.9390962541850787
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.8,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.13382269764956284,
+        "parameter_stability": 0.9988379676955796,
+        "learning_rate_adaptation": 0.05823109186351171,
+        "total_updates": 200,
+        "performance_score": 0.9404050401655104
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.85,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.1361370818366335,
+        "parameter_stability": 0.9980531545166426,
+        "learning_rate_adaptation": 7.614039172498791,
+        "total_updates": 200,
+        "performance_score": 0.9391143166636051
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.85,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.13606536435754019,
+        "parameter_stability": 0.9980794001320734,
+        "learning_rate_adaptation": 1.1644294743548598,
+        "total_updates": 200,
+        "performance_score": 0.9391552213087395
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.85,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.13569186951940326,
+        "parameter_stability": 0.9982600739517109,
+        "learning_rate_adaptation": 0.3080974297592865,
+        "total_updates": 200,
+        "performance_score": 0.9393902989530656
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.85,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.1334054636118811,
+        "parameter_stability": 0.9988305550775026,
+        "learning_rate_adaptation": 0.044733312723885775,
+        "total_updates": 200,
+        "performance_score": 0.940563671518276
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.9,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.1348214916888191,
+        "parameter_stability": 0.998043340768546,
+        "learning_rate_adaptation": 7.46288326517746,
+        "total_updates": 200,
+        "performance_score": 0.9396196002453914
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.9,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.13475363965802853,
+        "parameter_stability": 0.9980701916719511,
+        "learning_rate_adaptation": 1.0205709989614267,
+        "total_updates": 200,
+        "performance_score": 0.9396593710316744
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.9,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.13449783597676482,
+        "parameter_stability": 0.9982492747248648,
+        "learning_rate_adaptation": 0.22593446480537702,
+        "total_updates": 200,
+        "performance_score": 0.939848263396956
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.9,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.1327704507430844,
+        "parameter_stability": 0.9988202846216702,
+        "learning_rate_adaptation": 0.03154367402459182,
+        "total_updates": 200,
+        "performance_score": 0.9408058369743089
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.95,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.13222194783897978,
+        "parameter_stability": 0.9980019782690457,
+        "learning_rate_adaptation": 7.361320605346073,
+        "total_updates": 200,
+        "performance_score": 0.9406105171553558
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.95,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.13217480093545061,
+        "parameter_stability": 0.9980330802522862,
+        "learning_rate_adaptation": 0.9046079568331966,
+        "total_updates": 200,
+        "performance_score": 0.9406444579943724
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.95,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.13225567841133443,
+        "parameter_stability": 0.9982196443990312,
+        "learning_rate_adaptation": 0.14608662825758878,
+        "total_updates": 200,
+        "performance_score": 0.9407061944089701
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.95,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.1317156458556277,
+        "parameter_stability": 0.9987975214183196,
+        "learning_rate_adaptation": 0.018370793131312176,
+        "total_updates": 200,
+        "performance_score": 0.9412058540642911
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.99,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.11881922615439855,
+        "parameter_stability": 0.9972402909760955,
+        "learning_rate_adaptation": 7.457316153247388,
+        "total_updates": 200,
+        "performance_score": 0.9455198664721054
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.99,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.1191826403221299,
+        "parameter_stability": 0.9973253108787462,
+        "learning_rate_adaptation": 0.8630811633978641,
+        "total_updates": 200,
+        "performance_score": 0.9454172618690144
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.99,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.12233628648183623,
+        "parameter_stability": 0.9976944756320343,
+        "learning_rate_adaptation": 0.0907451770293887,
+        "total_updates": 200,
+        "performance_score": 0.9443465110929593
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.001,
+          "beta": 0.99,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.12855235728135614,
+        "parameter_stability": 0.9985282995690766,
+        "learning_rate_adaptation": 0.0083158114503472,
+        "total_updates": 200,
+        "performance_score": 0.9423096113211948
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.8,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.09580302551592608,
+        "parameter_stability": 0.9909519217973055,
+        "learning_rate_adaptation": 40.93392103757352,
+        "total_updates": 200,
+        "performance_score": 0.9517623448175052
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.8,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.09617564246347249,
+        "parameter_stability": 0.9911366022703185,
+        "learning_rate_adaptation": 8.274261883388704,
+        "total_updates": 200,
+        "performance_score": 0.9516995821371099
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.8,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.09952673129046982,
+        "parameter_stability": 0.9922597054133742,
+        "learning_rate_adaptation": 2.52562352115634,
+        "total_updates": 200,
+        "performance_score": 0.9508709570117824
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.8,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.11424022980885327,
+        "parameter_stability": 0.9949649825561276,
+        "learning_rate_adaptation": 0.319149784330178,
+        "total_updates": 200,
+        "performance_score": 0.9462187571421805
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.85,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.09316969895332146,
+        "parameter_stability": 0.9909658708195487,
+        "learning_rate_adaptation": 39.520719985652654,
+        "total_updates": 200,
+        "performance_score": 0.9528684634560929
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.85,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.09354612772101734,
+        "parameter_stability": 0.9911471604761681,
+        "learning_rate_adaptation": 7.036298743352314,
+        "total_updates": 200,
+        "performance_score": 0.952801663558186
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.85,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.09697810388401563,
+        "parameter_stability": 0.9922566358476114,
+        "learning_rate_adaptation": 1.9572770743054415,
+        "total_updates": 200,
+        "performance_score": 0.9519259297719136
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.85,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.11219132691079724,
+        "parameter_stability": 0.9949569768380381,
+        "learning_rate_adaptation": 0.2453929917480547,
+        "total_updates": 200,
+        "performance_score": 0.9470414259297719
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.9,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.08953157918764004,
+        "parameter_stability": 0.9909412977756631,
+        "learning_rate_adaptation": 38.281563752059725,
+        "total_updates": 200,
+        "performance_score": 0.9543834601831245
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.9,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.08991828206439614,
+        "parameter_stability": 0.9911252279976966,
+        "learning_rate_adaptation": 5.898383252192376,
+        "total_updates": 200,
+        "performance_score": 0.9543126030833128
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.9,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.09349976671622338,
+        "parameter_stability": 0.9922302365362407,
+        "learning_rate_adaptation": 1.3965054156124215,
+        "total_updates": 200,
+        "performance_score": 0.9533625866434439
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.9,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.1093366979074047,
+        "parameter_stability": 0.9949504137131924,
+        "learning_rate_adaptation": 0.17239385373754665,
+        "total_updates": 200,
+        "performance_score": 0.9481949936834217
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.95,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.08336166919183272,
+        "parameter_stability": 0.9906430333586203,
+        "learning_rate_adaptation": 37.3760689877377,
+        "total_updates": 200,
+        "performance_score": 0.9568479064517954
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.95,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.08381760241581784,
+        "parameter_stability": 0.9908669334083974,
+        "learning_rate_adaptation": 4.912958441451056,
+        "total_updates": 200,
+        "performance_score": 0.9567657046061346
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.95,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.08803047536111887,
+        "parameter_stability": 0.9920385849973391,
+        "learning_rate_adaptation": 0.8402043459161247,
+        "total_updates": 200,
+        "performance_score": 0.9555652439427679
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.95,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.10516072057360545,
+        "parameter_stability": 0.9948888975852225,
+        "learning_rate_adaptation": 0.09811187623663183,
+        "total_updates": 200,
+        "performance_score": 0.9498673323533732
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.99,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.06617736306734334,
+        "parameter_stability": 0.9866795217186878,
+        "learning_rate_adaptation": 38.573661061292874,
+        "total_updates": 200,
+        "performance_score": 0.9623048855375896
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.99,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.06729201951219954,
+        "parameter_stability": 0.9872346782474823,
+        "learning_rate_adaptation": 4.370444312286852,
+        "total_updates": 200,
+        "performance_score": 0.9620926868814452
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.99,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.07578820662041201,
+        "parameter_stability": 0.9892909930118524,
+        "learning_rate_adaptation": 0.4340907212130913,
+        "total_updates": 200,
+        "performance_score": 0.9594209949943784
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.005,
+          "beta": 0.99,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.09914807784831295,
+        "parameter_stability": 0.9935717491166554,
+        "learning_rate_adaptation": 0.03905625435624391,
+        "total_updates": 200,
+        "performance_score": 0.9516836359034575
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.8,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.06905485651055222,
+        "parameter_stability": 0.9822121615969562,
+        "learning_rate_adaptation": 86.32843253591773,
+        "total_updates": 200,
+        "performance_score": 0.9588089278086163
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.8,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.06960262308455765,
+        "parameter_stability": 0.9826479615478265,
+        "learning_rate_adaptation": 19.40881940972645,
+        "total_updates": 200,
+        "performance_score": 0.9587873070680115
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.8,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.07444917564546788,
+        "parameter_stability": 0.9850402251408338,
+        "learning_rate_adaptation": 5.258579260943683,
+        "total_updates": 200,
+        "performance_score": 0.9578748369571041
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.8,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.09452582495481643,
+        "parameter_stability": 0.9904033445000723,
+        "learning_rate_adaptation": 0.6173447055714368,
+        "total_updates": 200,
+        "performance_score": 0.9520204960732572
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.85,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.06701770032028051,
+        "parameter_stability": 0.9822501641454308,
+        "learning_rate_adaptation": 82.05291934426074,
+        "total_updates": 200,
+        "performance_score": 0.9597208699869345
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.85,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.0675789238786761,
+        "parameter_stability": 0.9826743017710388,
+        "learning_rate_adaptation": 16.054561018248215,
+        "total_updates": 200,
+        "performance_score": 0.9596865991712014
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.85,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.07259771075989278,
+        "parameter_stability": 0.9850400515383096,
+        "learning_rate_adaptation": 4.053623510713502,
+        "total_updates": 200,
+        "performance_score": 0.9586780223639545
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.85,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.09324373231740052,
+        "parameter_stability": 0.9903495059368133,
+        "learning_rate_adaptation": 0.4726193569697723,
+        "total_updates": 200,
+        "performance_score": 0.9525293073275946
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.9,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.06449172950982009,
+        "parameter_stability": 0.9822994171845959,
+        "learning_rate_adaptation": 78.36624625243708,
+        "total_updates": 200,
+        "performance_score": 0.9608574443491942
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.9,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.06507772368411992,
+        "parameter_stability": 0.9827346345687217,
+        "learning_rate_adaptation": 12.931097517333399,
+        "total_updates": 200,
+        "performance_score": 0.9608166249560042
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.9,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.07036614232457455,
+        "parameter_stability": 0.9850430231276947,
+        "learning_rate_adaptation": 2.856765368462788,
+        "total_updates": 200,
+        "performance_score": 0.9596513844446559
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.9,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.09174028512875781,
+        "parameter_stability": 0.9902774820525305,
+        "learning_rate_adaptation": 0.32929331861516736,
+        "total_updates": 200,
+        "performance_score": 0.9531231232193533
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.95,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.06030797342845357,
+        "parameter_stability": 0.9824821760058753,
+        "learning_rate_adaptation": 76.2674292620652,
+        "total_updates": 200,
+        "performance_score": 0.9628021933893988
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.95,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.060995143712915416,
+        "parameter_stability": 0.9828903523983487,
+        "learning_rate_adaptation": 10.268804549713325,
+        "total_updates": 200,
+        "performance_score": 0.9627008675779939
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.95,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.06701247957507867,
+        "parameter_stability": 0.9850521764878531,
+        "learning_rate_adaptation": 1.6662968523595996,
+        "total_updates": 200,
+        "performance_score": 0.9611241689328398
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.95,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.08991595148686087,
+        "parameter_stability": 0.9900955492095369,
+        "learning_rate_adaptation": 0.18383799793867342,
+        "total_updates": 200,
+        "performance_score": 0.9537987446386516
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.99,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.04835927051205393,
+        "parameter_stability": 0.9771269113858327,
+        "learning_rate_adaptation": 83.50647713340081,
+        "total_updates": 200,
+        "performance_score": 0.9654991914314701
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.99,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.04964947099706709,
+        "parameter_stability": 0.9780974388465463,
+        "learning_rate_adaptation": 8.046699584429572,
+        "total_updates": 200,
+        "performance_score": 0.9653982187709436
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.99,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.0589730691777094,
+        "parameter_stability": 0.9811735174910446,
+        "learning_rate_adaptation": 0.8255860797274872,
+        "total_updates": 200,
+        "performance_score": 0.9627422974961433
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.01,
+          "beta": 0.99,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.08804531008648196,
+        "parameter_stability": 0.9878676283481173,
+        "learning_rate_adaptation": 0.0737808081020357,
+        "total_updates": 200,
+        "performance_score": 0.9534735000353562
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.8,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.04977129271140742,
+        "parameter_stability": 0.964365540176418,
+        "learning_rate_adaptation": 180.29634792359812,
+        "total_updates": 200,
+        "performance_score": 0.9584769910023401
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.8,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.05038548445935969,
+        "parameter_stability": 0.9652478857515419,
+        "learning_rate_adaptation": 43.312706084108484,
+        "total_updates": 200,
+        "performance_score": 0.958639660341015
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.8,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.055076850549487265,
+        "parameter_stability": 0.9722177329458146,
+        "learning_rate_adaptation": 11.234899813615517,
+        "total_updates": 200,
+        "performance_score": 0.9600079949957239
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.8,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.07883594392285224,
+        "parameter_stability": 0.9821463993393824,
+        "learning_rate_adaptation": 1.1842367446578907,
+        "total_updates": 200,
+        "performance_score": 0.954535696276826
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.85,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.048511519313970436,
+        "parameter_stability": 0.9636215558599328,
+        "learning_rate_adaptation": 168.40822837646618,
+        "total_updates": 200,
+        "performance_score": 0.958677260357498
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.85,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.04902007731720423,
+        "parameter_stability": 0.9648705951261208,
+        "learning_rate_adaptation": 34.58791734422314,
+        "total_updates": 200,
+        "performance_score": 0.9590705982702834
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.85,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.05385244453164941,
+        "parameter_stability": 0.9724369582463721,
+        "learning_rate_adaptation": 8.69069079045366,
+        "total_updates": 200,
+        "performance_score": 0.960668201752248
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.85,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.07837424725502311,
+        "parameter_stability": 0.9821081370250312,
+        "learning_rate_adaptation": 0.9029230883571048,
+        "total_updates": 200,
+        "performance_score": 0.9547149926051843
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.9,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.04705562271346923,
+        "parameter_stability": 0.9644813085481941,
+        "learning_rate_adaptation": 163.30389512344172,
+        "total_updates": 200,
+        "performance_score": 0.9597702039500142
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.9,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.047544807669103344,
+        "parameter_stability": 0.965710383346318,
+        "learning_rate_adaptation": 28.99148824993485,
+        "total_updates": 200,
+        "performance_score": 0.9601617434688308
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.9,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.052464068356788456,
+        "parameter_stability": 0.9729351243275378,
+        "learning_rate_adaptation": 5.984002807955164,
+        "total_updates": 200,
+        "performance_score": 0.9615431633485673
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.9,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.07796266012303356,
+        "parameter_stability": 0.9820312295635218,
+        "learning_rate_adaptation": 0.626610281412723,
+        "total_updates": 200,
+        "performance_score": 0.9548535736429077
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.95,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.045514397814767724,
+        "parameter_stability": 0.9669076078387274,
+        "learning_rate_adaptation": 151.83535052361356,
+        "total_updates": 200,
+        "performance_score": 0.9616872945772172
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.95,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.04626401119444152,
+        "parameter_stability": 0.9688604287070558,
+        "learning_rate_adaptation": 21.215857141601234,
+        "total_updates": 200,
+        "performance_score": 0.9623210666147917
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.95,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.050879831055685505,
+        "parameter_stability": 0.9737554541778765,
+        "learning_rate_adaptation": 3.3516525381162414,
+        "total_updates": 200,
+        "performance_score": 0.9626695209972042
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.95,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.07766358834597437,
+        "parameter_stability": 0.981831634841142,
+        "learning_rate_adaptation": 0.34718033221321865,
+        "total_updates": 200,
+        "performance_score": 0.9548824999800261
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.99,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.05259355920788056,
+        "parameter_stability": 0.9613579694653979,
+        "learning_rate_adaptation": 147.44678079033363,
+        "total_updates": 200,
+        "performance_score": 0.9556961417598333
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.99,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.052705003034813624,
+        "parameter_stability": 0.9627930545793858,
+        "learning_rate_adaptation": 17.02139034078762,
+        "total_updates": 200,
+        "performance_score": 0.9563633969811678
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.99,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.05482660493685463,
+        "parameter_stability": 0.9678474758431121,
+        "learning_rate_adaptation": 1.708101413257814,
+        "total_updates": 200,
+        "performance_score": 0.9579352936216814
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.99,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.07917966726184565,
+        "parameter_stability": 0.9778190624624634,
+        "learning_rate_adaptation": 0.14208272811967362,
+        "total_updates": 200,
+        "performance_score": 0.9522244130512605
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.8,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.07165218592882129,
+        "parameter_stability": 0.9110431953323063,
+        "learning_rate_adaptation": 417.8368797624398,
+        "total_updates": 200,
+        "performance_score": 0.9220908881180179
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.8,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.07146461929068632,
+        "parameter_stability": 0.9130022605083702,
+        "learning_rate_adaptation": 85.49905284000307,
+        "total_updates": 200,
+        "performance_score": 0.9231520966024738
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.8,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.06872902026769633,
+        "parameter_stability": 0.9247211600349095,
+        "learning_rate_adaptation": 24.58964616479418,
+        "total_updates": 200,
+        "performance_score": 0.9302060212077384
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.8,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.06982425746038044,
+        "parameter_stability": 0.9597061221330404,
+        "learning_rate_adaptation": 2.7638078834917468,
+        "total_updates": 200,
+        "performance_score": 0.9472195434707733
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.85,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.07215166961866462,
+        "parameter_stability": 0.9111733516031957,
+        "learning_rate_adaptation": 397.6558929618004,
+        "total_updates": 200,
+        "performance_score": 0.9219386054477425
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.85,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.07182144794025014,
+        "parameter_stability": 0.9133067766128026,
+        "learning_rate_adaptation": 71.03208914081284,
+        "total_updates": 200,
+        "performance_score": 0.9231489981496865
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.85,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.06924513073273,
+        "parameter_stability": 0.9259953272253507,
+        "learning_rate_adaptation": 19.582463820258386,
+        "total_updates": 200,
+        "performance_score": 0.9306172820039802
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.85,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.07008938364431659,
+        "parameter_stability": 0.9594061689894519,
+        "learning_rate_adaptation": 2.113073697592766,
+        "total_updates": 200,
+        "performance_score": 0.9469537718131914
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.9,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.07446711651803964,
+        "parameter_stability": 0.9139877131412122,
+        "learning_rate_adaptation": 383.3523926410309,
+        "total_updates": 200,
+        "performance_score": 0.9223408107150193
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.9,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.07380564810138546,
+        "parameter_stability": 0.9183598715645093,
+        "learning_rate_adaptation": 60.25112692179926,
+        "total_updates": 200,
+        "performance_score": 0.9248135454434244
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.9,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.07196943559332929,
+        "parameter_stability": 0.9292279853223765,
+        "learning_rate_adaptation": 14.880416666224617,
+        "total_updates": 200,
+        "performance_score": 0.9310452017965987
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.9,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.07094409585951597,
+        "parameter_stability": 0.9594663568124743,
+        "learning_rate_adaptation": 1.4814160004874115,
+        "total_updates": 200,
+        "performance_score": 0.9466109565583367
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.95,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.07943343983057585,
+        "parameter_stability": 0.9197616951867469,
+        "learning_rate_adaptation": 370.03024600336914,
+        "total_updates": 200,
+        "performance_score": 0.9230868050431245
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.95,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.07921907340507855,
+        "parameter_stability": 0.9215742268160068,
+        "learning_rate_adaptation": 48.291249004961735,
+        "total_updates": 200,
+        "performance_score": 0.9240850779467824
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.95,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.07727523444329518,
+        "parameter_stability": 0.9320634988000954,
+        "learning_rate_adaptation": 9.174634281648922,
+        "total_updates": 200,
+        "performance_score": 0.9301656903036326
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.95,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.07297401432995156,
+        "parameter_stability": 0.9612410362932732,
+        "learning_rate_adaptation": 0.8381471405869827,
+        "total_updates": 200,
+        "performance_score": 0.9466150280996468
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.99,
+          "epsilon": 1e-06
+        },
+        "regret_bound": 0.10777900181310428,
+        "parameter_stability": 0.9218368829311786,
+        "learning_rate_adaptation": 359.5140756867193,
+        "total_updates": 200,
+        "performance_score": 0.9122720049305484
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.99,
+          "epsilon": 1e-05
+        },
+        "regret_bound": 0.10711111897998446,
+        "parameter_stability": 0.9243842709287533,
+        "learning_rate_adaptation": 39.05474005802685,
+        "total_updates": 200,
+        "performance_score": 0.9138179853254687
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.99,
+          "epsilon": 0.0001
+        },
+        "regret_bound": 0.10275529190575534,
+        "parameter_stability": 0.9306616589394952,
+        "learning_rate_adaptation": 4.756823337645867,
+        "total_updates": 200,
+        "performance_score": 0.9187405783687186
+      },
+      {
+        "parameters": {
+          "learning_rate": 0.05,
+          "beta": 0.99,
+          "epsilon": 0.001
+        },
+        "regret_bound": 0.09692929822561219,
+        "parameter_stability": 0.9509022913451926,
+        "learning_rate_adaptation": 0.3913734849562341,
+        "total_updates": 200,
+        "performance_score": 0.9312690373168414
+      }
+    ],
+    "ucb_confidence": [
+      {
+        "parameters": {
+          "confidence": 0.9,
+          "alpha": 1.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.28,
+        "regime_distribution": {
+          "bull_market": 0.13,
+          "bear_market": 0.71,
+          "sideways_market": 0.16
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7266875016278586
+      },
+      {
+        "parameters": {
+          "confidence": 0.9,
+          "alpha": 1.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.375,
+        "regime_distribution": {
+          "bull_market": 0.605,
+          "bear_market": 0.22,
+          "sideways_market": 0.175
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7160130981831098
+      },
+      {
+        "parameters": {
+          "confidence": 0.9,
+          "alpha": 2.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.58,
+        "regime_distribution": {
+          "bull_market": 0.3,
+          "bear_market": 0.3,
+          "sideways_market": 0.4
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6864297739604484
+      },
+      {
+        "parameters": {
+          "confidence": 0.9,
+          "alpha": 2.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.535,
+        "regime_distribution": {
+          "bull_market": 0.445,
+          "bear_market": 0.255,
+          "sideways_market": 0.3
+        },
+        "total_pulls": 200,
+        "performance_score": 0.691965378309949
+      },
+      {
+        "parameters": {
+          "confidence": 0.9,
+          "alpha": 3.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.55,
+        "regime_distribution": {
+          "bull_market": 0.295,
+          "bear_market": 0.28,
+          "sideways_market": 0.425
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6924466250256256
+      },
+      {
+        "parameters": {
+          "confidence": 0.92,
+          "alpha": 1.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.28,
+        "regime_distribution": {
+          "bull_market": 0.13,
+          "bear_market": 0.71,
+          "sideways_market": 0.16
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7266875016278586
+      },
+      {
+        "parameters": {
+          "confidence": 0.92,
+          "alpha": 1.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.375,
+        "regime_distribution": {
+          "bull_market": 0.605,
+          "bear_market": 0.22,
+          "sideways_market": 0.175
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7160130981831098
+      },
+      {
+        "parameters": {
+          "confidence": 0.92,
+          "alpha": 2.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.58,
+        "regime_distribution": {
+          "bull_market": 0.3,
+          "bear_market": 0.3,
+          "sideways_market": 0.4
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6864297739604484
+      },
+      {
+        "parameters": {
+          "confidence": 0.92,
+          "alpha": 2.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.535,
+        "regime_distribution": {
+          "bull_market": 0.445,
+          "bear_market": 0.255,
+          "sideways_market": 0.3
+        },
+        "total_pulls": 200,
+        "performance_score": 0.691965378309949
+      },
+      {
+        "parameters": {
+          "confidence": 0.92,
+          "alpha": 3.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.55,
+        "regime_distribution": {
+          "bull_market": 0.295,
+          "bear_market": 0.28,
+          "sideways_market": 0.425
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6924466250256256
+      },
+      {
+        "parameters": {
+          "confidence": 0.95,
+          "alpha": 1.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.28,
+        "regime_distribution": {
+          "bull_market": 0.13,
+          "bear_market": 0.71,
+          "sideways_market": 0.16
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7266875016278586
+      },
+      {
+        "parameters": {
+          "confidence": 0.95,
+          "alpha": 1.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.375,
+        "regime_distribution": {
+          "bull_market": 0.605,
+          "bear_market": 0.22,
+          "sideways_market": 0.175
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7160130981831098
+      },
+      {
+        "parameters": {
+          "confidence": 0.95,
+          "alpha": 2.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.58,
+        "regime_distribution": {
+          "bull_market": 0.3,
+          "bear_market": 0.3,
+          "sideways_market": 0.4
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6864297739604484
+      },
+      {
+        "parameters": {
+          "confidence": 0.95,
+          "alpha": 2.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.535,
+        "regime_distribution": {
+          "bull_market": 0.445,
+          "bear_market": 0.255,
+          "sideways_market": 0.3
+        },
+        "total_pulls": 200,
+        "performance_score": 0.691965378309949
+      },
+      {
+        "parameters": {
+          "confidence": 0.95,
+          "alpha": 3.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.55,
+        "regime_distribution": {
+          "bull_market": 0.295,
+          "bear_market": 0.28,
+          "sideways_market": 0.425
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6924466250256256
+      },
+      {
+        "parameters": {
+          "confidence": 0.97,
+          "alpha": 1.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.28,
+        "regime_distribution": {
+          "bull_market": 0.13,
+          "bear_market": 0.71,
+          "sideways_market": 0.16
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7266875016278586
+      },
+      {
+        "parameters": {
+          "confidence": 0.97,
+          "alpha": 1.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.375,
+        "regime_distribution": {
+          "bull_market": 0.605,
+          "bear_market": 0.22,
+          "sideways_market": 0.175
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7160130981831098
+      },
+      {
+        "parameters": {
+          "confidence": 0.97,
+          "alpha": 2.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.58,
+        "regime_distribution": {
+          "bull_market": 0.3,
+          "bear_market": 0.3,
+          "sideways_market": 0.4
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6864297739604484
+      },
+      {
+        "parameters": {
+          "confidence": 0.97,
+          "alpha": 2.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.535,
+        "regime_distribution": {
+          "bull_market": 0.445,
+          "bear_market": 0.255,
+          "sideways_market": 0.3
+        },
+        "total_pulls": 200,
+        "performance_score": 0.691965378309949
+      },
+      {
+        "parameters": {
+          "confidence": 0.97,
+          "alpha": 3.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.55,
+        "regime_distribution": {
+          "bull_market": 0.295,
+          "bear_market": 0.28,
+          "sideways_market": 0.425
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6924466250256256
+      },
+      {
+        "parameters": {
+          "confidence": 0.99,
+          "alpha": 1.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.28,
+        "regime_distribution": {
+          "bull_market": 0.13,
+          "bear_market": 0.71,
+          "sideways_market": 0.16
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7266875016278586
+      },
+      {
+        "parameters": {
+          "confidence": 0.99,
+          "alpha": 1.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.375,
+        "regime_distribution": {
+          "bull_market": 0.605,
+          "bear_market": 0.22,
+          "sideways_market": 0.175
+        },
+        "total_pulls": 200,
+        "performance_score": 0.7160130981831098
+      },
+      {
+        "parameters": {
+          "confidence": 0.99,
+          "alpha": 2.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.58,
+        "regime_distribution": {
+          "bull_market": 0.3,
+          "bear_market": 0.3,
+          "sideways_market": 0.4
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6864297739604484
+      },
+      {
+        "parameters": {
+          "confidence": 0.99,
+          "alpha": 2.5
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.535,
+        "regime_distribution": {
+          "bull_market": 0.445,
+          "bear_market": 0.255,
+          "sideways_market": 0.3
+        },
+        "total_pulls": 200,
+        "performance_score": 0.691965378309949
+      },
+      {
+        "parameters": {
+          "confidence": 0.99,
+          "alpha": 3.0
+        },
+        "regret_bound": 65.13558110930815,
+        "exploration_rate": 0.55,
+        "regime_distribution": {
+          "bull_market": 0.295,
+          "bear_market": 0.28,
+          "sideways_market": 0.425
+        },
+        "total_pulls": 200,
+        "performance_score": 0.6924466250256256
+      }
+    ],
+    "learning_rates": [
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.005,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.01,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.02,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.005,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.08949123396405377,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0779508722174
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666026963809697
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.01,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.06443098187522721,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0528906201286
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666054599795625
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.02,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.04700917257112646,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.03546881082448
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666073817668957
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.005
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.01
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.02
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      },
+      {
+        "parameters": {
+          "regime_detection": 0.05,
+          "parameter_adaptation": 0.05,
+          "kalman_optimization": 0.05
+        },
+        "regret_bounds": {
+          "regime_detection": 65.13558110930815,
+          "parameter_adaptation": 0.07446052114531823,
+          "kalman_optimization": 84.85287852894521,
+          "total_regret": 150.0629201593987
+        },
+        "system_performance": 0.21,
+        "performance_score": 0.10666043538299688
+      }
+    ]
+  },
+  "optimal_parameters": {
+    "adaptive_mirror_descent": {
+      "learning_rate": 0.01,
+      "beta": 0.99,
+      "epsilon": 1e-06
+    },
+    "adaptive_mirror_descent_performance": 0.9654991914314701,
+    "ucb_confidence": {
+      "confidence": 0.9,
+      "alpha": 1.0
+    },
+    "ucb_confidence_performance": 0.7266875016278586,
+    "learning_rates": {
+      "regime_detection": 0.005,
+      "parameter_adaptation": 0.02,
+      "kalman_optimization": 0.005
+    },
+    "learning_rates_performance": 0.10666073817668957
+  },
+  "validation_results": {
+    "system_status": {
+      "system_overview": {
+        "total_updates": 200,
+        "average_performance": 0.21,
+        "confidence_level": 0.9,
+        "window_size": 10
+      },
+      "regime_detection": {
+        "regime_detection": {
+          "current_regime": "bear_market",
+          "confidence": 0.09804061807638241,
+          "regret_bound": 65.13558110930815
+        },
+        "bandit_performance": {
+          "total_pulls": 200,
+          "regime_distribution": {
+            "bull_market": 0.13,
+            "bear_market": 0.71,
+            "sideways_market": 0.16
+          },
+          "average_rewards": {
+            "bull_market": 0.1346153846153846,
+            "bear_market": 0.3274647887323944,
+            "sideways_market": -0.25
+          },
+          "regret_bound": 65.13558110930815,
+          "exploration_rate": 0.28
+        },
+        "data_processing": {
+          "total_samples": 200,
+          "window_size": 10,
+          "confidence_level": 0.9
+        },
+        "performance_tracking": {
+          "total_rewards": 200,
+          "average_reward": 0.21,
+          "reward_std": 0.5033885179461288
+        }
+      },
+      "parameter_adaptation": {
+        "optimizer_performance": {
+          "total_updates": 200,
+          "average_gradient_norm": 0.002185904925303484,
+          "regret_bound": 0.04835927051205393,
+          "parameter_stability": 0.9771269113858327,
+          "learning_rate_adaptation": 83.50647713340081
+        },
+        "regime_adaptations": {
+          "bull_market": {
+            "adaptations_count": 26,
+            "parameter_means": {
+              "process_noise": 0.05463795250062128,
+              "measurement_noise": -0.09690093224255933,
+              "adaptation_rate": 0.0686210720166184,
+              "forgetting_factor": -0.128765515516584,
+              "uncertainty_weight": 0.46707401377606117,
+              "regime_threshold": 0.01933455603027505
+            },
+            "parameter_stds": {
+              "process_noise": 0.015342489458058817,
+              "measurement_noise": 0.04028401411970708,
+              "adaptation_rate": 0.030349305166807374,
+              "forgetting_factor": 0.04018232831624728,
+              "uncertainty_weight": 0.3027683091588508,
+              "regime_threshold": 0.050801207118187496
+            }
+          },
+          "bear_market": {
+            "adaptations_count": 142,
+            "parameter_means": {
+              "process_noise": 0.08983466511966288,
+              "measurement_noise": -0.09661902206307602,
+              "adaptation_rate": 0.047789794000112414,
+              "forgetting_factor": -0.1204868502712049,
+              "uncertainty_weight": 0.7631210332353803,
+              "regime_threshold": 0.011238318185849732
+            },
+            "parameter_stds": {
+              "process_noise": 0.023799615545924826,
+              "measurement_noise": 0.0252110921609598,
+              "adaptation_rate": 0.015646754148485098,
+              "forgetting_factor": 0.0339504223658871,
+              "uncertainty_weight": 0.33923660270131245,
+              "regime_threshold": 0.036116696313821126
+            }
+          },
+          "sideways_market": {
+            "adaptations_count": 32,
+            "parameter_means": {
+              "process_noise": 0.0588585864315894,
+              "measurement_noise": -0.13007497506275284,
+              "adaptation_rate": 0.03495473653456098,
+              "forgetting_factor": -0.15852261804944956,
+              "uncertainty_weight": 0.6018808648045063,
+              "regime_threshold": -0.026744257163531286
+            },
+            "parameter_stds": {
+              "process_noise": 0.007533339992708869,
+              "measurement_noise": 0.012424093443226527,
+              "adaptation_rate": 0.012392681257611315,
+              "forgetting_factor": 0.010404942145067876,
+              "uncertainty_weight": 0.10564460432490308,
+              "regime_threshold": 0.012578737400832025
+            }
+          }
+        },
+        "total_adaptations": 200,
+        "system_parameters": {
+          "learning_rate": 0.02,
+          "beta": 0.9,
+          "parameter_count": 6
+        }
+      },
+      "kalman_optimization": {
+        "optimizer_performance": {
+          "total_updates": 201,
+          "regret_bound": 84.85287852894521,
+          "hessian_condition": 2319.976207366346,
+          "parameter_stability": 0.0034515503973441453
+        },
+        "current_matrices": {
+          "F": "[[0. 0.]\n [0. 0.]]",
+          "H": "[[0. 0.]\n [0. 0.]]",
+          "Q": "[[28872.48728483     0.        ]\n [    0.         28872.48728483]]",
+          "R": "[[28872.48728483     0.        ]\n [    0.         28872.48728483]]"
+        },
+        "total_optimizations": 200,
+        "system_parameters": {
+          "learning_rate": 0.005,
+          "regularization": 0.001,
+          "parameter_count": 16
+        }
+      },
+      "regret_bounds": {
+        "regime_detection": 65.13558110930815,
+        "parameter_adaptation": 0.04835927051205393,
+        "kalman_optimization": 84.85287852894521,
+        "total_regret": 150.0368189087654
+      }
+    },
+    "optimal_parameters": {
+      "adaptive_mirror_descent": {
+        "learning_rate": 0.01,
+        "beta": 0.99,
+        "epsilon": 1e-06
+      },
+      "adaptive_mirror_descent_performance": 0.9654991914314701,
+      "ucb_confidence": {
+        "confidence": 0.9,
+        "alpha": 1.0
+      },
+      "ucb_confidence_performance": 0.7266875016278586,
+      "learning_rates": {
+        "regime_detection": 0.005,
+        "parameter_adaptation": 0.02,
+        "kalman_optimization": 0.005
+      },
+      "learning_rates_performance": 0.10666073817668957
+    },
+    "validation_performance": 0.10666072328226568
+  },
+  "tuning_report": "EPIC 1.5: Parameter Tuning Experiment Report\n============================================================\nTimestamp: 2025-10-18T20:56:08.050338\n\n\ud83d\udd27 ADAPTIVE MIRROR DESCENT TUNING\n----------------------------------------\nBest Parameters: {'learning_rate': 0.01, 'beta': 0.99, 'epsilon': 1e-06}\nPerformance Score: 0.9655\nRegret Bound: 0.0484\nParameter Stability: 0.9771\nImprovement: 5.8%\n\n\ud83c\udfaf UCB CONFIDENCE TUNING\n----------------------------------------\nBest Parameters: {'confidence': 0.9, 'alpha': 1.0}\nPerformance Score: 0.7267\nExploration Rate: 28.00%\nRegime Distribution: {'bull_market': 0.13, 'bear_market': 0.71, 'sideways_market': 0.16}\nImprovement: 5.9%\n\n\u2699\ufe0f LEARNING RATES TUNING\n----------------------------------------\nBest Parameters: {'regime_detection': 0.005, 'parameter_adaptation': 0.02, 'kalman_optimization': 0.005}\nPerformance Score: 0.1067\nRegret Bounds: {'regime_detection': np.float64(65.13558110930815), 'parameter_adaptation': np.float64(0.04700917257112646), 'kalman_optimization': np.float64(84.85287852894521), 'total_regret': np.float64(150.03546881082448)}\nSystem Performance: 0.2100\nImprovement: 0.0%\n\n\u2705 VALIDATION RESULTS\n----------------------------------------\nValidation Performance: 0.1067\nSystem Performance: 0.2100\nTotal Updates: 200\nRegret Bounds:\n  Regime Detection: 65.1356\n  Parameter Adaptation: 0.0484\n  Kalman Optimization: 84.8529\n  Total Regret: 150.0368\n\n\ud83c\udfc6 OPTIMAL PARAMETERS SUMMARY\n----------------------------------------\nadaptive_mirror_descent: {'learning_rate': 0.01, 'beta': 0.99, 'epsilon': 1e-06}\nucb_confidence: {'confidence': 0.9, 'alpha': 1.0}\nlearning_rates: {'regime_detection': 0.005, 'parameter_adaptation': 0.02, 'kalman_optimization': 0.005}\n\n============================================================\nEnd of Parameter Tuning Experiment Report",
+  "timestamp": "2025-10-18T20:56:31.186392"
+}
