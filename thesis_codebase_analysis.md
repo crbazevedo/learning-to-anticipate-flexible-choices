@@ -4,11 +4,37 @@
 
 This document provides a comprehensive analysis of the theoretical concepts from the PhD thesis "Learning to Anticipate Flexible Trade-off Choices" and assesses the adherence of the current Python codebase implementation to these theoretical foundations.
 
+**Canon note (2026-05-16, W1-5):** This document originally cited equations using the PhD thesis chapter-numbered convention (6.x / 7.x). The actively-maintained canonical algorithmic spec for the open-source release is the IEEE Transactions on Cybernetics paper (`docs/paper.pdf`; Azevedo & Von Zuben, 2015), which uses its own numbering. Every body citation of a thesis equation has been annotated inline with its paper-equation counterpart. The reconciliation table is §0 below.
+
+## 0. Thesis ↔ Paper Equation Reconciliation
+
+Source: cross-reading the PhD thesis chapter 6/7 and `docs/paper.pdf` §IV-A/B (Eqs 11–25). Authored as part of W1-5 of the dfg-harness wave plan.
+
+| Thesis equation | IEEE paper equation | Concept |
+|---|---|---|
+| 6.5 / Definition 6.1 | (12) | TIP — Time Incomparability Probability |
+| 6.6 | (13) | λ^(H) anticipation rate from binary entropy of TIP |
+| 6.7 | (6) | Normalisation constraint on the anticipation-rate set |
+| 6.9 | §IV-A.1 narrative | λ^(K) from KF residuals — discussed in the paper but not separately numbered |
+| 6.10 | (14) | OAL anticipatory learning rule — multi-horizon convex combination |
+| 6.11 | — | Alternate algebraic form of (14); not separately numbered in the paper |
+| 6.16 | (15) | Linear combination of Gaussians stays Gaussian |
+| 6.17 | (16) | H=2 special case of OAL Gaussian form |
+| 6.24–6.27 | (17) + (18) | Sliding-Window Dirichlet recursive concentration update — the paper consolidates the t<K, t=K, t>K cases into the recurrence in (17) and the explicit forms in (18) |
+| 6.28 | (19) | Belief-weighted mean dynamics |
+| 6.30 | (20) | Belief coefficient v_{t+1} from binary entropy of TIP |
+| 6.31 | (21) | Unconditional mean approximation E[Û^{N⋆}_{t+1}] |
+| 6.33 | (22) | MAP correction for predicted mean decision vectors |
+| 6.35 | (24) | Δ_S — hypervolume contribution definition |
+| 7.16 | — (thesis-only) | Combined λ that averages λ^(H) and λ^(K). The IEEE paper's λ in Eq (5) is only λ^(H); the (1/2)(λ^(H) + λ^(K)) blend is a thesis extension not in the published paper. |
+
+When in doubt, the paper is canon.
+
 ## 1. Theoretical Framework Analysis
 
 ### 1.1 Core Concepts and Definitions
 
-#### 1.1.1 Anticipatory Learning Rule (Equations 6.10-6.11)
+#### 1.1.1 Anticipatory Learning Rule (Equations 6.10-6.11 / paper Eq (14))
 **Theory**: The anticipatory learning rule adjusts objective vectors by combining current and predictive distributions:
 
 ```
@@ -22,7 +48,7 @@ This document provides a comprehensive analysis of the theoretical concepts from
 - `ẑ_{t+h} | z_t`: Predictive objective distribution
 - Convex combination between current and predictive distributions
 
-#### 1.1.2 Dirichlet Dynamical Model (Equations 6.24-6.27)
+#### 1.1.2 Dirichlet Dynamical Model (Equations 6.24-6.27 / paper Eqs (17)-(18))
 **Theory**: Sliding window Dirichlet model for decision space tracking:
 
 ```
@@ -47,7 +73,7 @@ P_{t,t+h} = Pr[ẑ_t || ẑ_{t+h} | ẑ_t]
 - Influences postponement of decision criteria preference specification
 - For two conflicting objectives: `p_{t,t+h} = Pr[ẑ_{t+h,1} < ẑ_{t,1} and ẑ_{t+h,2} > ẑ_{t,2}] + Pr[ẑ_{t+h,1} > ẑ_{t,1} and ẑ_{t+h,2} < ẑ_{t,2}]`
 
-#### 1.1.4 Anticipatory Learning Rates (Equations 6.6-6.7)
+#### 1.1.4 Anticipatory Learning Rates (Equations 6.6-6.7 / paper Eqs (13), (6))
 **Theory**: Self-adjusting anticipation rates based on temporal uncertainty:
 
 ```
@@ -64,7 +90,7 @@ H(p_{t,t+h}) = -p_{t,t+h} log p_{t,t+h} - (1-p_{t,t+h}) log(1-p_{t,t+h})
 - `H(0) = H(1) = 0` (minimum uncertainty)
 - Normalization factor `1/(H-1)` ensures `λ_t + Σ_{h=1}^{H-1} λ_{t+h} = 1`
 
-#### 1.1.5 Belief Coefficient and Velocity (Equations 6.28-6.30)
+#### 1.1.5 Belief Coefficient and Velocity (Equations 6.28-6.30 / paper Eqs (19)-(20))
 **Theory**: Self-adjusting belief coefficient for prediction confidence:
 
 ```
@@ -73,7 +99,7 @@ v_{t+1} = 1 - (1/2) H(p_{t-1,t})
 
 Where `H(p_{t-1,t})` is the binary entropy of the Trend Information Probability (TIP).
 
-#### 1.1.6 MAP Correction (Equation 6.33)
+#### 1.1.6 MAP Correction (Equation 6.33 / paper Eq (22))
 **Theory**: Maximum A Posteriori correction for Dirichlet mean decision vectors:
 
 ```
@@ -95,7 +121,7 @@ m̂_{u_i,t+1}^(i)* | u_{l,t+1}^(l) = m̂_{u_i,t+1}^(i)* + (Var[û_{u_l,t+1}^(l)*
 - Window size K: Sliding window for concentration parameter updates
 - Concentration scaling: Adaptive based on historical performance
 
-#### 1.2.2 Anticipatory Learning Rate Calculation (Equation 7.16)
+#### 1.2.2 Anticipatory Learning Rate Calculation (Equation 7.16 (thesis-only extension; not in IEEE paper))
 **Theory**: Combined anticipation rate from two components:
 
 ```
@@ -103,8 +129,8 @@ m̂_{u_i,t+1}^(i)* | u_{l,t+1}^(l) = m̂_{u_i,t+1}^(i)* + (Var[û_{u_l,t+1}^(l)*
 ```
 
 Where:
-- `λ^{(H)}_{t+h}`: Temporal incomparability probability component (Equation 6.6)
-- `λ^{(K)}_{t+h}`: KF residuals component (Equation 6.9)
+- `λ^{(H)}_{t+h}`: Temporal incomparability probability component (Equation 6.6 / paper Eq (13))
+- `λ^{(K)}_{t+h}`: KF residuals component (Equation 6.9 / paper §IV-A.1 narrative)
 - `H = 2`: Prediction horizon (one-step ahead)
 
 **Motivation**: Provides "balanced tension" between:
@@ -138,7 +164,7 @@ Where:
 - **Mutation Rate**: 0.3
 - **Crossover Probability**: 0.2
 - **Selection**: Binary tournament based on Pareto Dominance
-- **Tiebreaker**: Expected Hypervolume contribution (Equation 6.35)
+- **Tiebreaker**: Expected Hypervolume contribution (Equation 6.35 / paper Eq (24))
 - **Reference Point**: `z^ref = (0.2, 0.0)^T` (20% risk, 0% return)
 
 #### 1.2.5 Search Operators
@@ -172,7 +198,7 @@ Where:
 **Theory**: Main procedure for computing anticipatory distributions:
 1. Compute rank of candidate solution
 2. Regime-specific prediction (TLF vs TL)
-3. Apply Online Anticipatory Learning (OAL) using Equation 6.10
+3. Apply Online Anticipatory Learning (OAL) using Equation 6.10 / paper Eq (14)
 
 ### 1.4 Correspondence Mapping
 **Theory**: Method for tracking individual ranked solutions over time:
@@ -208,7 +234,7 @@ F = np.array([
 **Implementation Quality**: **EXCELLENT** - Closely aligned with C++ implementation
 
 **Strengths**:
-- **✅ Equation 6.10 Implementation**: The core anticipatory learning rule IS implemented in `anticipatory_learning_obj_space()` method (lines 282-325)
+- **✅ Equation 6.10 / paper Eq (14) Implementation**: The core anticipatory learning rule IS implemented in `anticipatory_learning_obj_space()` method (lines 282-325)
 - **✅ Exact C++ Formula**: Uses the exact same formula as C++ version (lines 241-245):
   ```python
   anticipation_rate = (rate_lwb + 
@@ -224,7 +250,7 @@ F = np.array([
 - **✅ Historical Population Tracking**: Implements `store_historical_population()` method
 
 **Minor Gaps**:
-1. **Belief Coefficient**: The self-adjusting belief coefficient (Equation 6.30) is not explicitly implemented, but the learning rate calculation achieves similar functionality
+1. **Belief Coefficient**: The self-adjusting belief coefficient (Equation 6.30 / paper Eq (20)) is not explicitly implemented, but the learning rate calculation achieves similar functionality
 2. **Multi-horizon Support**: Currently limited to single-step ahead prediction
 
 #### 2.1.3 Dirichlet Prediction ⚠️
@@ -244,8 +270,8 @@ F = np.array([
 - **✅ Decision Space Learning**: Implements `anticipatory_learning_dec_space()` method (lines 330-390)
 
 **Gaps Identified**:
-1. **Sliding Window Mechanism**: Missing Equations 6.24-6.27 for concentration parameter updates
-2. **Velocity Calculations**: No implementation of Equation 6.28 for velocity-based prediction
+1. **Sliding Window Mechanism**: Missing Equations 6.24-6.27 / paper Eqs (17)-(18) for concentration parameter updates
+2. **Velocity Calculations**: No implementation of Equation 6.28 / paper Eq (19) for velocity-based prediction
 3. **Historical Tracking**: Limited historical data management compared to C++ version
 
 #### 2.1.4 SMS-EMOA Algorithm ✅
@@ -278,7 +304,7 @@ F = np.array([
 - **❌ Time-based Tracking**: Limited tracking of how individual solutions evolve over time
 
 #### 2.2.2 Sliding Window Dirichlet Model ❌
-**Theory Requirement**: Equations 6.24-6.27 for concentration parameter updates
+**Theory Requirement**: Equations 6.24-6.27 / paper Eqs (17)-(18) for concentration parameter updates
 **Current Status**: **NOT IMPLEMENTED**
 **Impact**: High - Essential for decision space learning
 
@@ -291,7 +317,7 @@ F = np.array([
 - **✅ TIP Framework**: Multiple experiments implement TIP calculation (`real_data_experiment.py`, `top5_enhanced_experiment.py`, `enhanced_asmsoa_experiment.py`)
 - **✅ Monte Carlo Sampling**: Advanced implementations use Monte Carlo sampling over probability distributions
 - **✅ Binary Entropy Function**: Implemented in several experiments for uncertainty quantification
-- **✅ Equation 7.16**: Combined anticipation rate calculation implemented in `real_data_experiment.py`
+- **✅ Equation 7.16 (thesis-only extension; not in IEEE paper)**: Combined anticipation rate calculation implemented in `real_data_experiment.py`
 
 **Implementation Examples**:
 ```python
@@ -313,17 +339,17 @@ def _calculate_temporal_incomparability_probability(self, current_objectives, pr
 **Gaps Identified**:
 - **❌ Integration with Main Algorithm**: TIP calculation not integrated into main `AnticipatoryLearning` class
 - **❌ Proper Probability Distributions**: Current implementations use heuristics rather than proper Gaussian marginal distributions
-- **❌ Equation 6.6 Integration**: Binary entropy-based learning rate calculation not fully implemented
+- **❌ Equation 6.6 / paper Eq (13) Integration**: Binary entropy-based learning rate calculation not fully implemented
 
 #### 2.2.4 Belief Coefficient Self-Adjustment ⚠️
-**Theory Requirement**: Equation 6.30 for adaptive prediction confidence
+**Theory Requirement**: Equation 6.30 / paper Eq (20) for adaptive prediction confidence
 **Current Status**: **FUNCTIONALLY IMPLEMENTED**
 **Impact**: Low - Similar functionality achieved through learning rate calculation
 
 **Analysis**:
 - **✅ Learning Rate Calculation**: The `compute_anticipatory_learning_rate()` method (lines 206-245) implements adaptive confidence through uncertainty and accuracy factors
 - **✅ C++ Alignment**: The C++ version in `legacy-cpp/source/nsga2.cpp` (lines 525-596) shows similar approach using `alpha = 1.0 - linear_entropy(nd_probability)`
-- **⚠️ Different Approach**: While not implementing Equation 6.30 exactly, the current implementation achieves similar adaptive behavior through the learning rate formula
+- **⚠️ Different Approach**: While not implementing Equation 6.30 / paper Eq (20) exactly, the current implementation achieves similar adaptive behavior through the learning rate formula
 
 **Missing**:
 - **❌ Explicit TIP Integration**: No direct integration of TIP calculation with belief coefficient
@@ -342,7 +368,7 @@ def _calculate_temporal_incomparability_probability(self, current_objectives, pr
 
 ### 3.1 Critical Missing Implementations
 
-#### 3.1.1 Anticipatory Learning Rule (Equation 6.10)
+#### 3.1.1 Anticipatory Learning Rule (Equation 6.10 / paper Eq (14))
 **Current Implementation**:
 ```python
 # Simplified version in anticipatory_learning.py
@@ -353,7 +379,7 @@ x = x_state + solution.anticipation_rate * (anticipative_portfolio.P.kalman_stat
 ```python
 def apply_anticipatory_learning_rule(self, current_state, predicted_states, lambda_rates):
     """
-    Apply Equation 6.10: ẑ_t | z_{t+1:t+H-1} = (1 - Σλ) z_t + Σλ ẑ_{t+h}
+    Apply Equation 6.10 / paper Eq (14): ẑ_t | z_{t+1:t+H-1} = (1 - Σλ) z_t + Σλ ẑ_{t+h}
     """
     lambda_sum = sum(lambda_rates)
     anticipatory_state = (1 - lambda_sum) * current_state
@@ -373,7 +399,7 @@ class SlidingWindowDirichlet:
         self.alpha_history = []
     
     def update_concentration(self, t, u_t_minus_1):
-        """Implement Equations 6.24-6.27"""
+        """Implement Equations 6.24-6.27 / paper Eqs (17)-(18)"""
         if t < self.K:
             # Accumulating observations
             alpha_t = self.alpha_history[-1] + self.s * u_t_minus_1
@@ -436,7 +462,7 @@ class CorrespondenceMapper:
 
 1. **Implement Sliding Window Dirichlet Model**
    - Add `SlidingWindowDirichlet` class
-   - Implement concentration parameter updates (Equations 6.24-6.27)
+   - Implement concentration parameter updates (Equations 6.24-6.27 / paper Eqs (17)-(18))
    - Integrate with existing `DirichletPredictor`
 
 2. **Implement Correspondence Mapping**
@@ -445,19 +471,19 @@ class CorrespondenceMapper:
    - Maintain solution identity through optimization cycles
 
 3. **Complete Anticipatory Learning Rule**
-   - Implement proper Equation 6.10
+   - Implement proper Equation 6.10 / paper Eq (14)
    - Add multi-horizon prediction support
    - Integrate with existing learning framework
 
 ### 4.2 Priority 2: Enhanced Components
 
 1. **Belief Coefficient Self-Adjustment**
-   - Implement Equation 6.30
+   - Implement Equation 6.30 / paper Eq (20)
    - Add TIP (Trend Information Probability) calculation
    - Integrate with existing uncertainty quantification
 
 2. **Enhanced MAP Correction**
-   - Implement proper Equation 6.33
+   - Implement proper Equation 6.33 / paper Eq (22)
    - Add variance calculations for Dirichlet distributions
    - Improve decision space learning accuracy
 
@@ -477,12 +503,12 @@ class CorrespondenceMapper:
 
 ### 5.1 Major Corrections from Initial Assessment
 
-**Anticipatory Learning Rule (Equation 6.10)**: 
+**Anticipatory Learning Rule (Equation 6.10 / paper Eq (14))**: 
 - **Initial Assessment**: ❌ Missing implementation
 - **Corrected Assessment**: ✅ **FULLY IMPLEMENTED** in `anticipatory_learning_obj_space()` method
 - **Evidence**: Lines 282-325 show exact implementation matching C++ version
 
-**Dirichlet MAP Update (Equation 6.33)**:
+**Dirichlet MAP Update (Equation 6.33 / paper Eq (22))**:
 - **Initial Assessment**: ❌ Oversimplified
 - **Corrected Assessment**: ✅ **PROPERLY IMPLEMENTED** with variance calculations
 - **Evidence**: Lines 86-114 show complete MAP update with proper Dirichlet variance
@@ -522,14 +548,14 @@ The current codebase demonstrates a solid foundation for implementing the antici
 
 **Strengths**:
 - **✅ Excellent Kalman filter implementation** - Perfect alignment with theory
-- **✅ Complete anticipatory learning rule** - Equation 6.10 properly implemented
+- **✅ Complete anticipatory learning rule** - Equation 6.10 / paper Eq (14) properly implemented
 - **✅ Good Dirichlet prediction** - Core MAP functionality implemented
 - **✅ Good SMS-EMOA algorithm** - With stochastic features and proper integration
 - **✅ Historical population tracking** - Foundation for correspondence mapping
 - **✅ Transaction cost integration** - Real-world applicability
 
 **Remaining Gaps**:
-- **⚠️ Sliding window Dirichlet model** - Missing Equations 6.24-6.27 (advanced feature)
+- **⚠️ Sliding window Dirichlet model** - Missing Equations 6.24-6.27 / paper Eqs (17)-(18) (advanced feature)
 - **⚠️ Explicit correspondence mapping** - Basic functionality exists, needs enhancement
 - **⚠️ Multi-horizon prediction** - Currently limited to single-step ahead
 - **⚠️ N-step prediction integration** - Framework exists but needs better integration
@@ -562,7 +588,7 @@ The current codebase demonstrates a solid foundation for implementing the antici
 - **✅ Multiple Implementations**: `real_data_experiment.py`, `top5_enhanced_experiment.py`, `enhanced_asmsoa_experiment.py`
 - **✅ Monte Carlo Sampling**: Advanced implementations use proper probability distributions
 - **✅ Binary Entropy**: Correctly implemented in several experiments
-- **✅ Equation 7.16**: Combined anticipation rate calculation implemented
+- **✅ Equation 7.16 (thesis-only extension; not in IEEE paper)**: Combined anticipation rate calculation implemented
 
 **Integration Gaps**:
 - **❌ Main Algorithm**: TIP not integrated into `AnticipatoryLearning` class

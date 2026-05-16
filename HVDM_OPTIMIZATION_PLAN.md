@@ -6,6 +6,24 @@
 **Target**: Make Hv-DM the best performing strategy  
 **Branch**: `hvdm-optimization-plan`
 
+> **Canon note (2026-05-16, W1-5):** The canonical algorithmic spec for
+> the open-source release is the IEEE Transactions on Cybernetics paper
+> (`docs/paper.pdf`; Azevedo & Von Zuben, 2015). The Hv-DM / M-DM / R-DM
+> family of decision-maker strategies discussed here ARE in the paper
+> (§V-A — the three DM factors HDM/MDM/RDM). However, this document
+> also proposes **post-paper extensions** that are NOT in the IEEE
+> paper:
+>
+> - `UncertaintyAwarePredictor` (defined around line 50)
+> - `AMFCTrajectoryPredictor` (referenced around line 54)
+> - `AdvancedNeuralPredictor` (around line 114)
+>
+> Treat these as **research proposals**, not as paper-grounded
+> constructs. Any future implementation work that wants to be
+> paper-canonical must either (a) deliver the proposal AND propose
+> a paper-extension publication, or (b) stick to the paper's
+> existing predictor surface (KF + Dirichlet MAP per §IV-A/B).
+
 ---
 
 ## 📊 Current Performance Analysis
