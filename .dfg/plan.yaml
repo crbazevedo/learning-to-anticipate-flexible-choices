@@ -1,0 +1,130 @@
+# learning-to-anticipate-flexible-choices — wave plan
+#
+# Authored 2026-05-16 during dfg-harness bootstrap. Validates against
+# kit/SCHEMAS/plan.schema.json (schema v1.1.0+).
+#
+# Sources of truth:
+#   - docs/VISION.md (the canonical vision + provenance)
+#   - docs/paper.pdf (the canonical algorithmic spec — IEEE TCYB 2015)
+#   - the 2026-05-16 code-vs-paper adherence audit (the gap ledger)
+#
+# This W1 — "Wire what's built" — closes the bridge between the standalone
+# algorithm modules and the live ExperimentManager execution path.
+# Every paper-equation citation in this file uses the IEEE paper's
+# numbering (Eqs 11–18 in §IV-A/B), NOT the thesis numbering (6.x) that
+# the older analysis docs use. Reconciling that numbering across the docs
+# is unit W1-5.
+
+version: "1.1.0"
+name: learning-to-anticipate-flexible-choices
+
+waves:
+  - id: W1
+    name: Wire what's built
+    state: PLANNED
+    units:
+      - id: W1-1
+        slug: kalman-state-canonical
+        name: Canonicalize Kalman state-vector ordering to paper Eq (11)
+        purpose: "Align the KF state vector to paper Eq (11) across 3 files; add equation-level KF predict-update test."
+        files:
+          - python_refactor/src/algorithms/kalman_filter.py
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/tests/test_kalman_filter.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "Kalman state vector follows paper Eq (11): z_t^+ = (z_1,t ... z_m,t, ż_1,t ... ż_m,t)^T — for m=2: [ROI, risk, ROI_velocity, risk_velocity]"
+          - "State-transition matrix F in kalman_filter.py matches the chosen ordering and the SMS-EMOA / anticipatory_learning reads (no cross-file ordering drift)"
+          - "All three files (kalman_filter.py, sms_emoa.py, anticipatory_learning.py) read x[0]=ROI, x[1]=risk, x[2]=ROI_velocity, x[3]=risk_velocity consistently"
+          - "New test in test_kalman_filter.py: assert a known KF predict-update yields the expected x_next[1] (future risk), NOT x_next[2] (which is future ROI_velocity under the canonical ordering); cite Eq (11) in the docstring"
+          - "Existing tests in test_kalman_filter.py continue to pass"
+
+      - id: W1-5
+        slug: docs-paper-canon-reconcile
+        name: Reconcile docs to paper canon; strike thesis-numbered citations
+        purpose: "Replace thesis-equation citations (6.x) with paper-equation citations (Eqs 11–18) in 3 analysis docs; delete stale repository_analysis.md."
+        files:
+          - thesis_codebase_analysis.md
+          - 100_percent_adherence_backlog.md
+          - HVDM_OPTIMIZATION_PLAN.md
+          - repository_analysis.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "Every thesis-equation citation (6.x) in thesis_codebase_analysis.md replaced with the corresponding paper equation citation (Eqs 11–18 in §IV-A/B), with a one-line provenance note at the top of the file"
+          - "100_percent_adherence_backlog.md retains its current structure but every PT-language epic header reframed against paper equation numbers; Portuguese narrative retained for now (translation queued as a later unit)"
+          - "HVDM_OPTIMIZATION_PLAN.md headers reconciled to paper canon; the file's stated additions (UncertaintyAwarePredictor, AMFCTrajectoryPredictor) flagged as 'not in paper — extension proposals' so they can't be mistaken for paper-grounded constructs"
+          - "repository_analysis.md DELETED — superseded by VISION.md + the 2026-05-16 audit; stale claims removed rather than maintained"
+
+      - id: W1-2
+        slug: tip-wire-into-experiment-manager
+        name: Wire TIP into the live ExperimentManager path
+        purpose: "Fix broken super().__init__ in TIPIntegratedAnticipatoryLearning; thread tip_calculator through compute_anticipatory_learning_rate; make ExperimentManager use it via experiment-config flag."
+        files:
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/src/experiments/experiment_manager.py
+          - python_refactor/run_experiments.py
+          - python_refactor/tests/test_tip_integration.py
+        depends_on:
+          - W1-1
+        size: M
+        acceptance_criteria:
+          - "TIPIntegratedAnticipatoryLearning.__init__ correctly calls super().__init__(learning_rate=..., window_size=window_size) — no positional miswiring"
+          - "compute_anticipatory_learning_rate (paper Eq 7.16 / IEEE blended-λ form) actually combines KF-residual rate with TIP-derived rate (Eq 13) when tip_calculator is supplied; falls back to traditional KF-only only when explicitly opted out, not when threading is missing"
+          - "ExperimentManager honours an `experiment.learning.use_tip: true` flag and instantiates TIPIntegratedAnticipatoryLearning with a TIP calculator"
+          - "run_experiments.py exposes the new flag end-to-end with one baseline experiment using it"
+          - "test_tip_integration.py asserts that calling ExperimentManager with use_tip=True produces λ values whose TIP-arm is non-zero (i.e., the dial is actually turning)"
+
+      - id: W1-3
+        slug: multihorizon-wire-and-imports
+        name: Wire MultiHorizonAnticipatoryLearning + fix advanced-module imports
+        purpose: "Convert 4 dead modules from `from algorithms.X` to relative imports `from .X`; wire MultiHorizonAnticipatoryLearning into ExperimentManager."
+        files:
+          - python_refactor/src/algorithms/multi_horizon_anticipatory.py
+          - python_refactor/src/algorithms/belief_coefficient.py
+          - python_refactor/src/algorithms/sliding_window_dirichlet.py
+          - python_refactor/src/algorithms/enhanced_n_step_prediction.py
+          - python_refactor/tests/test_eq14_integration.py
+        depends_on:
+          - W1-2
+        size: M
+        acceptance_criteria:
+          - "All 4 advanced modules use relative imports (`from .X import Y`), no `sys.path` mutation required for any of them to be importable from src/algorithms/__init__.py"
+          - "ExperimentManager honours an `experiment.learning.use_multi_horizon: true` flag and instantiates MultiHorizonAnticipatoryLearning"
+          - "New test test_eq14_integration.py: paper Eq (14) — the multi-horizon convex combo ẑ_t|ẑ_{t+1:t+H-1} = ẑ_t + Σ_h λ_{t+h}(ẑ_{t+h}|ẑ_t - ẑ_t) — produces the documented result on a 3-horizon hand-computed toy case"
+          - "Pre-existing tests for the 4 modules continue to pass"
+
+      - id: W1-4
+        slug: equation-level-tests
+        name: Equation-level (not bounds-only) tests for TIP, λ, belief coefficient
+        purpose: "Add tests that assert paper Eqs (12)–(13) and the belief coefficient against known-analytical Gaussian pairs; remove the silent [0.05, 0.95] TIP clamp."
+        files:
+          - python_refactor/src/algorithms/temporal_incomparability_probability.py
+          - python_refactor/tests/test_temporal_incomparability_probability.py
+          - python_refactor/tests/test_belief_coefficient.py
+        depends_on:
+          - W1-3
+        size: M
+        acceptance_criteria:
+          - "TIP (paper Eq 12) tested against at least two known-analytical cases: (a) two disjoint Gaussians with sigma ≪ |μ_1 - μ_2| in both objectives → TIP near 0; (b) two identical Gaussians → TIP near 0.5 ± Monte-Carlo tolerance"
+          - "λ (paper Eq 13) tested against the binary-entropy table: H(0)=0, H(0.5)=1, H(1)=0; for H=2 this gives λ_{t+h} = 1 - H(p)"
+          - "Silent `[0.05, 0.95]` clamp in _calculate_tip_with_covariance either REMOVED, or made explicit via a constructor argument with a test asserting both clamped and unclamped behaviour"
+          - "Belief coefficient (current code's Eq 6.30 / paper IV-A) tested against the same known-Gaussian cases (v near 1 for predictable, v near 0.5 for unpredictable)"
+
+    parallel_groups:
+      - [W1-1, W1-5]
+      - [W1-2]
+      - [W1-3]
+      - [W1-4]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 5 units MERGED to master (squash-merge) with green pre-pr battery"
+        - "VISION.md committed; repository_analysis.md deleted"
+        - "Live experiment invocation `python -m experiments.real_data_experiment --use-tip --use-multi-horizon` (or equivalent run_experiments.py flag) executes end-to-end without ImportError or sys.path hacks"
+        - "test suite passes: at least one equation-level (not bounds-only) test exists for each of paper Eqs (11), (12), (13), (14)"
+        - "Retro for each unit at .dfg/retrospectives/W1/W1-N.md with ADR-004 YAML frontmatter; honest scars named where present"
+      checkpoint_file: .dfg/checkpoints/W1-gate.md
