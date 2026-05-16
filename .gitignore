@@ -213,4 +213,12 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# dfg-harness local symlink (per ADR-033 §Stage 1; remove once Stage 2 ships)
 kit/
+
+# uv-managed virtual environments
+.venv/
+.venv-*/
+__pycache__/
+.pytest_cache/

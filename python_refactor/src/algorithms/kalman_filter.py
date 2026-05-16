@@ -3,6 +3,24 @@ Kalman Filter implementation for portfolio optimization.
 
 This module implements the Kalman filter for state estimation of portfolio
 ROI and risk, including prediction and update steps.
+
+State-vector ordering. The canonical ordering follows the paper:
+
+    Azevedo, C. R. B., & Von Zuben, F. J. (2015). Learning to Anticipate
+    Flexible Choices in Multiple Criteria Decision-Making Under
+    Uncertainty. IEEE Transactions on Cybernetics. §IV-A Eq (11):
+
+        z_t^+ = (z_{1,t} ... z_{m,t}  ż_{1,t} ... ż_{m,t})^T
+
+For the m=2 portfolio case (objectives = ROI, risk) this is:
+
+        x = [ROI, risk, ROI_velocity, risk_velocity]
+
+That is: all m objectives first, then all m velocities. This module
+encodes that convention throughout — F, x init, and the get_portfolio_*
+readers. Callers MUST honour the same convention to avoid silent
+miswiring (a class of bug that previously affected sms_emoa.py:499
+under W1-1 of the dfg-harness wave plan).
 """
 
 import numpy as np
@@ -40,7 +58,8 @@ class KalmanParams:
     def __post_init__(self):
         """Initialize with default values if not provided."""
         if self.x is None:
-            self.x = np.zeros(4)  # [ROI, ROI_velocity, risk, risk_velocity]
+            # Paper Eq (11) ordering: [ROI, risk, ROI_velocity, risk_velocity]
+            self.x = np.zeros(4)
         if self.x_next is None:
             self.x_next = np.zeros(4)
         if self.u is None:
@@ -107,25 +126,29 @@ def kalman_filter(params: KalmanParams, measurement: np.ndarray) -> None:
 
 def initialize_kalman_matrices() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Initialize Kalman filter matrices based on C++ implementation.
-    
+    Initialize Kalman filter matrices following paper Eq (11) ordering.
+
+    State vector layout (paper Eq 11 with m=2):
+        x = [ROI, risk, ROI_velocity, risk_velocity]
+            [ 0,   1,        2,             3      ]
+
     Returns:
         Tuple of (F, H, R) matrices
     """
-    # State transition matrix F (4x4)
-    # [ROI, ROI_velocity, risk, risk_velocity]
+    # State transition matrix F (4x4) — constant-velocity dynamics.
+    # Indices: [0]=ROI, [1]=risk, [2]=ROI_vel, [3]=risk_vel.
     F = np.array([
-        [1.0, 1.0, 0.0, 0.0],  # ROI_next = ROI + ROI_velocity
-        [0.0, 1.0, 0.0, 0.0],  # ROI_velocity_next = ROI_velocity
-        [0.0, 0.0, 1.0, 1.0],  # risk_next = risk + risk_velocity
+        [1.0, 0.0, 1.0, 0.0],  # ROI_next = ROI + ROI_velocity
+        [0.0, 1.0, 0.0, 1.0],  # risk_next = risk + risk_velocity
+        [0.0, 0.0, 1.0, 0.0],  # ROI_velocity_next = ROI_velocity
         [0.0, 0.0, 0.0, 1.0]   # risk_velocity_next = risk_velocity
     ])
-    
+
     # Measurement matrix H (2x4)
-    # We only observe ROI and risk, not their velocities
+    # We observe ROI (x[0]) and risk (x[1]); velocities are latent.
     H = np.array([
-        [1.0, 0.0, 0.0, 0.0],  # Observe ROI
-        [0.0, 0.0, 1.0, 0.0]   # Observe risk
+        [1.0, 0.0, 0.0, 0.0],  # Observe ROI from x[0]
+        [0.0, 1.0, 0.0, 0.0]   # Observe risk from x[1]
     ])
     
     # Measurement noise covariance R (2x2)
@@ -154,9 +177,10 @@ def create_kalman_params(initial_roi: float = 0.0, initial_risk: float = 0.0) ->
     
     # Create instance with matrices
     params = KalmanParams(F=F, H=H, R=R)
-    
-    # Initialize state vector [ROI, ROI_velocity, risk, risk_velocity]
-    params.x = np.array([initial_roi, 0.0, initial_risk, 0.0])
+
+    # Initialize state vector (paper Eq 11 ordering):
+    # [ROI, risk, ROI_velocity, risk_velocity]
+    params.x = np.array([initial_roi, initial_risk, 0.0, 0.0])
     params.x_next = params.x.copy()
     
     # Initialize control input (zero for now)
@@ -189,27 +213,31 @@ def update_measurement_noise(params: KalmanParams, roi_variance: float, risk_var
 def get_portfolio_state(params: KalmanParams) -> tuple[float, float]:
     """
     Extract current portfolio ROI and risk from Kalman state.
-    
+
+    Per paper Eq (11) ordering: x = [ROI, risk, ROI_vel, risk_vel].
+
     Args:
         params: Kalman filter parameters
-        
+
     Returns:
         Tuple of (ROI, risk)
     """
-    return params.x[0], params.x[2]  # ROI, risk
+    return params.x[0], params.x[1]  # ROI = x[0], risk = x[1]
 
 
 def get_portfolio_prediction(params: KalmanParams) -> tuple[float, float]:
     """
     Extract predicted portfolio ROI and risk from Kalman state.
-    
+
+    Per paper Eq (11) ordering: x_next = [ROI, risk, ROI_vel, risk_vel].
+
     Args:
         params: Kalman filter parameters
-        
+
     Returns:
         Tuple of (predicted_ROI, predicted_risk)
     """
-    return params.x_next[0], params.x_next[2]  # ROI_prediction, risk_prediction
+    return params.x_next[0], params.x_next[1]  # ROI = [0], risk = [1]
 
 
 def get_error_covariance(params: KalmanParams) -> np.ndarray:

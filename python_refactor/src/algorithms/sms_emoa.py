@@ -495,8 +495,11 @@ class SMSEMOA:
                 # Sample from Kalman filter prediction
                 from .kalman_filter import kalman_prediction
                 kalman_prediction(solution.P.kalman_state)
+                # Paper Eq (11) ordering: x_next = [ROI, risk, ROI_vel, risk_vel]
+                # Prior to W1-1 this read x_next[2] (= ROI_velocity, NOT risk)
+                # under sms_emoa.py's own paper-canonical F matrix.
                 future_roi = solution.P.kalman_state.x_next[0]
-                future_risk = solution.P.kalman_state.x_next[2]
+                future_risk = solution.P.kalman_state.x_next[1]
                 
                 # Create temporary solution for hypervolume computation
                 temp_solution = Solution(num_assets=len(solution.P.investment))
