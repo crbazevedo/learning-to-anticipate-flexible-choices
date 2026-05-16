@@ -82,18 +82,6 @@ class TestBeliefCoefficientCalculator(unittest.TestCase):
         self.assertAlmostEqual(entropy_negative, 0.0, places=5)
         self.assertAlmostEqual(entropy_above_1, 0.0, places=5)
         
-    @unittest.skip(
-        "W1-4-CARRY: Pre-existing bug surfaced when this file's imports "
-        "started collecting cleanly. _calculate_confidence at "
-        "belief_coefficient.py:142 has `1.0 - abs(tip - 0.5) * 2` — the "
-        "leading `1.0 -` inverts the intent (the docstring says "
-        "'higher when TIP is closer to 0 or 1' but the formula returns "
-        "1.0 at tip=0.5 and 0.0 at tip=0/1). The test's assertions are "
-        "CORRECT; the implementation is wrong. Fix is one line in "
-        "belief_coefficient.py:142, scoped as a follow-up unit "
-        "(belief_coefficient.py is NOT in W1-4's output_contract per "
-        "directive #1)."
-    )
     def test_calculate_confidence(self):
         """Test confidence calculation."""
         # Test with TIP = 0.5 (maximum uncertainty)
