@@ -1,0 +1,24 @@
+proposal_id: wave-W2-20260516T233801Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-16T23:38:01Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W2
+  action: add
+trigger: retro-driven
+rationale: "W1 cleanup sweep \u2014 adds wave W2 with 4 file-disjoint units that close\
+  \ 5 carries documented in W1-3/W1-4/W1-5 retros + 1 packaging gap. (W2-1 closes\
+  \ W1-4-CARRY-1/2 via 1-line belief-coefficient bug fix + un-skip + magic-number\
+  \ replacement; W2-2 closes W1-3-CARRY-1/2 via test-file import-style sweep + thesis_aligned_experiment\
+  \ fix; W2-3 closes W1-5-CARRY-1 via .dfg/context-map.yaml cleanup; W2-4 adds pyproject.toml\
+  \ + uv lock + ruff sweep of 3 legacy files). All 4 units file-disjoint and form\
+  \ a single parallel group \u2014 encoded as parallel_groups: [[W2-1, W2-2, W2-3,\
+  \ W2-4]] for max parallelism per operator directive 2026-05-16. Wave W1 wave-close\
+  \ ceremony follows W2 merge."
+evidence: []
+accepted_at: '2026-05-16T23:40:28Z'
+operator_note: 'Approved: add wave W2 with 4 file-disjoint units (W2-1..W2-4) in a
+  single parallel group. Closes 5 W1 carries + 1 packaging gap. Per operator directive
+  #4 (paired diff).'
