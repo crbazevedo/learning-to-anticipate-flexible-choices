@@ -1,0 +1,82 @@
+# learning-to-anticipate-flexible-choices — context routing manifest
+#
+# Authored 2026-05-16 during dfg-harness bootstrap. Validates against
+# kit/SCHEMAS/context-map.schema.json.
+#
+# Encodes what every unit should read at cold-start. Loaded by
+# SessionStart hook injection (V02-ARCHITECTURE §4.1).
+#
+# Discipline note (operator directive 2026-05-16, sub-papercut #16):
+# "must_read" means BOTH emitting Read events AND actually opening +
+# scanning the files. Citing a file here without reading it is the
+# failure mode this manifest exists to make legible.
+version: "1"
+
+global_context:
+  # Briefing surface injected into EVERY agent's read_contract regardless
+  # of wave or unit. Kept short — global context costs every dispatch.
+  - docs/VISION.md
+  - docs/paper.pdf
+
+per_wave:
+  W1:
+    # W1 — "Wire what's built". Every unit reads the audit gap-ledger
+    # and the paper sections that ground the wiring decisions.
+    - docs/paper.pdf  # canonical algorithmic spec — §IV-A/B for OAL, Eqs (11)–(18)
+
+per_unit:
+  # ──────────────────────────────────────────────────────────────────────
+  # W1-1 — Canonicalize KF state-vector ordering to paper Eq (11)
+  # ──────────────────────────────────────────────────────────────────────
+  W1-1:
+    must_read:
+      - docs/paper.pdf  # §IV-A Eq (11) — canonical state-vector ordering
+      - python_refactor/src/algorithms/kalman_filter.py  # the existing F-matrix + state-vector layout
+      - python_refactor/src/algorithms/sms_emoa.py  # docstring + lines 168-174 (F-matrix) + lines 498-499 (reads)
+      - python_refactor/src/algorithms/anticipatory_learning.py  # lines 1103-1104 (KF state reads)
+      - python_refactor/tests/test_kalman_filter.py  # existing test surface to extend
+
+  # ──────────────────────────────────────────────────────────────────────
+  # W1-5 — Reconcile docs to paper canon
+  # ──────────────────────────────────────────────────────────────────────
+  W1-5:
+    must_read:
+      - docs/paper.pdf  # §IV-A/B equations (11)–(18) — the canonical numbering
+      - thesis_codebase_analysis.md  # equation-level analysis with thesis numbering (6.x) to reconcile
+      - 100_percent_adherence_backlog.md  # PT-flavored backlog with thesis numbering
+      - HVDM_OPTIMIZATION_PLAN.md  # mixes paper-grounded + extension-proposal concepts; needs disambiguation
+      - repository_analysis.md  # candidate for deletion — verify it's superseded by VISION.md before delete
+
+  # ──────────────────────────────────────────────────────────────────────
+  # W1-2 — Wire TIP into the live ExperimentManager path
+  # ──────────────────────────────────────────────────────────────────────
+  W1-2:
+    must_read:
+      - docs/paper.pdf  # §IV-A.1 Eq (13) — λ from TIP; §IV-A Eq (12) — TIP definition
+      - python_refactor/src/algorithms/anticipatory_learning.py  # line 315 super().__init__ bug; lines 257-262 Eq 7.16 path
+      - python_refactor/src/algorithms/temporal_incomparability_probability.py  # the TIP calculator surface
+      - python_refactor/src/experiments/experiment_manager.py  # the bridge to make alive
+      - python_refactor/run_experiments.py  # the end-to-end entry point + flag plumbing
+      - python_refactor/tests/test_tip_integration.py  # existing test surface to extend
+
+  # ──────────────────────────────────────────────────────────────────────
+  # W1-3 — Wire MultiHorizon + fix advanced-module imports
+  # ──────────────────────────────────────────────────────────────────────
+  W1-3:
+    must_read:
+      - docs/paper.pdf  # §IV-A.2 Eq (14) — the convex combo OAL distribution
+      - python_refactor/src/algorithms/multi_horizon_anticipatory.py  # the full Eq (14) implementation (currently dead)
+      - python_refactor/src/algorithms/belief_coefficient.py  # the velocity / belief code; currently dead
+      - python_refactor/src/algorithms/sliding_window_dirichlet.py  # DD update (paper Eqs 17-18); currently dead
+      - python_refactor/src/algorithms/enhanced_n_step_prediction.py  # n-step prediction subclass; currently dead
+      - python_refactor/src/experiments/experiment_manager.py  # to wire the use_multi_horizon flag
+
+  # ──────────────────────────────────────────────────────────────────────
+  # W1-4 — Equation-level tests for TIP, λ, belief coefficient
+  # ──────────────────────────────────────────────────────────────────────
+  W1-4:
+    must_read:
+      - docs/paper.pdf  # §IV-A Eqs (12), (13); §IV-A.1 binary entropy form
+      - python_refactor/src/algorithms/temporal_incomparability_probability.py  # the [0.05, 0.95] clamp to address
+      - python_refactor/tests/test_temporal_incomparability_probability.py  # currently bounds-only; extend
+      - python_refactor/tests/test_belief_coefficient.py  # currently bounds-only; extend
