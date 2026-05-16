@@ -11,8 +11,11 @@ from typing import List, Dict, Any, Optional, Tuple
 import logging
 from dataclasses import dataclass
 
-from algorithms.solution import Solution
-from algorithms.temporal_incomparability_probability import TemporalIncomparabilityCalculator
+# W1-3: relative imports (was `from algorithms.X import Y` which only
+# worked under a `sys.path.insert(..., src)` hack and was one of the
+# 16 pre-W1-3 pytest collection errors).
+from .solution import Solution
+from .temporal_incomparability_probability import TemporalIncomparabilityCalculator
 
 logger = logging.getLogger(__name__)
 

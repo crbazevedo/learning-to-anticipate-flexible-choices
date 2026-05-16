@@ -11,10 +11,13 @@ from typing import List, Dict, Any, Optional, Tuple
 import logging
 from dataclasses import dataclass
 
-from algorithms.n_step_prediction import NStepPredictor
-from algorithms.belief_coefficient import BeliefCoefficientCalculator
-from algorithms.anticipatory_learning import AnticipatoryLearning
-from algorithms.solution import Solution
+# W1-3: relative imports (was `from algorithms.X import Y` which only
+# worked under a `sys.path.insert(..., src)` hack and was one of the
+# 16 pre-W1-3 pytest collection errors).
+from .n_step_prediction import NStepPredictor
+from .belief_coefficient import BeliefCoefficientCalculator
+from .anticipatory_learning import AnticipatoryLearning
+from .solution import Solution
 
 logger = logging.getLogger(__name__)
 
