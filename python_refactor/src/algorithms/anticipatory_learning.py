@@ -210,8 +210,44 @@ class AnticipatoryLearning:
         
         self.historical_anticipative_decisions.append(anticipative_sol)
         self.predicted_anticipative_decision = anticipative_sol
-    
-    def compute_anticipatory_learning_rate(self, solution: Solution, min_error: float, 
+
+    def _build_predicted_shadow(self, current: Solution):
+        """Build a lightweight transient Solution-shaped object from `current`'s
+        Kalman-filter one-step-ahead prediction.
+
+        The TIP calculator (paper Eq 12) reads only ``.P.ROI``, ``.P.risk``,
+        and ``.P.kalman_state.P[:2, :2]`` from each of its two arguments;
+        this helper assembles a minimal shadow that satisfies that
+        interface without paying the cost of a full ``Solution`` +
+        ``Portfolio`` construction.
+
+        State-vector indices follow paper Eq (11): ``x = [ROI, risk,
+        ROI_velocity, risk_velocity]`` — canonicalised by W1-1.
+
+        Returns None when no prediction is available (callers fall back
+        to the KF-residuals-only path in `compute_anticipatory_learning_rate`).
+        """
+        from types import SimpleNamespace
+        kf = getattr(current.P, 'kalman_state', None)
+        if kf is None or getattr(kf, 'x_next', None) is None:
+            return None
+        # Reuse the predicted covariance when present; fall back to the
+        # filtered covariance otherwise.
+        cov_next = getattr(kf, 'P_next', None)
+        if cov_next is None:
+            cov_next = kf.P
+        shadow_kalman = SimpleNamespace(
+            x=kf.x_next.copy(),
+            P=cov_next.copy(),
+        )
+        shadow_portfolio = SimpleNamespace(
+            ROI=float(kf.x_next[0]),   # paper Eq (11): x[0] = ROI
+            risk=float(kf.x_next[1]),  # paper Eq (11): x[1] = risk
+            kalman_state=shadow_kalman,
+        )
+        return SimpleNamespace(P=shadow_portfolio)
+
+    def compute_anticipatory_learning_rate(self, solution: Solution, min_error: float,
                                          max_error: float, min_alpha: float, max_alpha: float, 
                                          current_time: int, tip_calculator: Optional[TemporalIncomparabilityCalculator] = None,
                                          predicted_solution: Optional[Solution] = None, horizon: int = 2) -> float:
@@ -307,12 +343,17 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
     def __init__(self, window_size: int = 10, monte_carlo_samples: int = 1000):
         """
         Initialize TIP-integrated anticipatory learning.
-        
+
         Args:
             window_size: Window size for historical tracking
             monte_carlo_samples: Number of Monte Carlo samples for TIP calculation
         """
-        super().__init__(window_size)
+        # Pre-W1-2 bug: `super().__init__(window_size)` passed window_size
+        # POSITIONALLY, which silently became `learning_rate` in the parent
+        # signature `(learning_rate, prediction_horizon, monte_carlo_simulations,
+        # state_observation_frequency, error_threshold, learning_type,
+        # adaptive_learning, window_size)`. Fixed to keyword form.
+        super().__init__(window_size=window_size)
         self.tip_calculator = TemporalIncomparabilityCalculator(monte_carlo_samples)
         self.prediction_horizon = 2  # Default prediction horizon
         
@@ -456,9 +497,21 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
         elif anticipative_portfolio.alpha > max_alpha:
             max_alpha = anticipative_portfolio.alpha
         
-        # Compute anticipatory learning rate
+        # Compute anticipatory learning rate.
+        # When `self` is a TIPIntegratedAnticipatoryLearning instance (or any
+        # subclass that exposes a `tip_calculator` attribute), thread the
+        # TIP machinery through so paper Eq (13) actually fires the TIP arm
+        # in the published λ — instead of silently falling back to the
+        # KF-residuals-only path (the pre-W1-2 default for every live run).
+        tip_calculator = getattr(self, 'tip_calculator', None)
+        predicted_shadow = None
+        if tip_calculator is not None:
+            predicted_shadow = self._build_predicted_shadow(anticipative_portfolio)
         solution.anticipation_rate = self.compute_anticipatory_learning_rate(
-            anticipative_portfolio, min_error, max_error, min_alpha, max_alpha, current_time
+            anticipative_portfolio, min_error, max_error, min_alpha, max_alpha, current_time,
+            tip_calculator=tip_calculator,
+            predicted_solution=predicted_shadow,
+            horizon=getattr(self, 'prediction_horizon', 2),
         )
         
         # Update state using anticipatory learning rate

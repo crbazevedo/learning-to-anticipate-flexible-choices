@@ -248,7 +248,40 @@ def create_learning_experiments():
             "evaluation_period": "full"
         }
     ])
-    
+
+    # SMS-EMOA with TIP-integrated learning (W1-2: keystone for paper Eq 13).
+    # `learning.use_tip: true` opts ExperimentManager into the TIP-integrated
+    # path; TIPIntegratedAnticipatoryLearning accepts only window_size +
+    # monte_carlo_samples (intentionally narrower than the base class).
+    experiments.append({
+        "name": "SMSEMOA_TIPIntegrated_Extended_2024",
+        "description": "SMS-EMOA with TIP-integrated anticipatory learning (paper Eq 13 / thesis Eq 7.16 blend); first live use_tip wiring per W1-2",
+        "data": {
+            "asset_files": ["data/ftse-updated/FTSE_100_20121121_20241231.csv"],
+            "date_range": {"start": "2012-11-21", "end": "2024-12-31"},
+            "assets": ["FTSE_100"]
+        },
+        "algorithm": {
+            "name": "sms_emoa",
+            "parameters": {
+                "population_size": 100,
+                "generations": 200,
+                "crossover_rate": 0.9,
+                "mutation_rate": 0.1
+            }
+        },
+        "learning": {
+            "enabled": True,
+            "use_tip": True,
+            "parameters": {
+                "window_size": 20,
+                "monte_carlo_samples": 500
+            }
+        },
+        "portfolio_selection": "hypervolume",
+        "evaluation_period": "full"
+    })
+
     return experiments
 
 def create_market_condition_experiments():

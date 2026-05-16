@@ -216,11 +216,25 @@ class ExperimentManager:
             else:
                 raise ValueError(f"Unknown algorithm: {algorithm_name}")
             
-            # Setup anticipatory learning if enabled
+            # Setup anticipatory learning if enabled. Per W1-2, an
+            # experiment may opt into the TIP-integrated path (paper Eq 13
+            # + thesis Eq 7.16 blend) by setting `learning.use_tip: true`
+            # alongside `learning.enabled: true`. The TIPIntegratedAnticipatory
+            # Learning constructor accepts ONLY `window_size` and
+            # `monte_carlo_samples`; experiment configs using `use_tip`
+            # must pass parameters compatible with that narrower surface.
             learning_config = experiment_config.get('learning', {})
             if learning_config.get('enabled', False):
-                from ..algorithms.anticipatory_learning import AnticipatoryLearning
-                learning = AnticipatoryLearning(**learning_config.get('parameters', {}))
+                if learning_config.get('use_tip', False):
+                    from ..algorithms.anticipatory_learning import (
+                        TIPIntegratedAnticipatoryLearning,
+                    )
+                    learning = TIPIntegratedAnticipatoryLearning(
+                        **learning_config.get('parameters', {})
+                    )
+                else:
+                    from ..algorithms.anticipatory_learning import AnticipatoryLearning
+                    learning = AnticipatoryLearning(**learning_config.get('parameters', {}))
                 algorithm.set_learning(learning)
             
             # Run algorithm
