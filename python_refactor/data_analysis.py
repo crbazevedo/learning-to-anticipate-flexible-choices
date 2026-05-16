@@ -8,13 +8,10 @@ downloading updated data.
 """
 
 import pandas as pd
-import numpy as np
 import os
 import glob
 from datetime import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import warnings
 warnings.filterwarnings('ignore')
 
