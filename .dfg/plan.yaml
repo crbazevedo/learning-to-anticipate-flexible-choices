@@ -173,7 +173,7 @@ waves:
       - id: W2-3
         slug: context-map-cleanup
         name: Remove dangling must_read reference to deleted repository_analysis.md
-        purpose: "Closes W1-5-CARRY-1 by removing the W1-5 entry from .dfg/context-map.yaml (W1-5 is COMPLETED; no future dispatch will need its must_read injection). Also removes the deleted-file reference."
+        purpose: "Remove the W1-5 entry from .dfg/context-map.yaml (W1-5 COMPLETED; dangling must_read to deleted repository_analysis.md). Closes W1-5-CARRY-1."
         files:
           - .dfg/context-map.yaml
         depends_on: []
@@ -186,7 +186,7 @@ waves:
       - id: W2-4
         slug: packaging-and-ruff-sweep
         name: pyproject.toml + uv.lock + ruff fix on 3 legacy files
-        purpose: "Add packaging substrate so the research repo has a real pip-installable layout. Run ruff fix on 3 legacy files at python_refactor/ root (11 F401 errors) to close the ruff pre-pr surface without touching files in W2-1 / W2-2 scope."
+        purpose: "Add pyproject.toml + ruff fix on 3 legacy files (11 F401 errors). Closes packaging gap; file-disjoint from W2-1/W2-2."
         files:
           - pyproject.toml
           - python_refactor/data_analysis.py

@@ -1,7 +1,7 @@
 {
   "active_wave": "W1",
   "events_source": ".dfg/events.jsonl",
-  "last_updated": "2026-05-16T23:40:28Z",
+  "last_updated": "2026-05-16T23:41:03Z",
   "schema_version": "2",
   "units": {
     "W1-1": {
