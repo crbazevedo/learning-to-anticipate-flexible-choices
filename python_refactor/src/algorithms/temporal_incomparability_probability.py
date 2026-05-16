@@ -24,15 +24,38 @@ class TemporalIncomparabilityCalculator:
     are mutually non-dominated, which is core to anticipatory learning rate calculation.
     """
     
-    def __init__(self, monte_carlo_samples: int = 1000):
+    def __init__(self, monte_carlo_samples: int = 1000,
+                 clamp_range: Optional[Tuple[float, float]] = (0.05, 0.95)):
         """
         Initialize TIP calculator.
-        
+
         Args:
             monte_carlo_samples: Number of Monte Carlo samples for probability estimation
+            clamp_range: Optional (min, max) tuple bounding the returned TIP.
+                Default `(0.05, 0.95)` preserves pre-W1-4 behaviour (and is
+                what every live caller — anticipatory_learning_obj_space,
+                MultiHorizonAnticipatoryLearning, TIPIntegratedAnticipatoryLearning
+                — implicitly relies on for stability). Pass `None` to
+                DISABLE the clamp entirely; this is the path that
+                equation-level regression tests (paper Eq 12) use so they
+                can observe TIP near 0 on disjoint Gaussians (the audit's
+                "hides degenerate dominance" concern). Live callers
+                should keep the default.
         """
         self.monte_carlo_samples = monte_carlo_samples
+        self.clamp_range = clamp_range
         self.historical_tips = []
+
+    def _clamp_tip(self, tip: float) -> float:
+        """Apply the constructor-set TIP bound (or no-op when disabled).
+
+        W1-4: extracted from 3 duplicated `max(0.05, min(0.95, tip))`
+        sites in the calculation methods. Single point of truth, opt-out
+        controlled by `self.clamp_range`.
+        """
+        if self.clamp_range is None:
+            return tip
+        return max(self.clamp_range[0], min(self.clamp_range[1], tip))
         
     def calculate_tip(self, current_solution, predicted_solution, 
                      prediction_uncertainty: Optional[float] = None) -> float:
@@ -116,7 +139,7 @@ class TemporalIncomparabilityCalculator:
             logger.warning("Covariance matrix not positive definite, using fallback TIP calculation")
             tip = self._calculate_tip_simple(current_roi, current_risk, predicted_roi, predicted_risk)
         
-        return max(0.05, min(0.95, tip))
+        return self._clamp_tip(tip)
     
     def _calculate_tip_monte_carlo(self, current_roi: float, current_risk: float,
                                  predicted_roi: float, predicted_risk: float,
@@ -158,7 +181,7 @@ class TemporalIncomparabilityCalculator:
                 mutual_non_dominance += 1
         
         tip = mutual_non_dominance / self.monte_carlo_samples
-        return max(0.05, min(0.95, tip))
+        return self._clamp_tip(tip)
     
     def _calculate_tip_simple(self, current_roi: float, current_risk: float,
                             predicted_roi: float, predicted_risk: float) -> float:
@@ -190,7 +213,7 @@ class TemporalIncomparabilityCalculator:
             # One dominates the other, so TIP is lower
             tip = 0.1
         
-        return max(0.05, min(0.95, tip))
+        return self._clamp_tip(tip)
     
     def binary_entropy(self, p: float) -> float:
         """

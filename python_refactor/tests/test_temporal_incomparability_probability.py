@@ -6,13 +6,14 @@ Tests the implementation of Definition 6.1 and related functionality.
 
 import unittest
 import numpy as np
-import sys
-import os
+from types import SimpleNamespace
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from algorithms.temporal_incomparability_probability import TemporalIncomparabilityCalculator
+# W1-4 import-style fix (follows W1-2's pattern in test_tip_integration.py
+# and W1-3's pattern in test_eq14_integration.py): use the standard
+# `from src.algorithms.X` style so pytest's rootdir collection works
+# without the legacy sys.path.insert hack. This closes 1 more of the
+# W1-3-CARRY-1 collection-error count.
+from src.algorithms.temporal_incomparability_probability import TemporalIncomparabilityCalculator
 
 
 class TestTemporalIncomparabilityProbability(unittest.TestCase):
@@ -260,10 +261,201 @@ class TestTemporalIncomparabilityProbability(unittest.TestCase):
         extreme_predicted = self._create_mock_solution(1.0, 1.0)
         
         tip = self.tip_calculator.calculate_tip(extreme_current, extreme_predicted)
-        
+
         # Should be constrained between 0.05 and 0.95
         self.assertGreaterEqual(tip, 0.05)
         self.assertLessEqual(tip, 0.95)
+
+
+def _make_kalman_state(roi_var: float, risk_var: float, cov: float = 0.0):
+    """Build a minimal kalman_state stand-in with a 4x4 P matrix whose
+    top-left 2x2 block is the (ROI, risk) covariance.
+
+    TIP._calculate_tip_with_covariance reads P[:2, :2] only.
+    """
+    P = np.zeros((4, 4))
+    P[0, 0] = roi_var
+    P[1, 1] = risk_var
+    P[0, 1] = cov
+    P[1, 0] = cov
+    return SimpleNamespace(P=P)
+
+
+def _make_mock_solution(roi: float, risk: float,
+                        roi_var: float = 1e-4, risk_var: float = 1e-4):
+    """Build a minimal Solution-shaped mock with .P.ROI, .P.risk,
+    .P.kalman_state.P[:2, :2] — the only attributes TIP reads.
+    """
+    portfolio = SimpleNamespace(
+        ROI=roi,
+        risk=risk,
+        kalman_state=_make_kalman_state(roi_var, risk_var),
+    )
+    return SimpleNamespace(P=portfolio)
+
+
+class TestPaperEq12TIPKnownAnalytical(unittest.TestCase):
+    """W1-4 regression tests for paper Eq (12) — TIP definition.
+
+    Pin the calculator against KNOWN-ANALYTICAL Gaussian cases (not
+    bounds-only assertions) so a future "optimization" can't silently
+    break the equation while leaving bounds intact. The audit's
+    "tests assert bounds, not equations" finding for TIP closes here.
+
+    Paper canon:
+        p_{t,t+h} = Pr[ẑ_t, ẑ_{t+h}|ẑ_t are mutually incomparable]   (12)
+
+    Two known-analytical bookend cases:
+      * Disjoint Gaussians with σ ≪ |μ_1 − μ_2| → mutual non-dominance
+        is rare → TIP near 0.
+      * Identical Gaussians → mutual non-dominance is the expected
+        outcome for half the draws → TIP near 0.5.
+
+    Both tests use `clamp_range=None` so the (default) [0.05, 0.95]
+    clamp doesn't hide the near-0 case.
+    """
+
+    def test_tip_near_zero_for_disjoint_gaussians(self):
+        """Two Gaussians far apart in both objectives → TIP should be
+        near 0 (current strictly dominates predicted; very few MC
+        samples produce mutual non-dominance).
+        """
+        np.random.seed(42)  # bound MC variance
+        calc = TemporalIncomparabilityCalculator(
+            monte_carlo_samples=2000,
+            clamp_range=None,  # disable W1-4 clamp to observe analytical truth
+        )
+
+        # current: high ROI (1.0), low risk (0.0) — clearly dominant
+        # predicted: low ROI (0.0), high risk (1.0) — clearly dominated
+        # With σ = 0.05 in each, the two distributions are >> 10σ apart
+        # → mutual non-dominance is rare → TIP near 0.
+        current = _make_mock_solution(roi=1.0, risk=0.0,
+                                       roi_var=0.0025, risk_var=0.0025)
+        predicted = _make_mock_solution(roi=0.0, risk=1.0,
+                                         roi_var=0.0025, risk_var=0.0025)
+
+        tip = calc.calculate_tip(current, predicted)
+        self.assertLess(tip, 0.1,
+                        f"Disjoint Gaussians should give TIP near 0, got {tip:.4f}")
+
+    def test_tip_near_half_for_identical_gaussians(self):
+        """Two IDENTICAL Gaussians → for any sampled pair, on average
+        about half the time one is mutually non-dominated with the
+        other (the other half splits between current-dominates and
+        predicted-dominates). Expected TIP near 0.5.
+
+        Uses a loose tolerance (0.3 < TIP < 0.7) because MC variance
+        is real even at 2000 samples; the point is to pin the
+        equation's behaviour against analytical expectation, not to
+        prove the calculator is high-precision.
+        """
+        np.random.seed(42)
+        calc = TemporalIncomparabilityCalculator(
+            monte_carlo_samples=2000,
+            clamp_range=None,
+        )
+
+        current = _make_mock_solution(roi=0.5, risk=0.5,
+                                       roi_var=0.01, risk_var=0.01)
+        predicted = _make_mock_solution(roi=0.5, risk=0.5,
+                                         roi_var=0.01, risk_var=0.01)
+
+        tip = calc.calculate_tip(current, predicted)
+        self.assertGreater(tip, 0.3,
+                           f"Identical Gaussians should give TIP near 0.5, got {tip:.4f}")
+        self.assertLess(tip, 0.7,
+                        f"Identical Gaussians should give TIP near 0.5, got {tip:.4f}")
+
+    def test_clamp_range_default_preserves_pre_w1_4_behaviour(self):
+        """Constructor opt-out: the default clamp_range=(0.05, 0.95)
+        still bounds TIP (W1-4 doesn't change live-caller behaviour).
+        """
+        np.random.seed(42)
+        calc_default = TemporalIncomparabilityCalculator(monte_carlo_samples=500)
+        # Disjoint case → without clamp would give TIP near 0; with
+        # default clamp should give >= 0.05.
+        current = _make_mock_solution(roi=1.0, risk=0.0,
+                                       roi_var=0.0025, risk_var=0.0025)
+        predicted = _make_mock_solution(roi=0.0, risk=1.0,
+                                         roi_var=0.0025, risk_var=0.0025)
+        tip = calc_default.calculate_tip(current, predicted)
+        self.assertGreaterEqual(tip, 0.05)
+        self.assertLessEqual(tip, 0.95)
+
+
+class TestPaperEq13LambdaBinaryEntropy(unittest.TestCase):
+    """W1-4 regression tests for paper Eq (13).
+
+    Paper canon:
+        λ^(H)_{t+h} = (1/(H-1)) [1 - H(p_{t,t+h})]              (13)
+
+    where H is the binary entropy function:
+        H(p) = -p log_2(p) - (1-p) log_2(1-p)
+
+    Verified table:
+        H(0)    = 0    (degenerate)
+        H(0.25) ≈ 0.811
+        H(0.5)  = 1    (max uncertainty)
+        H(0.75) ≈ 0.811
+        H(1)    = 0    (degenerate)
+
+    These give λ^(H) (for H=2 horizons, 1/(H-1) = 1):
+        λ(tip=0)    = 1 - 0 = 1.0
+        λ(tip=0.5)  = 1 - 1 = 0.0
+        λ(tip=1)    = 1 - 0 = 1.0
+
+    Pinned here against known-analytical truth, not bounds.
+    """
+
+    def setUp(self):
+        # clamp doesn't matter — these test the entropy + rate fns directly
+        self.calc = TemporalIncomparabilityCalculator(monte_carlo_samples=10)
+
+    def test_binary_entropy_table(self):
+        """Pin H(p) at known analytical points."""
+        self.assertAlmostEqual(self.calc.binary_entropy(0.0), 0.0, places=10)
+        self.assertAlmostEqual(self.calc.binary_entropy(1.0), 0.0, places=10)
+        self.assertAlmostEqual(self.calc.binary_entropy(0.5), 1.0, places=10)
+        # H(0.25) = -0.25 log2(0.25) - 0.75 log2(0.75)
+        #        = -0.25 * (-2) - 0.75 * log2(0.75)
+        #        = 0.5 + 0.75 * 0.4150375 = 0.5 + 0.3113 = 0.8113
+        self.assertAlmostEqual(
+            self.calc.binary_entropy(0.25), 0.8112781244591328, places=8,
+        )
+
+    def test_lambda_eq13_for_h_equals_2(self):
+        """For H=2 (one-step-ahead), (1/(H-1)) = 1, so
+        λ(tip) = 1 - H(tip).
+        """
+        # tip=0 → H(0)=0 → λ = 1.0
+        self.assertAlmostEqual(
+            self.calc.calculate_anticipatory_learning_rate_tip(0.0, 2), 1.0, places=10,
+        )
+        # tip=1 → H(1)=0 → λ = 1.0
+        self.assertAlmostEqual(
+            self.calc.calculate_anticipatory_learning_rate_tip(1.0, 2), 1.0, places=10,
+        )
+        # tip=0.5 → H(0.5)=1 → λ = 0.0
+        self.assertAlmostEqual(
+            self.calc.calculate_anticipatory_learning_rate_tip(0.5, 2), 0.0, places=10,
+        )
+
+    def test_lambda_eq13_for_h_equals_3_normalisation(self):
+        """For H=3, (1/(H-1)) = 0.5 — verify normalisation."""
+        # tip=0 → H(0)=0 → λ = 0.5 * 1 = 0.5
+        self.assertAlmostEqual(
+            self.calc.calculate_anticipatory_learning_rate_tip(0.0, 3), 0.5, places=10,
+        )
+        # tip=0.5 → H(0.5)=1 → λ = 0.5 * 0 = 0.0
+        self.assertAlmostEqual(
+            self.calc.calculate_anticipatory_learning_rate_tip(0.5, 3), 0.0, places=10,
+        )
+
+    def test_lambda_eq13_returns_zero_for_horizon_le_1(self):
+        """Edge case: H ≤ 1 has no future horizons, λ must be 0."""
+        self.assertEqual(self.calc.calculate_anticipatory_learning_rate_tip(0.3, 1), 0.0)
+        self.assertEqual(self.calc.calculate_anticipatory_learning_rate_tip(0.3, 0), 0.0)
 
 
 if __name__ == '__main__':
