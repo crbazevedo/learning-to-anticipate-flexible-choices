@@ -86,6 +86,7 @@ waves:
           - python_refactor/src/algorithms/belief_coefficient.py
           - python_refactor/src/algorithms/sliding_window_dirichlet.py
           - python_refactor/src/algorithms/enhanced_n_step_prediction.py
+          - python_refactor/src/experiments/experiment_manager.py  # added 2026-05-16 via replan proposal unit-W1-3-20260516T225709Z (resize) — needed for the "wire MultiHorizonAnticipatoryLearning" acceptance criterion which the original 5-file scope omitted
           - python_refactor/tests/test_eq14_integration.py
         depends_on:
           - W1-2
