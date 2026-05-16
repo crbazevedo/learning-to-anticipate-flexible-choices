@@ -216,16 +216,29 @@ class ExperimentManager:
             else:
                 raise ValueError(f"Unknown algorithm: {algorithm_name}")
             
-            # Setup anticipatory learning if enabled. Per W1-2, an
-            # experiment may opt into the TIP-integrated path (paper Eq 13
-            # + thesis Eq 7.16 blend) by setting `learning.use_tip: true`
-            # alongside `learning.enabled: true`. The TIPIntegratedAnticipatory
-            # Learning constructor accepts ONLY `window_size` and
-            # `monte_carlo_samples`; experiment configs using `use_tip`
-            # must pass parameters compatible with that narrower surface.
+            # Setup anticipatory learning if enabled. Three opt-in tiers
+            # ordered from strongest superset to base:
+            #   1. learning.use_multi_horizon (W1-3): MultiHorizonAnticipatoryLearning
+            #      — multi-horizon convex combo per paper Eq (14); also
+            #      has TIP built-in (composes with W1-2's obj_space
+            #      threading). Constructor: max_horizon + monte_carlo_samples.
+            #   2. learning.use_tip (W1-2): TIPIntegratedAnticipatoryLearning
+            #      — TIP arm via paper Eq (13) + thesis Eq 7.16 blend.
+            #      Constructor: window_size + monte_carlo_samples.
+            #   3. (default): base AnticipatoryLearning — KF-residuals
+            #      only (the pre-W1-2 default for every live run).
+            # Higher-tier classes inherit from AnticipatoryLearning so
+            # set_learning(learning) accepts any of them.
             learning_config = experiment_config.get('learning', {})
             if learning_config.get('enabled', False):
-                if learning_config.get('use_tip', False):
+                if learning_config.get('use_multi_horizon', False):
+                    from ..algorithms.multi_horizon_anticipatory import (
+                        MultiHorizonAnticipatoryLearning,
+                    )
+                    learning = MultiHorizonAnticipatoryLearning(
+                        **learning_config.get('parameters', {})
+                    )
+                elif learning_config.get('use_tip', False):
                     from ..algorithms.anticipatory_learning import (
                         TIPIntegratedAnticipatoryLearning,
                     )

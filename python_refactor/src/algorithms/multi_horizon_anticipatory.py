@@ -11,11 +11,15 @@ from typing import List, Dict, Any, Optional, Tuple
 import logging
 from dataclasses import dataclass
 
-from algorithms.solution import Solution
-from algorithms.temporal_incomparability_probability import TemporalIncomparabilityCalculator
-from algorithms.n_step_prediction import NStepPredictor
-from algorithms.sliding_window_dirichlet import SlidingWindowDirichlet
-from algorithms.kalman_filter import KalmanParams, kalman_prediction, kalman_update
+# W1-3: relative imports (was `from algorithms.X import Y` which only
+# worked under a `sys.path.insert(..., src)` hack and was one of the
+# 16 pre-W1-3 pytest collection errors).
+from .solution import Solution
+from .temporal_incomparability_probability import TemporalIncomparabilityCalculator
+from .n_step_prediction import NStepPredictor
+from .sliding_window_dirichlet import SlidingWindowDirichlet
+from .kalman_filter import KalmanParams, kalman_prediction, kalman_update
+from .anticipatory_learning import TIPIntegratedAnticipatoryLearning
 
 logger = logging.getLogger(__name__)
 
@@ -32,35 +36,74 @@ class MultiHorizonPrediction:
     confidence: float
 
 
-class MultiHorizonAnticipatoryLearning:
+class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
     """
     Multi-horizon anticipatory learning implementation.
-    
-    This class implements the complete multi-horizon anticipatory learning
-    framework as specified in the thesis, including Equation 6.10 and
-    support for multiple prediction horizons.
+
+    Implements paper Eq (14) (= thesis Eq 6.10) — the multi-horizon
+    anticipatory learning convex combination over the predictive
+    distributions ẑ_{t+h} | ẑ_t for h=1,...,H-1.
+
+    Per W1-3 (2026-05-16) this class inherits from
+    `TIPIntegratedAnticipatoryLearning` (which itself inherits from
+    `AnticipatoryLearning`). Why TIPIntegrated and not the base:
+    almost all of the actual learning-loop machinery
+    (`learn_population`, `learn_single_solution`, `anticipatory_learning_obj_space`,
+    `anticipatory_learning_dec_space`) lives on the TIPIntegrated
+    subclass, not on the base. Inheriting from TIPIntegrated makes
+    MultiHorizonAnticipatoryLearning a drop-in `set_learning(...)`
+    target for SMS-EMOA / NSGA-II via the
+    `ExperimentManager.learning.use_multi_horizon: true` flag.
+
+    The multi-horizon-specific machinery (`apply_anticipatory_learning_rule`,
+    `calculate_multi_horizon_lambda_rates`, `perform_multi_horizon_prediction`)
+    remains this class's own surface; the inherited learn_* methods use the
+    parent's single-horizon path until a deeper integration unit
+    rewires them to drive the multi-horizon convex combination
+    directly inside the run loop.
     """
-    
+
     def __init__(self, max_horizon: int = 3, monte_carlo_samples: int = 1000):
         """
         Initialize multi-horizon anticipatory learning.
-        
+
         Args:
             max_horizon: Maximum prediction horizon (H parameter)
             monte_carlo_samples: Number of Monte Carlo samples for TIP calculation
         """
+        # Initialise the inherited TIPIntegratedAnticipatoryLearning surface
+        # (which itself initialises AnticipatoryLearning). That gives this
+        # instance learn_population / learn_single_solution /
+        # anticipatory_learning_obj_space / kalman_filter_functions /
+        # correspondence_mapping / tip_calculator — all for free.
+        # IMPORTANT: keyword args only — the pre-W1-2 super-bug pattern
+        # silently maps `super().__init__(N)` to the parent's first positional arg.
+        super().__init__(window_size=20, monte_carlo_samples=monte_carlo_samples)
+
         self.max_horizon = max_horizon
+        # Override the parent's prediction_horizon to match max_horizon
+        # so multi-horizon callers read the right value.
+        self.prediction_horizon = max_horizon
+        # `monte_carlo_samples` is also stored by the parent's
+        # tip_calculator; we keep a direct reference for backward
+        # compatibility with calls inside this class.
         self.monte_carlo_samples = monte_carlo_samples
-        
-        # Initialize components
-        self.tip_calculator = TemporalIncomparabilityCalculator(monte_carlo_samples)
+
+        # Initialize multi-horizon-specific components. tip_calculator is
+        # already created by the parent (TIPIntegratedAnticipatoryLearning.__init__),
+        # so we don't re-create it here.
         self.n_step_predictor = NStepPredictor(max_horizon)
-        self.dirichlet_model = SlidingWindowDirichlet(window_size=20)
-        
+        # W1-3: SlidingWindowDirichlet expects `window_size_K`, not
+        # `window_size`. Pre-W1-3 the kwarg was wrong, but the class was
+        # dead code (never instantiated from any live path), so the bug
+        # never surfaced. Surfaced by test_eq14_integration constructing
+        # the class for the first time.
+        self.dirichlet_model = SlidingWindowDirichlet(window_size_K=20)
+
         # Storage for predictions and learning rates
         self.prediction_history: List[Dict[str, Any]] = []
         self.lambda_rates_history: List[Dict[str, float]] = []
-        
+
         logger.info(f"Initialized MultiHorizonAnticipatoryLearning with max_horizon={max_horizon}")
     
     def apply_anticipatory_learning_rule(self, current_state: np.ndarray, 
