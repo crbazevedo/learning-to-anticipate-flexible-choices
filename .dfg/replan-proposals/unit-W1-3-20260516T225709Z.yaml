@@ -1,0 +1,24 @@
+proposal_id: unit-W1-3-20260516T225709Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-16T22:57:09Z'
+scope:
+  level: unit
+  cli_level: unit
+  target: W1-3
+  action: resize
+trigger: operator-intervention
+rationale: "W1-3's plan.yaml entry (authored during the 2026-05-16 bootstrap) lists\
+  \ 5 files in output_contract but its acceptance_criteria + purpose explicitly require\
+  \ wiring MultiHorizonAnticipatoryLearning into ExperimentManager \u2014 which requires\
+  \ touching python_refactor/src/experiments/experiment_manager.py. The 5-file list\
+  \ is a planning inconsistency I am closing now via replan-resize. The expanded files\
+  \ list adds experiment_manager.py (1 file). No new acceptance criteria; no schedule\
+  \ change; no dependency change. Resize is the smallest available action \u2014 split\
+  \ would create an unnecessary 2-PR cascade for what is a single coherent wiring\
+  \ unit."
+evidence: []
+accepted_at: '2026-05-16T22:58:09Z'
+operator_note: 'Approved: scope-resize to add experiment_manager.py per directive
+  #4 (plan.yaml mutation paired with accept in same diff). Authored on chore/replan-W1-3-resize
+  branch to keep feat/w1-3''s P3 contract-alone discipline clean.'
