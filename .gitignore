@@ -214,11 +214,14 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-# dfg-harness local symlink (per ADR-033 §Stage 1; remove once Stage 2 ships)
+# dfg-harness local symlink (per ADR-033 §Stage 1; remove once Stage 2 ships).
+# Both `kit/` (the dir form) and `kit` (the symlink form) are ignored.
 kit/
+/kit
 
-# uv-managed virtual environments
+# uv-managed virtual environments + auto-generated lock (W2-4 deferred locked installs)
 .venv/
 .venv-*/
+uv.lock
 __pycache__/
 .pytest_cache/
