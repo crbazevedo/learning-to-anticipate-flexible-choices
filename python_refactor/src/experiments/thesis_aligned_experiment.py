@@ -11,10 +11,15 @@ from typing import Dict, Any, List, Tuple
 import logging
 from datetime import datetime
 
-from config.experiment_config import get_experiment_config, ExperimentConfig
-from algorithms.sms_emoa import SMSEMOA
-from algorithms.anticipatory_learning import TIPIntegratedAnticipatoryLearning
-from algorithms.correspondence_mapping import CorrespondenceMapping
+# W2-2: relative imports (was `from algorithms.X import Y` which only
+# worked under a `sys.path.insert(..., src)` hack and was one of the
+# pre-W1-3 collection errors). thesis_aligned_experiment lives in
+# src/experiments/, so the parent-package relative `..algorithms` /
+# `..config` resolves correctly when imported as part of `src`.
+from ..config.experiment_config import get_experiment_config, ExperimentConfig
+from ..algorithms.sms_emoa import SMSEMOA
+from ..algorithms.anticipatory_learning import TIPIntegratedAnticipatoryLearning
+from ..algorithms.correspondence_mapping import CorrespondenceMapping
 
 logger = logging.getLogger(__name__)
 

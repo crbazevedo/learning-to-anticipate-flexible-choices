@@ -6,13 +6,9 @@ Tests the implementation of Equations 6.24-6.27 and related functionality.
 
 import unittest
 import numpy as np
-import sys
-import os
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from algorithms.sliding_window_dirichlet import SlidingWindowDirichlet
+# W2-2 import-style fix: use canonical `from src.algorithms.X` (W1-2/W1-3/W1-4 pattern).
+from src.algorithms.sliding_window_dirichlet import SlidingWindowDirichlet
 
 
 class TestSlidingWindowDirichlet(unittest.TestCase):
