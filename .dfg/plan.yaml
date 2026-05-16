@@ -129,3 +129,86 @@ waves:
         - "test suite passes: at least one equation-level (not bounds-only) test exists for each of paper Eqs (11), (12), (13), (14)"
         - "Retro for each unit at .dfg/retrospectives/W1/W1-N.md with ADR-004 YAML frontmatter; honest scars named where present"
       checkpoint_file: .dfg/checkpoints/W1-gate.md
+
+  - id: W2
+    name: W1 cleanup sweep
+    state: PLANNED
+    # Added 2026-05-16 via replan proposal wave-W2-20260516T233801Z (action=add).
+    # Closes 5 W1 carries + 1 packaging gap in a single 4-unit parallel group.
+    # All units file-disjoint → max parallelism encoded.
+    units:
+      - id: W2-1
+        slug: belief-coefficient-formula-fix
+        name: Fix inverted _calculate_confidence formula; un-skip test
+        purpose: "1-line fix at belief_coefficient.py:142 (formula inverted vs docstring) + un-skip test_calculate_confidence (W1-4-CARRY-1)."
+        files:
+          - python_refactor/src/algorithms/belief_coefficient.py
+          - python_refactor/tests/test_belief_coefficient.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "belief_coefficient.py:142 reads `tip_confidence = abs(tip - 0.5) * 2` (removes the inverting `1.0 -` prefix per docstring intent)"
+          - "test_calculate_confidence in test_belief_coefficient.py is un-skipped and PASSES"
+          - "All 12 existing belief tests + 2 W1-4 tests continue to pass (90 → 91 PASS / 0 SKIP)"
+
+      - id: W2-2
+        slug: import-style-housekeeping
+        name: Test-file + thesis_aligned_experiment import-style sweep
+        purpose: "Fix 5 remaining test files + 1 source file using broken `from algorithms.X` style (W1-3-CARRY-1/2). Each gets `from src.algorithms.X` (W1-2/W1-3/W1-4 pattern)."
+        files:
+          - python_refactor/tests/test_multi_horizon_anticipatory.py
+          - python_refactor/tests/test_enhanced_n_step_prediction.py
+          - python_refactor/tests/test_correspondence_integration.py
+          - python_refactor/tests/test_sliding_window_dirichlet.py
+          - python_refactor/tests/test_correspondence_mapping.py
+          - python_refactor/src/experiments/thesis_aligned_experiment.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "All 5 test files use `from src.algorithms.X` (or equivalent rootdir-aware import); zero `from algorithms.X` lines remain in any tests/ file"
+          - "thesis_aligned_experiment.py uses `from ..algorithms.X` (relative within src/experiments/)"
+          - "grep `from algorithms\\.` python_refactor/ --include='*.py' returns 0 hits after the unit"
+          - "Pre-existing tests in those files continue to collect cleanly in .venv-w1"
+
+      - id: W2-3
+        slug: context-map-cleanup
+        name: Remove dangling must_read reference to deleted repository_analysis.md
+        purpose: "Remove the W1-5 entry from .dfg/context-map.yaml (W1-5 COMPLETED; dangling must_read to deleted repository_analysis.md). Closes W1-5-CARRY-1."
+        files:
+          - .dfg/context-map.yaml
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - ".dfg/context-map.yaml W1-5 entry is removed (W1-5 is COMPLETED; per-unit must_read no longer needed)"
+          - "No remaining reference to `repository_analysis.md` in .dfg/context-map.yaml"
+          - "dfg validate continues to pass"
+
+      - id: W2-4
+        slug: packaging-and-ruff-sweep
+        name: pyproject.toml + uv.lock + ruff fix on 3 legacy files
+        purpose: "Add pyproject.toml + ruff fix on 3 legacy files (11 F401 errors). Closes packaging gap; file-disjoint from W2-1/W2-2."
+        files:
+          - pyproject.toml
+          - python_refactor/data_analysis.py
+          - python_refactor/ftse_data_downloader.py
+          - python_refactor/ftse_data_downloader_v2.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "pyproject.toml at repo root declares `learning-to-anticipate-flexible-choices` package with the runtime deps from python_refactor/requirements.txt (numpy, pandas, scipy, matplotlib, scikit-learn) + dev deps (pytest, ruff)"
+          - "Ruff F401 errors closed in the 3 legacy files (`ruff check --select F401 python_refactor/data_analysis.py python_refactor/ftse_data_downloader*.py` returns 0 errors)"
+          - "uv.lock NOT added in this unit (locked installs are a separate concern; pyproject alone is enough for ADR-033 §Stage 2 wheel-shipping ergonomics)"
+          - "Substrate gates green: dfg validate / make ci"
+
+    parallel_groups:
+      - [W2-1, W2-2, W2-3, W2-4]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 4 units MERGED to master (squash-merge) with green pre-pr battery"
+        - "Pre-pr collection-error count drops materially in .venv-w1 (target: 0 collection errors from `from algorithms.X` family after W2-2)"
+        - "Pre-pr ruff F401 count drops by 11 in legacy files after W2-4"
+        - "W1 wave-close ceremony fires CLEAN after W2 merges (no open carries from W1-3/W1-4/W1-5 listed in W1-gate verdict)"
+        - "Retro for each unit at .dfg/retrospectives/W2/W2-N.md with ADR-004 YAML frontmatter"
+      checkpoint_file: .dfg/checkpoints/W2-gate.md
