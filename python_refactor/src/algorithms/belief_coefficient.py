@@ -138,8 +138,12 @@ class BeliefCoefficientCalculator:
         # 1. TIP is closer to 0 or 1 (less uncertainty)
         # 2. Entropy is lower (less uncertainty)
         
-        # TIP-based confidence: higher when TIP is closer to 0 or 1
-        tip_confidence = 1.0 - abs(tip - 0.5) * 2
+        # TIP-based confidence: higher when TIP is closer to 0 or 1.
+        # W2-1 fix: was `1.0 - abs(tip - 0.5) * 2` which is INVERTED
+        # vs the docstring (returned 1.0 at tip=0.5, 0.0 at tip=0/1 —
+        # the opposite of the intent). Surfaced by test_calculate_confidence
+        # once W1-4 fixed the test file's imports. Closes W1-4-CARRY-1.
+        tip_confidence = abs(tip - 0.5) * 2
         
         # Entropy-based confidence: higher when entropy is lower
         entropy_confidence = 1.0 - entropy
