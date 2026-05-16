@@ -7,13 +7,9 @@ Equation 6.10 and multi-horizon prediction capabilities.
 
 import unittest
 import numpy as np
-import sys
-import os
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from algorithms.multi_horizon_anticipatory import (
+# W2-2 import-style fix: use canonical `from src.algorithms.X` (W1-2/W1-3/W1-4 pattern).
+from src.algorithms.multi_horizon_anticipatory import (
     MultiHorizonAnticipatoryLearning, MultiHorizonPrediction,
     create_multi_horizon_anticipatory_learning
 )
