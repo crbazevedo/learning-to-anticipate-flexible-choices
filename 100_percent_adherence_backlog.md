@@ -1,5 +1,15 @@
 # Backlog Técnico: 100% Aderência à Tese
 
+> **Canon note (2026-05-16, W1-5):** This file is written in Portuguese
+> as a working backlog. The canonical algorithmic spec for the open-
+> source release is the IEEE Transactions on Cybernetics paper
+> (`docs/paper.pdf`; Azevedo & Von Zuben, 2015), which uses its own
+> equation numbering. Every body citation of a thesis equation has been
+> annotated inline with its paper-equation counterpart. For the full
+> reconciliation table see §0 of `thesis_codebase_analysis.md`. Full
+> English translation is queued as a separate later unit; this unit
+> only adds paper-canonical anchoring.
+
 ## Status Atual: 85% → Meta: 100%
 
 ### Resumo Executivo
@@ -30,24 +40,24 @@ class SlidingWindowDirichlet:
     
     def update_concentration(self, t: int, u_t_minus_1: np.ndarray) -> np.ndarray:
         """
-        Implement Equations 6.24-6.27 for concentration parameter updates
+        Implement Equations 6.24-6.27 / paper Eqs (17)-(18) for concentration parameter updates
         
-        Equation 6.24: α_t^(i) | u_{t-1}^(i) = α_{t-1}^(i) | u_{t-2}^(i) + s u_{t-1}^(i) if t < K
-        Equation 6.25: α_t^(i) | u_{t-1}^(i) = α_{t-1}^(i) | u_{t-2}^(i) + s u_{t-1}^(i) - α_0^(i) if t = K
-        Equation 6.26: α_t^(i) | u_{t-1}^(i) = α_{t-1}^(i) | u_{t-2}^(i) + s u_{t-1}^(i) - s u_{t-K-1}^(i) if t > K
+        Equation 6.24 / paper Eq (17), case t<K: α_t^(i) | u_{t-1}^(i) = α_{t-1}^(i) | u_{t-2}^(i) + s u_{t-1}^(i) if t < K
+        Equation 6.25 / paper Eq (17), case t=K: α_t^(i) | u_{t-1}^(i) = α_{t-1}^(i) | u_{t-2}^(i) + s u_{t-1}^(i) - α_0^(i) if t = K
+        Equation 6.26 / paper Eq (17), case t>K: α_t^(i) | u_{t-1}^(i) = α_{t-1}^(i) | u_{t-2}^(i) + s u_{t-1}^(i) - s u_{t-K-1}^(i) if t > K
         """
         if t == 0:
             # Initialize with even-handed concentration
             alpha_t = self.s * np.ones_like(u_t_minus_1) / len(u_t_minus_1)
             self.alpha_0 = alpha_t.copy()
         elif t < self.K:
-            # Equation 6.24: Accumulating observations
+            # Equation 6.24 / paper Eq (17), case t<K: Accumulating observations
             alpha_t = self.alpha_history[-1] + self.s * u_t_minus_1
         elif t == self.K:
-            # Equation 6.25: First time window is full
+            # Equation 6.25 / paper Eq (17), case t=K: First time window is full
             alpha_t = self.alpha_history[-1] + self.s * u_t_minus_1 - self.alpha_0
         else:
-            # Equation 6.26: Sliding window
+            # Equation 6.26 / paper Eq (17), case t>K: Sliding window
             alpha_t = (self.alpha_history[-1] + self.s * u_t_minus_1 - 
                       self.s * self.alpha_history[-(self.K+1)])
         
@@ -65,7 +75,7 @@ class SlidingWindowDirichlet:
 ```python
 def calculate_velocity(self, t: int) -> np.ndarray:
     """
-    Implement Equation 6.28: Velocity calculation
+    Implement Equation 6.28 / paper Eq (19): Velocity calculation
     
     ẋ_t^(i) = s u_{t-1}^(i) - α_{t-K}^(i) | u_{t-K-1}^(i)
     """
@@ -128,7 +138,7 @@ class AnticipatoryLearning:
     
     def calculate_anticipatory_learning_rate_tip(self, tip: float, horizon: int) -> float:
         """
-        Calculate anticipatory learning rate using TIP (Equation 6.6)
+        Calculate anticipatory learning rate using TIP (Equation 6.6 / paper Eq (13))
         λ_{t+h} = (1/(H-1)) * [1 - H(p_{t,t+h})]
         """
         entropy = self._binary_entropy(tip)
@@ -138,7 +148,7 @@ class AnticipatoryLearning:
 **Critérios de Aceitação**:
 - [ ] Integrar TIP calculation no `AnticipatoryLearning` class
 - [ ] Implementar binary entropy function
-- [ ] Implementar Equation 6.6 para learning rate
+- [ ] Implementar Equation 6.6 / paper Eq (13) para learning rate
 - [ ] Usar distribuições Gaussianas marginais corretas
 - [ ] Testes unitários para TIP calculation
 
@@ -237,7 +247,7 @@ class ThesisParameters:
     
     # Anticipatory Learning
     PREDICTION_HORIZON = 2  # H parameter
-    LEARNING_RATE_COMBINATION = 0.5  # Weight for Equation 7.16
+    LEARNING_RATE_COMBINATION = 0.5  # Weight for Equation 7.16 (thesis-only extension; not in IEEE paper)
 ```
 
 **Critérios de Aceitação**:
@@ -264,7 +274,7 @@ class MultiHorizonAnticipatoryLearning:
                                        predicted_states: List[np.ndarray], 
                                        lambda_rates: List[float]) -> np.ndarray:
         """
-        Implement complete Equation 6.10:
+        Implement complete Equation 6.10 / paper Eq (14):
         ẑ_t | z_{t+1:t+H-1} = (1 - Σ_{h=1}^{H-1} λ_{t+h}) z_t + Σ_{h=1}^{H-1} λ_{t+h} ẑ_{t+h} | z_t
         """
         lambda_sum = sum(lambda_rates)
@@ -283,7 +293,7 @@ class MultiHorizonAnticipatoryLearning:
         """
         Calculate λ_{t+h} rates for multiple horizons
         
-        Based on Equation 6.6: λ_{t+h} = (1/(H-1)) [1 - H(p_{t,t+h})]
+        Based on Equation 6.6 / paper Eq (13): λ_{t+h} = (1/(H-1)) [1 - H(p_{t,t+h})]
         """
         lambda_rates = []
         
@@ -322,7 +332,7 @@ class BeliefCoefficientCalculator:
     def calculate_belief_coefficient(self, solution: Solution, 
                                    predicted_solution: Solution) -> float:
         """
-        Implement Equation 6.30: v_{t+1} = 1 - (1/2) H(p_{t-1,t})
+        Implement Equation 6.30 / paper Eq (20): v_{t+1} = 1 - (1/2) H(p_{t-1,t})
         
         Where H(p_{t-1,t}) is binary entropy of TIP
         """
@@ -489,21 +499,21 @@ class DirichletMAPTracking:
         """
         # Historical DD MAP mean tracking
         for k in range(self.K, 0, -1):
-            # Estimate belief coefficient v_{t-k} using Eq. (6.30)
+            # Estimate belief coefficient v_{t-k} using Eq. (6.30) / paper Eq (20)
             v_t_minus_k = self._estimate_belief_coefficient(k)
             
-            # Predict m̂_{u_{t-k}} using Eq. (6.31)
+            # Predict m̂_{u_{t-k}} using Eq. (6.31) / paper Eq (21)
             m_hat = self._predict_mean_vector(k, U_t_minus_K_to_t_minus_1)
             
-            # Update m̂_{u_{t-k}} | m_{u_{t-k}} using Eq. (6.33)
+            # Update m̂_{u_{t-k}} | m_{u_{t-k}} using Eq. (6.33) / paper Eq (22)
             m_hat_updated = self._map_update(m_hat, U_t_minus_K_to_t_minus_1[k-1])
         
         # H steps ahead prediction
         for h in range(1, H + 1):
-            # Estimate belief coefficient v_{t+h} using Eq. (6.30)
+            # Estimate belief coefficient v_{t+h} using Eq. (6.30) / paper Eq (20)
             v_t_plus_h = self._estimate_belief_coefficient(h)
             
-            # Predict m̂_{u_{t+h}} using Eq. (6.31)
+            # Predict m̂_{u_{t+h}} using Eq. (6.31) / paper Eq (21)
             m_hat_future = self._predict_mean_vector(h, U_t_minus_K_to_t_minus_1)
         
         # Return predicted solution from Dirichlet distribution
@@ -571,7 +581,7 @@ class AnticipatoryDistributionEstimation:
                 
                 Z_t_to_t_plus_H_minus_1.append(z_t_plus_h)
         
-        # Apply OAL over Z_{t:t+H-1}^(i) using Eq. (6.10)
+        # Apply OAL over Z_{t:t+H-1}^(i) using Eq. (6.10) / paper Eq (14)
         anticipatory_distribution = self._apply_oal(Z_t_to_t_plus_H_minus_1)
         
         return anticipatory_distribution
