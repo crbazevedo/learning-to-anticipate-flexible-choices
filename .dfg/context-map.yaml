@@ -36,16 +36,9 @@ per_unit:
       - python_refactor/src/algorithms/anticipatory_learning.py  # lines 1103-1104 (KF state reads)
       - python_refactor/tests/test_kalman_filter.py  # existing test surface to extend
 
-  # ──────────────────────────────────────────────────────────────────────
-  # W1-5 — Reconcile docs to paper canon
-  # ──────────────────────────────────────────────────────────────────────
-  W1-5:
-    must_read:
-      - docs/paper.pdf  # §IV-A/B equations (11)–(18) — the canonical numbering
-      - thesis_codebase_analysis.md  # equation-level analysis with thesis numbering (6.x) to reconcile
-      - 100_percent_adherence_backlog.md  # PT-flavored backlog with thesis numbering
-      - HVDM_OPTIMIZATION_PLAN.md  # mixes paper-grounded + extension-proposal concepts; needs disambiguation
-      - repository_analysis.md  # candidate for deletion — verify it's superseded by VISION.md before delete
+  # W1-5 entry removed via W2-3 (2026-05-16): W1-5 is COMPLETED, and
+  # the entry's must_read still pointed at the deleted
+  # repository_analysis.md. Closes W1-5-CARRY-1.
 
   # ──────────────────────────────────────────────────────────────────────
   # W1-2 — Wire TIP into the live ExperimentManager path
