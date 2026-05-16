@@ -1,7 +1,7 @@
 {
-  "active_wave": "W1",
+  "active_wave": "W2",
   "events_source": ".dfg/events.jsonl",
-  "last_updated": "2026-05-16T23:41:03Z",
+  "last_updated": "2026-05-16T23:56:35Z",
   "schema_version": "2",
   "units": {
     "W1-1": {
@@ -41,6 +41,6 @@
       "state": "DRAFT"
     }
   },
-  "wave": 1,
-  "wave_state": "DRAFT"
+  "wave": 2,
+  "wave_state": "PLANNED"
 }
