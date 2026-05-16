@@ -6,7 +6,7 @@ This repository contains PhD research on portfolio optimization using multi-obje
 
 ## Project Structure
 
-### Original C++ Implementation (`ASMOO/`)
+### Original C++ Implementation (`legacy-cpp/`)
 The original implementation is written in C++ and uses:
 - **Eigen** for linear algebra operations
 - **Boost** libraries for date handling and utilities
@@ -24,7 +24,7 @@ A complete Python refactor that maintains 100% functional equivalence:
 
 ### 1. Portfolio Optimization Engine
 
-#### C++ Implementation (`ASMOO/source/portfolio.cpp`)
+#### C++ Implementation (`legacy-cpp/source/portfolio.cpp`)
 - **Asset management**: Historical price data loading and validation
 - **Statistical calculations**: ROI, risk, covariance estimation
 - **Robust methods**: Median-based robust statistics
@@ -40,7 +40,7 @@ A complete Python refactor that maintains 100% functional equivalence:
 ### 2. Multi-Objective Optimization Algorithms
 
 #### NSGA-II Algorithm
-**C++**: `ASMOO/source/nsga2.cpp` (801 lines)
+**C++**: `legacy-cpp/source/nsga2.cpp` (801 lines)
 **Python**: `python_refactor/src/algorithms/nsga2.py`
 
 Features:
@@ -50,7 +50,7 @@ Features:
 - **Population management**: Generation evolution workflow
 
 #### SMS-EMOA Algorithm
-**C++**: `ASMOO/source/nsga2.cpp` (includes SMS-EMOA functions)
+**C++**: `legacy-cpp/source/nsga2.cpp` (includes SMS-EMOA functions)
 **Python**: `python_refactor/src/algorithms/sms_emoa.py` (283 lines)
 
 Features:
@@ -74,7 +74,7 @@ Features:
 
 ### 4. Statistical Functions
 
-#### C++ Implementation (`ASMOO/source/statistics.cpp`)
+#### C++ Implementation (`legacy-cpp/source/statistics.cpp`)
 - Robust covariance estimation
 - Moving averages and medians
 - Autocorrelation analysis
@@ -87,7 +87,7 @@ Features:
 
 ### 5. Kalman Filter
 
-#### C++ Implementation (`ASMOO/source/kalman_filter.cpp`)
+#### C++ Implementation (`legacy-cpp/source/kalman_filter.cpp`)
 - State estimation for portfolio optimization
 - Prediction and update steps
 - Error covariance management
@@ -100,7 +100,7 @@ Features:
 ## Data Management
 
 ### Financial Data
-- **Location**: `ASMOO/executable/data/ftse-original/`
+- **Location**: `legacy-cpp/executable/data/ftse-original/`
 - **Format**: CSV files with historical price data
 - **Content**: 98 CSV files (table (0).csv to table (97).csv)
 - **Usage**: FTSE market data for portfolio optimization experiments
@@ -183,7 +183,7 @@ python src/main.py ftse 50 NSGA2 L1 1 10 2010-01-01 2015-12-31 0.7 20 1
 
 ### C++ Architecture
 ```
-ASMOO/
+legacy-cpp/
 ├── headers/           # Header files
 ├── source/           # Implementation files
 ├── executable/       # Compiled binaries and data

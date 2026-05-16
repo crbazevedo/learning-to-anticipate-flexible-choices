@@ -29,7 +29,7 @@ def create_baseline_experiments():
             "name": "NSGA2_Baseline_Original_2012",
             "description": "NSGA-II baseline with original 2012 data",
             "data": {
-                "asset_files": ["../ASMOO/executable/data/ftse-original/table (0).csv"],
+                "asset_files": ["../legacy-cpp/executable/data/ftse-original/table (0).csv"],
                 "date_range": {"start": "2012-11-20", "end": "2012-11-21"},
                 "assets": ["Asset_0"]
             },
@@ -75,7 +75,7 @@ def create_baseline_experiments():
             "name": "SMSEMOA_Baseline_Original_2012",
             "description": "SMS-EMOA baseline with original 2012 data",
             "data": {
-                "asset_files": ["../ASMOO/executable/data/ftse-original/table (0).csv"],
+                "asset_files": ["../legacy-cpp/executable/data/ftse-original/table (0).csv"],
                 "date_range": {"start": "2012-11-20", "end": "2012-11-21"},
                 "assets": ["Asset_0"]
             },

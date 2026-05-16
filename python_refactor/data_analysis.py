@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 class FTSEDataAnalyzer:
     """Analyzer for FTSE CSV data files."""
     
-    def __init__(self, data_dir: str = "../ASMOO/executable/data/ftse-original"):
+    def __init__(self, data_dir: str = "../legacy-cpp/executable/data/ftse-original"):
         """Initialize the analyzer with data directory."""
         self.data_dir = data_dir
         self.csv_files = []

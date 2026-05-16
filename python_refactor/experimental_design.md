@@ -62,7 +62,7 @@
 ```python
 # Dataset configurations
 DATASETS = {
-    'original_2012': 'ASMOO/executable/data/ftse-original/',
+    'original_2012': 'legacy-cpp/executable/data/ftse-original/',
     'extended_2024': 'data/ftse-updated/',
     'bull_market': '2017-01-01 to 2019-12-31',
     'bear_market': '2020-01-01 to 2022-12-31',

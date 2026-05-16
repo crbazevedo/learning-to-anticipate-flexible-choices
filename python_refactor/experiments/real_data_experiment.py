@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 def load_existing_ftse_data():
     """Load existing FTSE data from the repository"""
     
-    ftse_data_path = "../../ASMOO/executable/data/ftse-original"
+    ftse_data_path = "../../legacy-cpp/executable/data/ftse-original"
     csv_files = glob.glob(os.path.join(ftse_data_path, "table (*).csv"))
     csv_files.sort()
     

@@ -270,7 +270,7 @@ F = np.array([
 - **✅ Solution Ranking**: Implemented in `src/algorithms/solution.py` with `rank_ROI` and `rank_risk` attributes
 - **✅ Sorting Functions**: Implemented comparison functions (`compare_ROI`, `compare_risk`) in `solution.py`
 - **✅ Historical Population Storage**: Implemented in `AnticipatoryLearning.store_historical_population()` method
-- **✅ C++ Alignment**: The C++ version shows similar ranking implementation in `ASMOO/source/statistics.cpp` (lines 34-53)
+- **✅ C++ Alignment**: The C++ version shows similar ranking implementation in `legacy-cpp/source/statistics.cpp` (lines 34-53)
 
 **Missing Components**:
 - **❌ Explicit Correspondence Mapping**: No dedicated class for mapping solutions across time periods
@@ -322,7 +322,7 @@ def _calculate_temporal_incomparability_probability(self, current_objectives, pr
 
 **Analysis**:
 - **✅ Learning Rate Calculation**: The `compute_anticipatory_learning_rate()` method (lines 206-245) implements adaptive confidence through uncertainty and accuracy factors
-- **✅ C++ Alignment**: The C++ version in `ASMOO/source/nsga2.cpp` (lines 525-596) shows similar approach using `alpha = 1.0 - linear_entropy(nd_probability)`
+- **✅ C++ Alignment**: The C++ version in `legacy-cpp/source/nsga2.cpp` (lines 525-596) shows similar approach using `alpha = 1.0 - linear_entropy(nd_probability)`
 - **⚠️ Different Approach**: While not implementing Equation 6.30 exactly, the current implementation achieves similar adaptive behavior through the learning rate formula
 
 **Missing**:
@@ -503,8 +503,8 @@ class CorrespondenceMapper:
 **Key C++ References**:
 - `anticipatory-learning-asmoo/source/asms_emoa.cpp` (lines 639-712): Anticipatory learning implementation
 - `anticipatory-learning-asmoo/source/dirichlet.cpp` (lines 39-88): Dirichlet prediction functions
-- `ASMOO/source/nsga2.cpp` (lines 525-596): Alternative anticipatory learning approach
-- `ASMOO/source/statistics.cpp` (lines 34-53): Solution ranking implementation
+- `legacy-cpp/source/nsga2.cpp` (lines 525-596): Alternative anticipatory learning approach
+- `legacy-cpp/source/statistics.cpp` (lines 34-53): Solution ranking implementation
 
 ### 5.3 Implementation Quality Reassessment
 
