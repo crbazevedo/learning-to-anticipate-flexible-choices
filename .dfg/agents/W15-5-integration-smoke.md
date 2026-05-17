@@ -13,13 +13,11 @@ hardening_max_cycles: 1
 prompt_version: 1
 read_contract:
   must_read:
-    - path: docs/BACKLOG.md
-      sections: ["§1.1 B1", "§1.1 B3", "§1.1 B4", "§1.1 B2", "§1.2 H3", "§1.2 H5"]
-      reason: "All W15 BLOCKERs whose combined effect this smoke measures"
-    - path: docs/OOS-EFHV-WALK-FORWARD-REPORT.md
-      reason: "Baseline (W14-2) for comparison — pre-BLOCKERs-fix walk-forward"
-    - path: python_refactor/experiments/walk_forward_report.py
-      reason: "Smoke driver (reused as-is)"
+    # Grounding details (reasons) in contract body below per BACKLOG §6
+    # (schema requires plain-string list here).
+    - docs/BACKLOG.md
+    - docs/OOS-EFHV-WALK-FORWARD-REPORT.md
+    - python_refactor/experiments/walk_forward_report.py
 output_contract:
   files:
     - docs/OOS-EFHV-W15-INTEGRATION-SMOKE.md

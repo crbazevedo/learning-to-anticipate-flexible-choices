@@ -13,25 +13,13 @@ hardening_max_cycles: 1
 prompt_version: 1
 read_contract:
   must_read:
-    - path: docs/BACKLOG.md
-      sections: ["§1.1 B1 — Internal HV reference point wrong scale"]
-      reason: "Catalog entry — read FIRST; full grounding for this unit"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [147]
-      sections: ["§7.2.3 ASMS Parameters"]
-      excerpt: "Finally, the reference point for computing Hypv was set to z^ref = (0.2, 0.0)^T in terms of risk and return, coinciding with the objective space feasibility boundaries (maximum risk of 20% and minimum mean return of 0%)."
-      reason: "Source of truth for z_ref value — verbatim"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [57]
-      sections: ["§3.1.1 The Hypervolume (S-Metric) Indicator"]
-      reason: "Formal HV definition and reference-point role"
-    - path: docs/THESIS-INDEX.md
-      sections: ["§2 OOS Future HV protocol", "§4 ASMS parameters"]
-      reason: "Cross-reference table mapping z_ref usage"
-    - path: python_refactor/src/algorithms/sms_emoa.py
-      reason: "Module being edited — lines 55-75 defaults; lines 384, 409 call sites"
-    - path: python_refactor/experiments/oos_evaluator.py
-      reason: "Cross-reference: W13-2 oos_evaluator.py already uses z_ref=(0.2, 0.0) default; ensure consistency"
+    # Grounding details (pages, excerpts, reasons) in contract body
+    # below per BACKLOG §6 (schema requires plain-string list here).
+    - docs/BACKLOG.md
+    - docs/Azevedo_CarlosRenatoBelo_D.pdf
+    - docs/THESIS-INDEX.md
+    - python_refactor/src/algorithms/sms_emoa.py
+    - python_refactor/experiments/oos_evaluator.py
 output_contract:
   files:
     - python_refactor/src/algorithms/sms_emoa.py

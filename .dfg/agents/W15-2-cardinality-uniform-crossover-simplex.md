@@ -13,33 +13,12 @@ hardening_max_cycles: 1
 prompt_version: 1
 read_contract:
   must_read:
-    - path: docs/BACKLOG.md
-      sections: ["§1.1 B3 — Cardinality constraint not enforced", "§1.1 B4 — Non-simplex weights AND wrong crossover operator"]
-      reason: "Catalog entries — read FIRST; full grounding for this unit"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [146]
-      sections: ["§7.2.3 Constraint Handling"]
-      excerpt: "We considered minimum and maximum cardinality of c_l = 5 and c_u = 15 assets."
-      reason: "Source of truth for cardinality bounds (B3)"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [142]
-      sections: ["§7.2 Eq (7.3)"]
-      excerpt: "s.t. c_l ≤ c(u_t) ≤ c_u, where c(u_t) computes the number of assets in u_t with non-zero weight (u_t > 0)."
-      reason: "Formal cardinality constraint (B3)"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [147]
-      sections: ["§7.2.3 Search Operators"]
-      excerpt: "We utilized uniform crossover over the mean DD vectors. For mutation, we randomly choose between (1) modifying the non-zero weights; or (2) adding/removing assets. If operator (1) is selected, then, with probability 1/2, we either increase or decrease the investment on a randomly chosen asset by a uniformly drawn factor from 10 to 50%. If (2) is selected, then, with probability 1/2, we either add or remove a randomly chosen asset. If it is removed, we simply set its weight to zero. If it is added, we randomly set its weight within a ±10% range from an equally-balanced allocation. All modified DD vectors are renormalized."
-      reason: "Verbatim spec for the operators (B4): UNIFORM crossover (NOT SBX) + dual-mode mutation"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [141]
-      sections: ["§7.2 Solving Portfolio Selection with AS-MOO"]
-      excerpt: "u ∈ S^{N-1} denote the proportions of wealth to be invested"
-      reason: "Simplex constraint: u_i ≥ 0, sum(u_i) = 1 (B4)"
-    - path: python_refactor/src/algorithms/operators.py
-      reason: "Module being edited — current crossover/mutation/normalize"
-    - path: python_refactor/src/portfolio/portfolio.py
-      reason: "Cardinality computation site (line ~298 cls.card) + Portfolio.max_cardinality default"
+    # Grounding details (pages, excerpts, reasons) in contract body
+    # below per BACKLOG §6 (schema requires plain-string list here).
+    - docs/BACKLOG.md
+    - docs/Azevedo_CarlosRenatoBelo_D.pdf
+    - python_refactor/src/algorithms/operators.py
+    - python_refactor/src/portfolio/portfolio.py
 output_contract:
   files:
     - python_refactor/src/algorithms/operators.py
