@@ -1,0 +1,17 @@
+proposal_id: wave-W6-20260517T010425Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T01:04:25Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W6
+  action: add
+trigger: stakeholder-decision
+rationale: "W6 ships the repo to public-ready state per operator directive 2026-05-17.\
+  \ 3 units: W6-1 publication-quality README rewrite; W6-3 live experiment validation\
+  \ plan (doc only \u2014 execution deferred); W6-2 gh repo visibility flip to public\
+  \ (depends on W6-1 merge). Parallel groups: [[W6-1, W6-3], [W6-2]]."
+evidence: []
+accepted_at: '2026-05-17T01:05:03Z'
+operator_note: 'Approved: W6 ships public-ready state'
