@@ -1685,3 +1685,121 @@ waves:
         - "4 cross-checks (H, I, J, K) shipped with receipts"
         - "Retros at .dfg/retrospectives/W20/W20-N.md with ADR-004 keys"
       checkpoint_file: .dfg/checkpoints/W20-gate.md
+
+  - id: W21
+    name: Reading-F experimental test + cross-checks L/M/N + full ablation + 30-seed → final replication verdict
+    state: PLANNED
+    units:
+      - id: W21-1
+        slug: reading-f-experimental-test
+        name: Reading-F experimental test (use_v2_stability_weighting flag + smoke)
+        purpose: "KEYSTONE. Closes W20-5-CARRY-1. Per W20-5 CORRECTION: Reading F is INVERTED — v2's stability is no-op (always 1.0); Python's depresses Δ_S. Flag forces Python stability=1.0 to match v2."
+        files:
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/src/algorithms/solution.py
+          - python_refactor/tests/test_use_v2_stability_weighting.py
+          - python_refactor/experiments/validation_matrix.py
+          - docs/READING-F-EXPERIMENTAL-TEST.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "use_v2_stability_weighting kwarg added to SMS-EMOA constructor; when True, solution.stability is forced to 1.0 (no-op multiplier matching v2's effective behavior) at the three Δ_S call sites in sms_emoa.py (538, 554, 599)"
+          - "W17-5 smoke re-run with v2-rate flag AND v2-stability flag both enabled; Δ(S2 − S0) reported honestly"
+          - "Verdict: READING-F-CONFIRMED (combined gap closes ≤ 0) / READING-F-PARTIAL / READING-F-REFUTED"
+          - "≥ 3 unit tests for the flag behavior (default off; flag on forces stability=1.0; combined with use_v2_anticipative_rate)"
+
+      - id: W21-2
+        slug: cross-check-l-nds
+        name: Cross-check L — non-dominated sorting (NDS) algorithm
+        purpose: "Closes operator check L. Deterministic; likely AGREE."
+        files:
+          - legacy-cpp-v2/build/drivers/nds_driver.cpp
+          - python_refactor/scripts/cross_validation/run_nds.py
+          - python_refactor/tests/test_cross_check_nds.py
+          - docs/CROSS-VALIDATION-L-NDS.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "C++ + Python drivers on identical Pareto-front fixture"
+          - "Front identity + ordering compared"
+          - "Verdict per W18 matrix"
+
+      - id: W21-3
+        slug: cross-check-m-mutation
+        name: Cross-check M — mutation operator (simplex / parent-correlation)
+        purpose: "Closes operator check M. W15-2 changed Python from per-element to dual-mode per thesis §7.2.3."
+        files:
+          - legacy-cpp-v2/build/drivers/mutation_driver.cpp
+          - python_refactor/scripts/cross_validation/run_mutation.py
+          - python_refactor/tests/test_cross_check_mutation.py
+          - docs/CROSS-VALIDATION-M-MUTATION.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "C++ + Python mutation on shared (parent, RNG-seed) fixture"
+          - "Statistical comparison of offspring distribution"
+          - "Verdict per W18 matrix"
+
+      - id: W21-4
+        slug: cross-check-n-crossover
+        name: Cross-check N — SBX vs uniform crossover semantic divergence
+        purpose: "Closes operator check N. C++ uses SBX; Python switched to uniform in W15-2 per thesis §7.2.3 p.147. Confirm intentional."
+        files:
+          - legacy-cpp-v2/build/drivers/crossover_driver.cpp
+          - python_refactor/scripts/cross_validation/run_crossover.py
+          - python_refactor/tests/test_cross_check_crossover.py
+          - docs/CROSS-VALIDATION-N-CROSSOVER.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "Both C++ SBX + Python uniform on shared (parents, RNG-seed) fixture"
+          - "Document semantic divergence with thesis citation"
+          - "Verdict: INTENTIONAL-PER-THESIS"
+
+      - id: W21-5
+        slug: full-ablation-30-seed
+        name: Full ablation table + 30-seed run → final replication verdict
+        purpose: "KEYSTONE. Synthesize all closed-divergences into a single ablation matrix on 30 seeds to determine which combination of fixes reverses S2 vs S0."
+        files:
+          - python_refactor/experiments/ablation_matrix.py
+          - python_refactor/experiments/results/w21-5-ablation/per_seed.json
+          - docs/W21-FULL-ABLATION-VERDICT.md
+        depends_on: [W21-1]
+        size: L
+        acceptance_criteria:
+          - "Ablation variants run (default × v2-rate × v2-stability × +sqrt-removed × +KF-lifecycle-aligned)"
+          - "30 seeds per variant"
+          - "Headline table: Δ(S2 − S0) per variant with std"
+          - "Final replication verdict: PAPER-REPLICATES / PARTIAL / REFUTED"
+
+      - id: W21-6
+        slug: synthesis-publication-decision
+        name: W21 synthesis + publication-track decision
+        purpose: "Aggregate W21-1..W21-5; consolidate the W7→W21 chain; surface publication-track decision to operator."
+        files:
+          - docs/W21-CROSS-VALIDATION-SYNTHESIS.md
+          - docs/PUBLICATION-TRACK-DECISION.md
+          - .dfg/retrospectives/W21/W21-6.md
+        depends_on: [W21-1, W21-2, W21-3, W21-4, W21-5]
+        size: S
+        acceptance_criteria:
+          - "Verdict matrix for L/M/N + Reading F + final ablation"
+          - "W7→W21 chain narrative"
+          - "Publication-track decision menu for operator"
+          - "ADR-004 retro"
+
+    parallel_groups:
+      - [W21-1, W21-2, W21-3, W21-4]
+      - [W21-5]
+      - [W21-6]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 6 units MERGED with green pre-pr battery"
+        - "W21-1 Reading-F test reports verdict with honest data"
+        - "3 cross-checks (L, M, N) shipped with receipts"
+        - "W21-5 ablation reports final replication verdict on 30 seeds"
+        - "W21-6 surfaces publication-track decision menu"
+        - "Retros at .dfg/retrospectives/W21/W21-N.md with ADR-004 keys"
+      checkpoint_file: .dfg/checkpoints/W21-gate.md
