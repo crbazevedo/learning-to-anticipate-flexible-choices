@@ -1010,3 +1010,58 @@ waves:
         - "VALIDATION-RESULTS.populated.md §1 reports mean OOS EFHV ± std per scenario (S0 + S2)"
         - "Retros at .dfg/retrospectives/W13/W13-N.md with ADR-004 canonical keys"
       checkpoint_file: .dfg/checkpoints/W13-gate.md
+
+  - id: W14
+    name: Walk-forward OOS protocol (thesis §7.2.2 rolling)
+    state: PLANNED
+    # Added 2026-05-17 via replan wave-W14-20260517T083255Z.
+    # W13-CARRY-2: W13-3 used single-shot 80/20; thesis uses rolling
+    # 50-day-shift periods over 24 (FTSE) windows × 30 seeds = ~720
+    # observations. Walk-forward also activates the algorithm's
+    # anticipation property (training advances period-by-period).
+    units:
+      - id: W14-1
+        slug: walk-forward-orchestrator
+        name: Walk-forward rolling-period orchestrator
+        purpose: "New module: at each period t (1..T-1), train SMS-EMOA on rolling 1.5y window, extract Pareto, compute Ŝ_{t+1} via W13-2 against next-period MLE Gaussian; aggregate per seed."
+        files:
+          - python_refactor/experiments/walk_forward.py
+          - python_refactor/tests/test_experiments_walk_forward.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "walk_forward.py exposes run_walk_forward(scenario, seed, full_returns, train_window_days, step_days, n_mc, rng) → list of Ŝ_{t+1} per period"
+          - "Default config matches thesis §7.2.3: train_window_days≈378 (1.5y), step_days=50, n_mc=1000"
+          - "Per-period output: trained Pareto weights + Ŝ_{t+1} value"
+          - "≥ 5 regression tests: (a) period enumeration arithmetic, (b) train/next-period non-overlap, (c) per-period EFHV is finite, (d) reproducibility under fixed rng seed, (e) handles edge case where last period has insufficient OOS data"
+
+      - id: W14-2
+        slug: walk-forward-30seed-report
+        name: 30-seed walk-forward run + populate VALIDATION-RESULTS
+        purpose: "Run S0+S2 × 30 seeds × ~24 periods via W14-1; aggregate; update VALIDATION-RESULTS.md §1 with walk-forward receipt (disambiguates W13-3 finding)."
+        files:
+          - python_refactor/experiments/walk_forward_report.py
+          - docs/OOS-EFHV-WALK-FORWARD-REPORT.md
+          - docs/VALIDATION-RESULTS.populated.md
+          - .dfg/retrospectives/W14/W14-2.md
+        depends_on: [W14-1]
+        size: M
+        acceptance_criteria:
+          - "Full S0+S2 × 30 seeds × ~24 periods walk-forward run completes (60 × 24 = 1440 algorithm runs)"
+          - "Aggregated per-scenario grand mean ± std reported in OOS-EFHV-WALK-FORWARD-REPORT.md"
+          - "VALIDATION-RESULTS.populated.md §1 updated: walk-forward receipt replaces the W13-3 single-shot receipt as the headline metric"
+          - "Retro empirically reports: (a) direction (S2 vs S0); (b) if S2 > S0, claim direction matches paper; if S2 ≤ S0, W13-CARRY-1 (K window-size) becomes the next probe"
+
+    parallel_groups:
+      - [W14-1]
+      - [W14-2]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "Both units MERGED with green pre-pr battery"
+        - "Walk-forward module shipped with ≥ 5 regression tests"
+        - "30-seed × 24-period full run completes (≥ 90% periods status=ok per seed)"
+        - "VALIDATION-RESULTS.populated.md §1 updated with walk-forward result"
+        - "Retros at .dfg/retrospectives/W14/W14-N.md with ADR-004 canonical keys"
+      checkpoint_file: .dfg/checkpoints/W14-gate.md

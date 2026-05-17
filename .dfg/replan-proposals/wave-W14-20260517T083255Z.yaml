@@ -1,0 +1,22 @@
+proposal_id: wave-W14-20260517T083255Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T08:32:55Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W14
+  action: add
+trigger: operator-intervention
+rationale: "W13-CARRY-2 = HIGH PRIORITY methodology scar. W13-3 used single-shot 80/20\
+  \ train/test; thesis \xA77.2.2 uses rolling-period walk-forward (T=24-25 periods\
+  \ \xD7 30 seeds = ~720 obs vs our 30). The S2 < S0 finding is contaminated by methodology.\
+  \ W14 implements walk-forward + re-runs S0/S2 to disambiguate. If S2 > S0 under\
+  \ proper methodology, paper claim replicates (W7-W13 chain structurally complete).\
+  \ If S2 \u2264 S0, W15 implements K-aware SCENARIOS (W13-CARRY-1) per Option B."
+evidence:
+- .dfg/checkpoints/W13-gate.md
+- .dfg/retrospectives/W13/W13-3.md
+accepted_at: '2026-05-17T08:34:39Z'
+operator_note: 'Option A first: walk-forward methodology before K-aware SCENARIOS
+  (W15 is Option B)'
