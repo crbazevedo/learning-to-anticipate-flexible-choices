@@ -29,7 +29,7 @@ output_contract:
     - .dfg/retrospectives/W8/W8-2.md
     - .dfg/retrospectives/W8/W8-3.md
     - .dfg/retrospectives/W8/W8-4.md
-    - kit/scripts/pre-pr-reflect-validate.sh
+    - scripts/pre-pr-reflect-validate.sh  # NOTE: plan.yaml has stale 'kit/scripts/' path; corrected here since kit/ is a symlink into dfg-harness
   branch_name: feat/w9-3-retro-hygiene-gate
   acceptance: >
     All 7 retros re-keyed to ADR-004 canonical (what_worked, what_broke,
