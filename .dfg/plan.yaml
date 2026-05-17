@@ -1481,3 +1481,99 @@ waves:
         - "W19-W22 roadmap with pre-stubbed contracts for C/D/E/G/H/I/J/K/L/M/N"
         - "Retros at .dfg/retrospectives/W18/W18-N.md with ADR-004 canonical keys"
       checkpoint_file: .dfg/checkpoints/W18-gate.md
+
+  - id: W19
+    name: Cross-validation deepening (C bivariate + D KF + E Dirichlet + G λ end-to-end)
+    state: PLANNED
+    units:
+      - id: W19-1
+        slug: cross-check-c-bivariate-inputs
+        name: Cross-check C — bivariate Gaussian inputs feeding KF
+        purpose: "Closes operator check C. Cross-validate (mean, covariance) construction. Upstream of D."
+        files:
+          - legacy-cpp/build/drivers/bivariate_gaussian_driver.cpp
+          - python_refactor/scripts/cross_validation/run_bivariate_gaussian.py
+          - python_refactor/tests/test_cross_check_bivariate_gaussian.py
+          - docs/CROSS-VALIDATION-C-BIVARIATE-GAUSSIAN.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "Both sides compute estimate_assets_mean_ROI + estimate_covariance on identical fixture"
+          - "Markdown diff with abs+rel tolerance"
+          - "Verdict per W18 matrix"
+
+      - id: W19-2
+        slug: cross-check-d-kf-gaussians
+        name: Cross-check D — KF predictive Gaussians (Reading-C KEYSTONE)
+        purpose: "Closes operator check D + W18-CARRY-2. THE Reading-C critical test: do C++/Python KFs produce same predictive (mean, cov) on identical inputs?"
+        files:
+          - legacy-cpp/build/drivers/kf_driver.cpp
+          - python_refactor/scripts/cross_validation/run_kf.py
+          - python_refactor/tests/test_cross_check_kf.py
+          - docs/CROSS-VALIDATION-D-KF-GAUSSIANS.md
+        depends_on: [W19-1]
+        size: M
+        acceptance_criteria:
+          - "N=5 predict-update cycles compared step-by-step"
+          - "Posterior (x, P) compared with abs+rel tolerance"
+          - "Reading C verdict: confirmed if KFs agree; refuted with drift identified if disagree"
+
+      - id: W19-3
+        slug: cross-check-e-dirichlet-filter
+        name: Cross-check E — Dirichlet distributions from Dirichlet filter
+        purpose: "Closes operator check E. Cross-validate DirichletPredictor outputs (or scar if C++ lacks the filter)."
+        files:
+          - legacy-cpp/build/drivers/dirichlet_driver.cpp
+          - python_refactor/scripts/cross_validation/run_dirichlet.py
+          - python_refactor/tests/test_cross_check_dirichlet.py
+          - docs/CROSS-VALIDATION-E-DIRICHLET.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "Python DirichletPredictor outputs documented"
+          - "C++ equivalent located (or scar if absent)"
+          - "Verdict per W18 matrix"
+
+      - id: W19-4
+        slug: cross-check-g-anticipative-rate
+        name: Cross-check G — anticipative learning rate λ end-to-end
+        purpose: "Closes operator check G. Cross-validate full Eq 7.16 chain. Expected structural finding: C++ Eq 6.6 vs Python Eq 7.16 (1/2) avg."
+        files:
+          - legacy-cpp/build/drivers/anticipative_rate_driver.cpp
+          - python_refactor/scripts/cross_validation/run_anticipative_rate.py
+          - python_refactor/tests/test_cross_check_anticipative_rate.py
+          - docs/CROSS-VALIDATION-G-ANTICIPATIVE-RATE.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "Both sides report λ on identical (KF state, K, H) inputs"
+          - "Expected: structural divergence (C++ Eq 6.6 vs Python Eq 7.16)"
+          - "Verdict per W18 matrix"
+
+      - id: W19-5
+        slug: synthesis
+        name: W19 synthesis + W20-W21 roadmap
+        purpose: "Aggregate W19-1..4 verdicts + update Reading framework with W19 evidence."
+        files:
+          - docs/W19-CROSS-VALIDATION-SYNTHESIS.md
+          - .dfg/retrospectives/W19/W19-5.md
+        depends_on: [W19-1, W19-2, W19-3, W19-4]
+        size: S
+        acceptance_criteria:
+          - "Verdict table for C/D/E/G"
+          - "Reading A/B/C update with W19 evidence"
+          - "W20-W21 roadmap for H/I/J/K/L/M/N"
+
+    parallel_groups:
+      - [W19-1, W19-3, W19-4]
+      - [W19-2]
+      - [W19-5]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 5 units MERGED with green pre-pr battery"
+        - "4 cross-checks (C, D, E, G) shipped with receipts"
+        - "Reading A/B/C verdict updated with W19 evidence"
+        - "Retros at .dfg/retrospectives/W19/W19-N.md with ADR-004 keys"
+      checkpoint_file: .dfg/checkpoints/W19-gate.md
