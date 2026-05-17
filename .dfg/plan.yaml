@@ -812,3 +812,73 @@ waves:
         - "All 4 S1/S2/S3/S4 smoke-tests either GREEN (status=ok + metrics.csv populated) OR honestly scarred (new carries filed, no laundering)"
         - "Retros at .dfg/retrospectives/W10/W10-N.md with ADR-004 canonical keys; `bash scripts/pre-pr-reflect-validate.sh --wave W10` green"
       checkpoint_file: .dfg/checkpoints/W10-gate.md
+
+  - id: W11
+    name: Scenario-dispatch + portfolio-evaluator fixup (unblocks experiments)
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W11-20260517T031039Z.
+    # W10-CARRY-2 root cause: SMS-EMOA always calls learn_single_solution;
+    # TIPIntegrated/MultiHorizon override learn_population so they degenerate.
+    # W10-CARRY-1 root cause: portfolio_evaluator returns price-level data;
+    # (1+prices).cumprod() overflows.
+    # W11-1 + W11-2 file-disjoint parallel; W11-3 verifies + ships gate.
+    units:
+      - id: W11-1
+        slug: sms-emoa-learn-population-dispatch
+        name: Fix SMS-EMOA learning dispatch (prefer learn_population)
+        purpose: "Closes W10-CARRY-2 half. _apply_anticipatory_learning prefers learn_population when override exists; falls back to per-solution loop."
+        files:
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/tests/test_sms_emoa_dispatch.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "_apply_anticipatory_learning calls learn_population when the learner overrides it; falls back to learn_single_solution per-solution otherwise"
+          - "TIPIntegratedAnticipatoryLearning.learn_population is detected as overridden"
+          - "MultiHorizonAnticipatoryLearning.learn_population is detected as overridden"
+          - "≥ 2 regression tests: (a) base learner uses per-solution loop, (b) override learner gets learn_population called"
+
+      - id: W11-2
+        slug: portfolio-evaluator-returns-space
+        name: Fix portfolio_evaluator price-vs-returns input
+        purpose: "Closes W10-CARRY-1. _get_asset_returns detects price-level input (median |value| > 1.5) and converts via pct_change before cumprod."
+        files:
+          - python_refactor/src/experiments/portfolio_evaluator.py
+          - python_refactor/tests/test_experiments_portfolio_evaluator.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "_get_asset_returns detects price-level input via median |value| > 1.5 and converts to returns"
+          - "Returns-shaped input (median <= 1.5) passes through unchanged (backward compat)"
+          - "No more Infinity / NaN in portfolio.portfolio_value / max_drawdown on real paper-window data"
+          - "≥ 2 regression tests: (a) price-level → returns conversion, (b) returns-shape pass-through"
+
+      - id: W11-3
+        slug: scenario-differentiation-verify-and-gate
+        name: Re-smoke-test S0-S4 + scenario-differentiation regression gate
+        purpose: "Verifies W11-1+W11-2 unblock real experiments; ships the class-retiring regression gate (no two scenarios with different learning configs produce identical algorithm metrics)."
+        files:
+          - python_refactor/tests/test_scenario_differentiation.py
+          - .dfg/retrospectives/W11/W11-3.md
+        depends_on: [W11-1, W11-2]
+        size: S
+        acceptance_criteria:
+          - "Re-running S0-S4 smoke-tests: S2 metrics differ from S0 in ≥ 1 algorithm/learning value; S2 differs from S3 (max_horizon difference) in ≥ 1 value"
+          - "No metric value is NaN or Infinity for any scenario"
+          - "test_scenario_differentiation.py asserts pairwise metric-vector inequality across S1/S2/S3/S4 configurations"
+          - "Retro documents the scenario-differentiation gate as class-retirement receipt per directive #5"
+
+    parallel_groups:
+      - [W11-1, W11-2]
+      - [W11-3]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 3 units MERGED with green pre-pr battery"
+        - "W10-CARRY-1 closed: portfolio_evaluator produces finite values on real 98-asset paper-window data"
+        - "W10-CARRY-2 closed: S1, S2, S3, S4 produce DIFFERENTIATED metrics (no two identical)"
+        - "W7-1-CARRY-1 closed: experiments now actually exercise their differentiating code paths"
+        - "Scenario-differentiation regression gate in place (class-retiring per directive #5)"
+        - "Retros at .dfg/retrospectives/W11/W11-N.md with ADR-004 canonical keys"
+      checkpoint_file: .dfg/checkpoints/W11-gate.md
