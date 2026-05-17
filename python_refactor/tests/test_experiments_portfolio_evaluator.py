@@ -74,7 +74,15 @@ class TestPriceVsReturnsDetection(unittest.TestCase):
 
     def test_real_paper_window_no_inf_after_sanitation(self):
         """End-to-end: real 98-CSV paper-window passes through
-        portfolio_evaluator with all values finite + bounded."""
+        portfolio_evaluator with all values finite + bounded.
+
+        W13-1 update: data_loader now sanitizes at the source, so
+        assets_df arrives Inf-free. The portfolio_evaluator sanitation
+        becomes a defensive second layer (no-op in this case). Test
+        keeps the post-condition check (output bounded + finite) and
+        drops the pre-condition assertion that data has Inf — the
+        W11-2 layer would still catch Inf if it ever reached us, but
+        a clean source is also a valid input."""
         from pathlib import Path
         from src.experiments.data_loader import DataLoader
         repo_root = Path(__file__).parents[2]
@@ -85,10 +93,7 @@ class TestPriceVsReturnsDetection(unittest.TestCase):
         assets_df = loader.load_asset_data([str(glob_path)], date_range={}, assets=[])
         if assets_df.empty:
             self.skipTest("data_loader returned empty")
-        # Pre-W11-2: there ARE Inf values in the real data.
-        self.assertGreater(np.isinf(assets_df.values).sum(), 0,
-                            "expected Inf values in pre-W11-2 data")
-        # Post-W11-2 sanitation: no Inf, bounded values.
+        # Post-W13-1 + post-W11-2 sanitation: output must be finite + bounded.
         out = self.ev._get_asset_returns({"assets": assets_df})
         self.assertFalse(np.isinf(out.values).any())
         self.assertLessEqual(np.nanmax(out.values), 1.0)

@@ -262,12 +262,21 @@ class ExperimentManager:
             
             execution_time = time.time() - start_time
             
-            # Collect algorithm metrics
+            # Collect algorithm metrics.
+            # W13-1: thread expected_future_hypervolume into the
+            # collector. Pre-W13-1 the kwarg was omitted → defaulted
+            # to None → emitted as `null` in final_metrics. SMS-EMOA's
+            # get_expected_future_hypervolume() runs paper §V-D MC
+            # over the Pareto front when anticipatory_learning is set.
+            efhv = (algorithm.get_expected_future_hypervolume()
+                     if hasattr(algorithm, 'get_expected_future_hypervolume')
+                     else None)
             algorithm_metrics = self.metrics_collector.collect_optimization_metrics(
                 population=population,
                 generation=algorithm_config.get('generations', 0),
                 pareto_front=algorithm.get_pareto_front(),
-                hypervolume=algorithm.get_hypervolume()
+                hypervolume=algorithm.get_hypervolume(),
+                expected_future_hypervolume=efhv,
             )
             
             # Collect computational metrics
