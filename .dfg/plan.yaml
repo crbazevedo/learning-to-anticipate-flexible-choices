@@ -1693,20 +1693,20 @@ waves:
       - id: W21-1
         slug: reading-f-experimental-test
         name: Reading-F experimental test (use_v2_stability_weighting flag + smoke)
-        purpose: "KEYSTONE. Closes W20-5-CARRY-1. Test whether v2's Δ_S stability multiplier closes the residual 4.04% gap from W20-1 (+7.82pp Reading-E recovery)."
+        purpose: "KEYSTONE. Closes W20-5-CARRY-1. Per W20-5 CORRECTION: Reading F is INVERTED — v2's stability is no-op (always 1.0); Python's depresses Δ_S. Flag forces Python stability=1.0 to match v2."
         files:
-          - python_refactor/src/algorithms/anticipatory_learning.py
-          - python_refactor/src/algorithms/expected_hypervolume.py
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/src/algorithms/solution.py
           - python_refactor/tests/test_use_v2_stability_weighting.py
           - python_refactor/experiments/validation_matrix.py
           - docs/READING-F-EXPERIMENTAL-TEST.md
         depends_on: []
         size: M
         acceptance_criteria:
-          - "use_v2_stability_weighting kwarg implemented; Δ_S × stability multiplier where stability = 1/(1 + (ROI_unseen-P.ROI)² + (risk_unseen-P.risk)²)"
-          - "W17-5 smoke re-run with v2-rate flag AND v2-stability flag enabled; Δ(S2 − S0) reported honestly"
-          - "Verdict: READING-F-CONFIRMED (combined gap < 0) / READING-F-PARTIAL / READING-F-REFUTED"
-          - "≥ 3 unit tests for the flag behavior"
+          - "use_v2_stability_weighting kwarg added to SMS-EMOA constructor; when True, solution.stability is forced to 1.0 (no-op multiplier matching v2's effective behavior) at the three Δ_S call sites in sms_emoa.py (538, 554, 599)"
+          - "W17-5 smoke re-run with v2-rate flag AND v2-stability flag both enabled; Δ(S2 − S0) reported honestly"
+          - "Verdict: READING-F-CONFIRMED (combined gap closes ≤ 0) / READING-F-PARTIAL / READING-F-REFUTED"
+          - "≥ 3 unit tests for the flag behavior (default off; flag on forces stability=1.0; combined with use_v2_anticipative_rate)"
 
       - id: W21-2
         slug: cross-check-l-nds
