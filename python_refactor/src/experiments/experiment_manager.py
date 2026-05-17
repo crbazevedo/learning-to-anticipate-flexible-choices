@@ -186,8 +186,16 @@ class ExperimentManager:
             'config': data_config
         }
         
+        # W9-1: explicit None/empty check — `if asset_data:` calls
+        # DataFrame.__bool__ which raises ValueError ("ambiguous").
+        # `num_assets` reports the column count (one column per asset
+        # after the data_loader pivot in W9-2).
+        if asset_data is None or asset_data.empty:
+            num_assets = 0
+        else:
+            num_assets = len(asset_data.columns)
         self.logger.log('data', 'INFO', 'Data loading completed', {
-            'num_assets': len(asset_data) if asset_data else 0,
+            'num_assets': num_assets,
             'data_period': data_config.get('date_range', {})
         })
         
