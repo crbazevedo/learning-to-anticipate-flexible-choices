@@ -553,3 +553,80 @@ waves:
         - "VALIDATION-RESULTS.md template exists with structured empty sections (no fabricated results)"
         - "Retros at .dfg/retrospectives/W7/W7-N.md with ADR-004 frontmatter"
       checkpoint_file: .dfg/checkpoints/W7-gate.md
+
+  - id: W8
+    name: Analytics layer + smoke-test real-run
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W8-20260517T014109Z.
+    # Group 1 parallel (file-disjoint); Group 2 depends on Group 1.
+    # Full 300-run matrix execution deferred to W9.
+    units:
+      - id: W8-1
+        slug: validation-matrix-smoke-test
+        name: Smoke-test validation_matrix real-run path
+        purpose: "Closes W7-1-CARRY-1. End-to-end S0/paper/seed=1 real-run + any integration fixes in validation_matrix.py."
+        files:
+          - python_refactor/experiments/validation_matrix.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "`python -m experiments.validation_matrix --scenario S0 --window paper --seed 1 --output /tmp/w8-smoke/` exits 0 (without --dry-run)"
+          - "/tmp/w8-smoke/manifest.json shows status=ok"
+          - "/tmp/w8-smoke/metrics.csv has at least 1 metric row"
+
+      - id: W8-2
+        slug: stats-helpers
+        name: Statistical test helpers
+        purpose: "Pure functions: Mann-Whitney U, Wilcoxon, Welch t, one-way ANOVA, Cohen d, Cliff delta, bootstrap CI, Holm-Bonferroni."
+        files:
+          - python_refactor/experiments/stats.py
+          - python_refactor/tests/test_experiments_stats.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "stats.py exposes mann_whitney_u, wilcoxon_signed_rank, welch_t, one_way_anova, cohens_d, cliffs_delta, bootstrap_ci, holm_bonferroni"
+          - "Each function has a docstring citing its methodology source (paper §V-D for Mann-Whitney; standard stats refs for the others)"
+          - "test_experiments_stats.py has equation-level tests for each function (known-analytical inputs → expected outputs within tolerance)"
+          - "Tests PASS in .venv-w1 (verify: ≥ 8 new tests)"
+
+      - id: W8-3
+        slug: table-generators
+        name: Table generators A-H from summary CSV
+        purpose: "Reads VALIDATION-SUMMARY.csv + per-run results, emits Markdown table strings for A-H per ANALYTICS-PLAN.md §7."
+        files:
+          - python_refactor/experiments/tables.py
+          - python_refactor/tests/test_experiments_tables.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "tables.py exposes generate_table_a..generate_table_h functions"
+          - "Each returns a Markdown-formatted string suitable for embedding in VALIDATION-RESULTS.md"
+          - "Numerical formatting per ANALYTICS-PLAN.md §7 (4 sig figs default; p < 0.001 rendered as '<0.001')"
+          - "test_experiments_tables.py has smoke + format tests (≥ 4 tests)"
+
+      - id: W8-4
+        slug: report-orchestrator
+        name: Report orchestrator (CSVs → populated VALIDATION-RESULTS.md)
+        purpose: "Composes stats + tables; reads aggregate summary + per-run metrics; emits a populated copy of VALIDATION-RESULTS.md."
+        files:
+          - python_refactor/experiments/report.py
+        depends_on: [W8-2, W8-3]
+        size: M
+        acceptance_criteria:
+          - "report.py CLI: --summary VALIDATION-SUMMARY.csv --runs results/ --template docs/VALIDATION-RESULTS.md --output docs/VALIDATION-RESULTS.populated.md"
+          - "Output file replaces 🚧 markers with computed values where possible"
+          - "Leaves 🚧 in cells that require runs not yet executed (graceful incompleteness)"
+          - "Embeds receipt block per ANALYTICS-PLAN.md §8 (git SHA + uv lock + seeds + command)"
+
+    parallel_groups:
+      - [W8-1, W8-2, W8-3]
+      - [W8-4]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 4 units MERGED with green pre-pr battery"
+        - "W7-1-CARRY-1 closed: validation_matrix real-run smoke-test PASSES end-to-end"
+        - "Stats helpers + table generators + report orchestrator all importable + tested"
+        - "Retros at .dfg/retrospectives/W8/W8-N.md with ADR-004 frontmatter"
+      checkpoint_file: .dfg/checkpoints/W8-gate.md
