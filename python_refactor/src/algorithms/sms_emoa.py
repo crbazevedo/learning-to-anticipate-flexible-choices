@@ -112,7 +112,15 @@ class SMSEMOA:
         self.pareto_front = []
         self.hypervolume_history = []
         self.stochastic_hypervolume_history = []
-        
+
+        # W16-3: per-generation [ROI_max, ROI_min, risk_max, risk_min]
+        # trace, computed from rank-1 (Pareto front) only. Used to
+        # diagnose whether the front extent shrinks over generations
+        # (which it should NOT — extrema preservation is the W16-3
+        # fix). Each entry is a dict {gen, roi_max, roi_min,
+        # risk_max, risk_min}.
+        self.extrema_trace: List[Dict[str, float]] = []
+
         # Performance tracking
         self.function_evaluations = 0
         self.current_generation = 0
@@ -535,21 +543,77 @@ class SMSEMOA:
         return best_idx
     
     def _remove_worst_solution(self):
-        """Remove the solution with the lowest hypervolume contribution."""
-        # Remove solutions until population size is correct
+        """
+        Remove the solution with the lowest hypervolume contribution.
+
+        W16-3: rank-1 extrema (argmax(ROI), argmin(risk)) are protected
+        from removal so the HV bounding box doesn't shrink over
+        generations. Per standard SMS-EMOA practice (Beume et al. 2007
+        EJOR 181(3):1653-1669) the HV indicator is most sensitive to
+        anchor solutions which define the bounding box; pruning them
+        introduces sawtooth instability in the per-gen HV trajectory.
+
+        Edge cases:
+          - Rank-1 with < 3 solutions: fall back to no protection
+            (otherwise reduce can't proceed at all).
+          - Rank-1 anchors that happen to coincide (same solution is
+            both argmax(ROI) AND argmin(risk)): protect that single
+            solution.
+        """
         while len(self.population) > self.population_size:
-            # Find worst solution
-            worst_idx = 0
-            worst_contribution = getattr(self.population[0], 'hypervolume_contribution', float('inf'))
-            
+            # ── W16-3: identify protected anchor indices ──────────
+            protected = self._identify_protected_anchors()
+
+            # Find worst solution among non-protected
+            worst_idx = -1
+            worst_contribution = float('inf')
+
             for i, solution in enumerate(self.population):
+                if i in protected:
+                    continue
                 contribution = getattr(solution, 'hypervolume_contribution', float('inf'))
                 if contribution < worst_contribution:
                     worst_contribution = contribution
                     worst_idx = i
-            
+
+            # Edge case: every solution is protected (rank-1 too small).
+            # Fall back to the original behavior (pick globally worst,
+            # may evict an anchor — better than infinite loop).
+            if worst_idx == -1:
+                worst_idx = 0
+                worst_contribution = getattr(self.population[0], 'hypervolume_contribution', float('inf'))
+                for i, solution in enumerate(self.population):
+                    contribution = getattr(solution, 'hypervolume_contribution', float('inf'))
+                    if contribution < worst_contribution:
+                        worst_contribution = contribution
+                        worst_idx = i
+
             # Remove worst solution
             self.population.pop(worst_idx)
+
+    def _identify_protected_anchors(self) -> set:
+        """
+        Identify rank-1 extrema (argmax(ROI), argmin(risk)) — W16-3.
+
+        Returns:
+            set of population indices to protect from reduce-step eviction.
+            Empty set if rank-1 has < 3 solutions (then protection is
+            counter-productive — would block reduce entirely).
+        """
+        # Pareto front (rank 0 = first non-dominated front; some code
+        # paths use rank 0, others rank 1 — be permissive).
+        rank1 = [
+            (i, s) for i, s in enumerate(self.population)
+            if getattr(s, 'Pareto_rank', None) in (0, 1)
+        ]
+        if len(rank1) < 3:
+            # Edge case: rank-1 too small to protect anchors safely.
+            return set()
+
+        # argmax(ROI) and argmin(risk) within rank-1.
+        argmax_roi_idx = max(rank1, key=lambda pair: pair[1].P.ROI)[0]
+        argmin_risk_idx = min(rank1, key=lambda pair: pair[1].P.risk)[0]
+        return {argmax_roi_idx, argmin_risk_idx}
     
     def _update_pareto_front(self):
         """Update the Pareto front."""
@@ -561,11 +625,23 @@ class SMSEMOA:
             # Compute current hypervolume
             hypervolume = self._compute_hypervolume()
             self.hypervolume_history.append(hypervolume)
-            
+
             # Compute expected future hypervolume if using anticipatory learning
             if self.anticipatory_learning is not None:
                 future_hypervolume = self._compute_expected_future_hypervolume()
                 self.stochastic_hypervolume_history.append(future_hypervolume)
+
+            # W16-3: per-generation Pareto front extrema trace
+            rois = [s.P.ROI for s in self.pareto_front]
+            risks = [s.P.risk for s in self.pareto_front]
+            self.extrema_trace.append({
+                "gen": self.current_generation,
+                "roi_max": float(max(rois)),
+                "roi_min": float(min(rois)),
+                "risk_max": float(max(risks)),
+                "risk_min": float(min(risks)),
+                "front_size": len(self.pareto_front),
+            })
     
     def _compute_hypervolume(self) -> float:
         """Compute hypervolume of current Pareto front."""
