@@ -241,14 +241,21 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
                 predicted_solution.P.ROI = predicted_state[0]
                 predicted_solution.P.risk = predicted_state[1]
                 
-                # Update Kalman state
+                # Update Kalman state.
+                # W5-2: drop the pre-existing `Q=kalman_state.Q` kwarg —
+                # KalmanParams doesn't carry a Q (process-noise) field
+                # (verified against src/algorithms/kalman_filter.py:32-56),
+                # so the reference was always a latent AttributeError waiting
+                # for the dead `_generate_predicted_solution` path to wake up.
+                # Surfaced by W5-2 covariance-threading tests (the first
+                # tests to actually construct a KF-bearing solution and
+                # drive this path).
                 predicted_solution.P.kalman_state = KalmanParams(
                     x=predicted_state,
                     P=step_prediction['covariance'],
                     F=kalman_state.F,
                     H=kalman_state.H,
-                    Q=kalman_state.Q,
-                    R=kalman_state.R
+                    R=kalman_state.R,
                 )
         else:
             # Fallback: simple linear prediction
@@ -510,6 +517,20 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
         (paper Eq 15) — only mean vectors. A deeper integration unit
         would close that gap.
 
+        W5-2 (closes W4-2-CARRY-1): the mean-only restriction is
+        LIFTED. When `solution.P.kalman_state` is present, the
+        anticipatory covariance is computed per paper Eq (15)
+        generalized to the multi-horizon convex combo:
+
+            Σ_combined = w_0² · Σ_t + Σ_{h=1}^{H-1} w_h² · Σ_{t+h}
+
+        where w_0 = (1 - Σλ) and w_h = λ_{t+h}. The result is
+        positive-semidefinite (sum of weighted PSD matrices with
+        non-negative weights). Written back to
+        `solution.P.kalman_state.P[:2, :2]` (the [ROI, risk] block
+        per paper Eq 11). Degrades to mean-only when kalman_state
+        is None or lacks the predicted-side covariance.
+
         Args:
             population: list of Solution objects to update in-place
             current_time: current time step
@@ -533,8 +554,10 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
                 continue
 
             # For each future horizon h=1..H-1, build the predicted
-            # [ROI, risk] state from the existing predictor surface.
+            # [ROI, risk] state + (W5-2) covariance from the existing
+            # predictor surface.
             predicted_states = []
+            predicted_covs = []  # W5-2: per-horizon [ROI, risk] cov blocks
             for h_idx, _ in enumerate(lambda_rates):
                 h = h_idx + 1  # horizons are 1-indexed in the API
                 predicted_solution = self._generate_predicted_solution(
@@ -544,17 +567,43 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
                     predicted_solution.P.ROI,
                     predicted_solution.P.risk,
                 ]))
+                # W5-2: pull the predicted [ROI, risk] covariance block
+                # if the predicted solution carries a kalman_state.
+                pred_kf = getattr(predicted_solution.P, 'kalman_state', None)
+                if pred_kf is not None and getattr(pred_kf, 'P', None) is not None:
+                    predicted_covs.append(np.array(pred_kf.P[:2, :2]))
+                else:
+                    predicted_covs.append(None)
 
-            # Paper Eq (14): the multi-horizon convex combination.
+            # Paper Eq (14): the multi-horizon convex combination on
+            # mean vectors.
             anticipatory_state = self.apply_anticipatory_learning_rule(
                 current_state, predicted_states, lambda_rates,
             )
 
-            # Write back the anticipated state. The solution's covariance
-            # update (paper Eq 15) is NOT threaded here — see honest scar
-            # in the docstring.
+            # Write back the anticipated MEAN.
             solution.P.ROI = float(anticipatory_state[0])
             solution.P.risk = float(anticipatory_state[1])
+
+            # W5-2: paper Eq (15) covariance threading. Only fires when
+            # the current solution AND every predicted-horizon solution
+            # carry a kalman_state with a P matrix; otherwise leaves the
+            # current covariance untouched (graceful degradation).
+            current_kf = getattr(solution.P, 'kalman_state', None)
+            if (current_kf is not None
+                    and getattr(current_kf, 'P', None) is not None
+                    and all(c is not None for c in predicted_covs)):
+                current_cov = np.array(current_kf.P[:2, :2])
+                w_0 = 1.0 - sum(lambda_rates)
+                # Σ_combined = w_0² · Σ_t + Σ w_h² · Σ_{t+h}
+                combined_cov = (w_0 ** 2) * current_cov
+                for w_h, cov_h in zip(lambda_rates, predicted_covs):
+                    combined_cov = combined_cov + (w_h ** 2) * cov_h
+                # Write back to the [ROI, risk] block of P, leaving the
+                # velocity block untouched (W4 scope; deeper integration
+                # would thread velocities too).
+                current_kf.P[:2, :2] = combined_cov
+
             solution.multi_horizon_applied = True
 
         # Mirror the parent's bookkeeping so historical-population

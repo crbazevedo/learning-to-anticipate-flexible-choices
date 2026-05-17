@@ -535,5 +535,126 @@ class TestW4_2_LearnPopulationOverride(unittest.TestCase):
         )
 
 
+class TestW5_2_CovarianceThreading(unittest.TestCase):
+    """W5-2 regression: MultiHorizonAnticipatoryLearning.learn_population
+    threads covariance updates per paper Eq (15) when kalman_state is
+    present on the current and predicted solutions.
+
+    Closes W4-2-CARRY-1.
+
+    Paper canon:
+        Σ_combined = w_0² · Σ_t + Σ_{h=1}^{H-1} w_h² · Σ_{t+h}
+
+    where w_0 = (1 - Σλ) and w_h = λ_{t+h}. Σ_combined is positive-
+    semidefinite by construction (sum of weighted PSD matrices with
+    non-negative weights).
+    """
+
+    def setUp(self):
+        np.random.seed(7)
+        self.learner = MultiHorizonAnticipatoryLearning(
+            max_horizon=3, monte_carlo_samples=50,
+        )
+
+    def _make_solution_with_kf(self, roi: float, risk: float,
+                                roi_var: float = 0.01, risk_var: float = 0.01,
+                                cov: float = 0.0):
+        """Build a Solution-shaped mock WITH a real KalmanParams whose
+        P[:2, :2] is the [ROI, risk] covariance. Uses create_kalman_params
+        helper so F + H + R are all properly populated (required by
+        the n-step predictor that `_generate_predicted_solution` calls).
+        """
+        from src.algorithms.kalman_filter import create_kalman_params
+
+        kalman_state = create_kalman_params(initial_roi=roi, initial_risk=risk)
+        # Override the [ROI, risk] covariance block to the test-specified
+        # values; leave velocity block at the create_kalman_params default.
+        kalman_state.P[0, 0] = roi_var
+        kalman_state.P[1, 1] = risk_var
+        kalman_state.P[0, 1] = cov
+        kalman_state.P[1, 0] = cov
+        kalman_state.P_next = kalman_state.P.copy()
+
+        class MockPortfolio:
+            def __init__(self, roi, risk, kf):
+                self.ROI = roi
+                self.risk = risk
+                self.num_assets = 3
+                self.investment = np.array([0.4, 0.3, 0.3])
+                self.cardinality = 3
+                self.kalman_state = kf
+
+        class MockSolution:
+            def __init__(self, roi, risk, kf):
+                self.P = MockPortfolio(roi, risk, kf)
+                self.alpha = 0.5
+                self.prediction_error = 0.02
+                self.anticipation = False
+
+        return MockSolution(roi, risk, kalman_state)
+
+    def test_covariance_updated_in_place_for_solution_with_kf(self):
+        """When solution has kalman_state, learn_population computes
+        the Eq (15) Σ_combined and writes it to P[:2, :2].
+        """
+        sol = self._make_solution_with_kf(roi=0.10, risk=0.05,
+                                            roi_var=0.005, risk_var=0.005)
+        original_cov = sol.P.kalman_state.P[:2, :2].copy()
+
+        self.learner.learn_population([sol], current_time=1)
+
+        new_cov = sol.P.kalman_state.P[:2, :2]
+        # Covariance should be a real 2x2 numpy array.
+        self.assertEqual(new_cov.shape, (2, 2))
+        self.assertTrue(np.all(np.isfinite(new_cov)))
+        # In the multi-horizon path with non-trivial λ, the combined
+        # covariance differs from the original (weighted sum, not a
+        # passthrough). Original was 0.005·I; combined typically smaller
+        # because each w² < 1 and Σ w² < 1 for the weighted sum.
+        self.assertFalse(np.allclose(new_cov, original_cov),
+                          "Covariance should be updated, not left unchanged")
+
+    def test_covariance_remains_positive_semidefinite(self):
+        """Σ_combined per paper Eq (15) is PSD by construction. Verify
+        eigenvalues all >= 0 (within numerical tolerance).
+        """
+        sol = self._make_solution_with_kf(roi=0.1, risk=0.05)
+        self.learner.learn_population([sol], current_time=1)
+
+        new_cov = sol.P.kalman_state.P[:2, :2]
+        eigenvalues = np.linalg.eigvalsh(new_cov)
+        # PSD: all eigenvalues >= 0 (small numerical slack)
+        for eig in eigenvalues:
+            self.assertGreaterEqual(eig, -1e-9,
+                                     f"Covariance must remain PSD; eig={eig:.2e}")
+
+    def test_kalman_state_none_does_not_break_learn_population(self):
+        """Graceful degradation: when current solution has no
+        kalman_state, the mean update still runs and the solution is
+        still tagged. No covariance update + no exception.
+        """
+        class MockPortfolio:
+            def __init__(self, roi, risk):
+                self.ROI = roi
+                self.risk = risk
+                self.num_assets = 3
+                self.investment = np.array([0.4, 0.3, 0.3])
+                self.cardinality = 3
+                self.kalman_state = None  # ← graceful-degradation case
+
+        class MockSolution:
+            def __init__(self, roi, risk):
+                self.P = MockPortfolio(roi, risk)
+                self.alpha = 0.5
+                self.prediction_error = 0.02
+                self.anticipation = False
+
+        sol = MockSolution(0.1, 0.05)
+
+        # Must NOT raise.
+        self.learner.learn_population([sol], current_time=1)
+        self.assertTrue(sol.multi_horizon_applied)
+
+
 if __name__ == '__main__':
     unittest.main()
