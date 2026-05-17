@@ -1,0 +1,20 @@
+proposal_id: wave-W4-20260517T003031Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T00:30:31Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W4
+  action: add
+trigger: retro-driven
+rationale: "W4 \u2014 closes W3 algorithm + integration carries. 2 file-disjoint units\
+  \ in 1 parallel group: W4-1 clamps _compute_traditional_learning_rate output to\
+  \ [rate_lwb=0, rate_upb=0.5] per C++ comment intent (closes W3-3-CARRY-1; 1-line\
+  \ fix); W4-2 overrides MultiHorizonAnticipatoryLearning.learn_population to actually\
+  \ drive the multi-horizon convex combination via apply_anticipatory_learning_rule\
+  \ (closes W1-3-CARRY-3; ~50 lines). Defers W3-5-CARRY-1 (test pollution) to W5 \u2014\
+  \ investigation-heavy."
+evidence: []
+accepted_at: '2026-05-17T00:31:16Z'
+operator_note: 'Approved: add W4 with 2 file-disjoint units. Per directive #4.'
