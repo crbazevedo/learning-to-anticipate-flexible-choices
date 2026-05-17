@@ -52,27 +52,57 @@ class SMSEMOA:
     
     def __init__(self, population_size: int = 100, generations: int = 200,
                  crossover_rate: float = 0.9, mutation_rate: float = 0.1,
-                 tournament_size: int = 3, reference_point_1: float = 0.0,
-                 reference_point_2: float = 1.0):
+                 tournament_size: int = 3,
+                 z_ref: tuple[float, float] = (0.0, 0.2),
+                 # Deprecated kwargs kept for callers that still pass them:
+                 reference_point_1: float | None = None,
+                 reference_point_2: float | None = None):
         """
         Initialize SMS-EMOA algorithm.
-        
+
         Args:
             population_size: Size of the population
             generations: Number of generations
             crossover_rate: Crossover probability
             mutation_rate: Mutation probability
             tournament_size: Tournament selection size
-            reference_point_1: First reference point for hypervolume (ROI)
-            reference_point_2: Second reference point for hypervolume (Risk)
+            z_ref: tuple (return_min, risk_max) — the HV reference point
+                in the order (R1=return_min, R2=risk_max) used internally.
+
+                **W15-1 (BACKLOG B1)**: thesis §7.2.3 p.147 specifies
+                ``z^ref = (0.2, 0.0)^T`` "in terms of risk and return"
+                meaning risk_max=0.2 and return_min=0.0. Mapping to the
+                INTERNAL (R1, R2) ordering used by
+                _compute_hypervolume_contributions_class
+                (``(ROI - R1) * (R2 - risk)``): R1=return_min=0.0,
+                R2=risk_max=0.2. Pre-W15-1 default was R2=1.0
+                — far beyond the thesis feasibility boundary
+                of 20% risk — which allowed high-risk solutions to
+                accumulate positive HV contribution + skewed selection
+                pressure outside the feasible region.
+
+                Verbatim thesis quote (§7.2.3 p.147):
+                "Finally, the reference point for computing Hypv was
+                set to z^ref = (0.2, 0.0)^T in terms of risk and
+                return, coinciding with the objective space feasibility
+                boundaries (maximum risk of 20% and minimum mean
+                return of 0%)."
+            reference_point_1: DEPRECATED — use z_ref. Kept for
+                backward compatibility; if supplied overrides z_ref[0].
+            reference_point_2: DEPRECATED — use z_ref. Kept for
+                backward compatibility; if supplied overrides z_ref[1].
         """
         self.population_size = population_size
         self.generations = generations
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.tournament_size = tournament_size
-        self.R1 = reference_point_1  # ROI reference point
-        self.R2 = reference_point_2  # Risk reference point
+        # Resolve z_ref with deprecated-kwarg overrides.
+        r1 = reference_point_1 if reference_point_1 is not None else z_ref[0]
+        r2 = reference_point_2 if reference_point_2 is not None else z_ref[1]
+        self.R1 = r1  # ROI reference point (return_min in thesis terms)
+        self.R2 = r2  # Risk reference point (risk_max in thesis terms)
+        self.z_ref = (r1, r2)  # canonical exposure for downstream consumers
         
         # Anticipatory learning components
         self.anticipatory_learning = None
