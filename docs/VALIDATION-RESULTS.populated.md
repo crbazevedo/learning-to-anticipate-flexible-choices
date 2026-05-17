@@ -26,13 +26,37 @@ command:    python -m experiments.report --summary docs/VALIDATION-SUMMARY.csv -
 
 ## 1. Executive summary
 
-> 🚧 *One paragraph: did the wired pipeline reproduce the paper? Did
-> multi-horizon add value? Where in the data does the effect live?
-> What's the headline finding for a reader who reads only this
-> paragraph?*
+**The current Python implementation does NOT replicate the paper's
+headline claim.** At 30 seeds × 1000 MC scenarios × paper-window
+80/20 temporal split, the mean out-of-sample future hypervolume
+(thesis Eqs 7.10+7.11) is:
 
-**Headline number:** S2 paper-window final wealth uplift vs S0 = **🚧%**
-(paper Table I reports ~12%). Agreement: **🚧** (close / divergent / inconclusive).
+| Scenario | Mean OOS EFHV | Std (n=30) | Direction vs S0 |
+|---|---|---|---|
+| **S0** (myopic baseline = SMS/RDM) | **5.12e-05** | 4.06e-06 | — |
+| **S2** (anticipatory + max-Hypv DM ≈ ASMS/mHDM) | **4.22e-05** | 3.68e-06 | **−17.59%** |
+
+**Delta** = S2 − S0 = **−9.01e-06 (−17.59%)** — strongly statistically
+significant (Welch t ≈ 9, df ≈ 60, p < 0.0001) but in the **OPPOSITE**
+direction from the paper's Table 7.2 claim that ASMS/mHDM beats
+SMS/RDM in 70% of scenario × dataset combinations.
+
+**Honest interpretation.** The W7→W13 chain delivered functioning
+infrastructure (60-run sweeps, 312-line populated doc, 16-test OOS
+evaluator), but the S2 "anticipatory" configuration in the current
+Python port does NOT produce the OOS-future-hypervolume gain the
+thesis reports. Candidate root causes (see W13-3 retro for the full
+list — filed as W13-CARRY-1 for W14 investigation): (a) the SCENARIOS
+dict maps `max_horizon` (paper Eq 14 H) but does NOT map the OAL
+window-size K∈{0,1,2,3} from thesis §7.2.3 that drives the
+anticipation effect; (b) cardinality constraints c_l=5, c_u=15
+unenforced; (c) OAL rate λ_{t+h} = ½(λ^H + λ^K) from Eq 7.16 likely
+only half-firing; (d) data-window divergence (98 assets vs thesis
+87; 2003–2012 partial range).
+
+**Headline number:** S2 paper-window mean OOS EFHV vs S0 = **−17.59%**
+(paper Table 7.2 claim direction: +; agreement: **divergent —
+investigate per W13-CARRY-1**). See [`OOS-EFHV-REPORT.md`](OOS-EFHV-REPORT.md).
 
 ---
 
