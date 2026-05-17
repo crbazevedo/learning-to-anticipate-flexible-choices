@@ -77,9 +77,16 @@ _BASELINE_MYOPIC = {"enabled": False}
 
 
 def _asms_learning_config(K: int, use_multi_horizon: bool = True,
-                            use_v2_anticipative_rate: bool = False) -> dict:
+                            use_v2_anticipative_rate: bool = False,
+                            max_horizon: int = 2) -> dict:
     """Construct the AnticipatoryLearning constructor kwargs for K > 0.
-    H = 2 fixed per thesis Eq 7.16.
+
+    H semantics (verified W21-1 code-read):
+      - max_horizon=2 → MultiHorizonAnticipatoryLearning loops `for h in
+        range(1, 2)` = [1] → single one-step-ahead prediction. Matches
+        thesis Eq 7.16 denominator (H-1)=1.
+      - max_horizon=3 → loops [1, 2] → one-step + two-step recursive
+        prediction via n_step_prediction.kalman_n_step_prediction.
 
     W20-1 / Reading-E: when use_v2_anticipative_rate=True, the learner
     instance uses v2's monotonic α = 1 - TIP formula (legacy-cpp-v2/
@@ -91,7 +98,7 @@ def _asms_learning_config(K: int, use_multi_horizon: bool = True,
         "use_multi_horizon": use_multi_horizon,
         "parameters": {
             "window_size": K,        # K = OAL historical window
-            "max_horizon": 2,         # H = 2 (one-step-ahead) per thesis
+            "max_horizon": max_horizon,  # H per thesis Eq 7.16 (H-1 future steps)
             "monte_carlo_samples": 500,
             "use_v2_anticipative_rate": use_v2_anticipative_rate,  # W20-1 / Reading-E
         },
@@ -175,6 +182,49 @@ SCENARIOS: dict[str, dict[str, Any]] = {
         "name": "ASMS/mHDM K=3 + v2 stability (Reading-F isolated experiment)",
         "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=False),
         "algorithm_overrides": {"use_v2_stability_weighting": True},
+        "dm": "mHDM",
+    },
+    # ─── W21-5 ablation matrix scenarios (V5/V6/V7) ─────────────────────
+    # V5: v2_rate + sqrt removed (W18-CARRY-1 / Reading-A risk-scale fix).
+    # Tests whether returning bare variance per thesis Eq 7.4 (instead of
+    # std-dev) closes residual gap after Reading E.
+    "ASMS_mHDM_K3_v2rate_noSqrt": {
+        "name": "ASMS/mHDM K=3 + v2 rate + sqrt-removed (W21-5 V5)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True),
+        "algorithm_overrides": {"use_thesis_eq74_risk": True},
+        "dm": "mHDM",
+    },
+    # V6 stub: v2_rate + KF lifecycle flag (full impl deferred). Smoke
+    # exists as control; expected to behave identically to v2_rate alone
+    # until V6 impl lands.
+    "ASMS_mHDM_K3_v2rate_kfV6": {
+        "name": "ASMS/mHDM K=3 + v2 rate + KF lifecycle flag (W21-5 V6 stub)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True),
+        "algorithm_overrides": {"use_v2_kf_lifecycle": True},
+        "dm": "mHDM",
+    },
+    # V7: v2_rate + v2 entropy operators (raise/lower) in mutation suite.
+    # Tests whether adding the 2 non-thesis mutation operators (W21-3)
+    # closes residual gap.
+    "ASMS_mHDM_K3_v2rate_v2entropy": {
+        "name": "ASMS/mHDM K=3 + v2 rate + v2 entropy ops (W21-5 V7)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True),
+        "algorithm_overrides": {"use_v2_entropy_operators": True},
+        "dm": "mHDM",
+    },
+    # H=3 variant: same as ASMS_mHDM_K3 default but with max_horizon=3
+    # (genuine two-step-ahead via recursive KF prediction). Tests whether
+    # the paper headline (which may have used H>2) is recoverable with
+    # additional anticipation depth.
+    "ASMS_mHDM_K3_H3": {
+        "name": "ASMS/mHDM K=3 + H=3 two-step-ahead (vs default H=2 one-step)",
+        "learning": _asms_learning_config(K=3, max_horizon=3),
+        "dm": "mHDM",
+    },
+    # H=3 with v2_rate: combined two-step horizon + v2 monotonic rate.
+    "ASMS_mHDM_K3_H3_v2rate": {
+        "name": "ASMS/mHDM K=3 + H=3 + v2 rate (two-step Reading-E)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True, max_horizon=3),
         "dm": "mHDM",
     },
     # ─── Legacy aliases for backward compat with W12-W14 reports ─────────

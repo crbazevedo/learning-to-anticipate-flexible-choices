@@ -56,6 +56,15 @@ class Portfolio:
     # Configuration
     max_cardinality: int = 10
     robustness: bool = False
+
+    # W21-5 V5 (W18-CARRY-1 Reading): when True, compute_risk returns the
+    # bare variance per thesis Eq 7.4 (`u^T Σ u`) instead of std-dev
+    # (`sqrt(u^T Σ u)`). The thesis defines portfolio risk as variance;
+    # Python's pre-W21-5 default added sqrt, mismatching the thesis scale
+    # and affecting KF covariance + dominance comparisons.
+    # Default False preserves pre-W21-5 behavior across all callers; the
+    # SMSEMOA constructor's use_thesis_eq74_risk kwarg toggles this.
+    use_thesis_eq74_risk: bool = False
     
     def __init__(self, num_assets: int):
         """
@@ -248,17 +257,32 @@ class Portfolio:
     @classmethod
     def compute_risk(cls, portfolio: 'Portfolio', covariance: np.ndarray) -> float:
         """
-        Compute portfolio risk (standard deviation).
-        
+        Compute portfolio risk.
+
+        Default (use_thesis_eq74_risk=False): standard deviation
+        (`sqrt(u^T Σ u)`) — pre-W21-5 behavior preserved for backward
+        compatibility.
+
+        When Portfolio.use_thesis_eq74_risk=True (W21-5 V5 /
+        W18-CARRY-1 Reading): returns bare variance (`u^T Σ u`) per
+        thesis Eq 7.4. This is the original thesis-faithful risk
+        definition; the pre-W21-5 sqrt was added in our Python port
+        and mismatches thesis scale, affecting KF covariance + dominance
+        comparisons in the W17-5 saturation chain.
+
         Args:
             portfolio: Portfolio object
             covariance: Covariance matrix
-        
+
         Returns:
-            Portfolio risk (standard deviation)
+            Portfolio risk (variance OR std-dev depending on
+            class-level use_thesis_eq74_risk flag)
         """
         variance = portfolio.investment @ covariance @ portfolio.investment
-        return np.sqrt(max(variance, 0.0))  # Ensure non-negative
+        variance = max(variance, 0.0)  # Ensure non-negative
+        if cls.use_thesis_eq74_risk:
+            return variance  # thesis Eq 7.4 = bare variance
+        return np.sqrt(variance)  # pre-W21-5 default: std-dev
     
     @classmethod
     def compute_efficiency(cls, portfolio: 'Portfolio'):
