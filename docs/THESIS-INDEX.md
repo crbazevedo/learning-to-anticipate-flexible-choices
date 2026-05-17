@@ -27,6 +27,21 @@ condenses chapters 5–7 of this thesis. **When the two disagree, the
 thesis wins** — it has the unabridged derivations and the explicit
 experimental protocol.
 
+**Companion C++ codebases (added 2026-05-17 during W18 substrate update).**
+TWO C++ implementations are vendored:
+
+| Path | Era | Status |
+|---|---|---|
+| `../legacy-cpp/` | 2013, thesis-companion (pre-paper) | Historical provenance only; **NOT cross-validation oracle** |
+| `../legacy-cpp-v2/` | 2015, paper-companion release (GitHub `crbazevedo/anticipatory-learning-asmoo` @ `6643c92`) | **Cross-validation oracle for the Python port** |
+
+The Python port (`../python_refactor/`) was built against the 2015 v2
+code, which adds the explicit `dirichlet.cpp` module that the 2013
+version lacks. W18 cross-validation work initially used `legacy-cpp/`
+and surfaced false-positive structural divergences; PR (W18-substrate-import)
+imported `legacy-cpp-v2/` as the correct reference. See
+`../legacy-cpp-v2/README.md` for the full diff.
+
 ---
 
 ## §1 Authoritative chapter map (for codebase work)

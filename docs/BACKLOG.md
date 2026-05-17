@@ -39,6 +39,8 @@ canonical template in §6.
 
 - **TH** = Azevedo PhD thesis (`docs/Azevedo_CarlosRenatoBelo_D.pdf`). Page numbers refer to printed thesis pagination (PDF page = printed + 20 frontmatter offset).
 - **PAP** = Azevedo & Von Zuben IEEE TCYB 2015 paper (`docs/paper.pdf`).
+- **CPP2** = 2015-era paper-companion C++ reference at `legacy-cpp-v2/` (GitHub `crbazevedo/anticipatory-learning-asmoo` @ `6643c92`). **Cross-validation oracle for the Python port.** Has `dirichlet.cpp`, `asms_emoa.cpp`, English filenames. Use this for any CPP cross-reference.
+- **CPP1** = 2013-era thesis-companion C++ at `legacy-cpp/`. Historical provenance only — pre-dates the post-thesis refinement that added Dirichlet + ASMS-EMOA naming. **NOT a cross-validation oracle.**
 - **REF** = third-party reference (cited via thesis bibliography pp. 198+).
 - **STD** = standard implementation pattern (no direct paper grounding; cite community practice).
 
