@@ -219,9 +219,8 @@ pip-log.txt
 kit/
 /kit
 
-# uv-managed virtual environments + auto-generated lock (W2-4 deferred locked installs)
+# uv-managed virtual environments (uv.lock IS now tracked, per W3-6)
 .venv/
 .venv-*/
-uv.lock
 __pycache__/
 .pytest_cache/
