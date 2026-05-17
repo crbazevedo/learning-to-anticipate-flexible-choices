@@ -32,12 +32,14 @@ output_contract:
     New regression test asserts the override is invoked + the tag
     is set. All 22 existing multi_horizon tests + new test PASS.
 
-## What this contract does NOT authorise
-
-- Touching anticipatory_learning.py (parent class is left alone).
-- Touching files outside output_contract.
-
 dispatch_instructions: |
+  ## What this contract does NOT authorise
+
+  - Touching anticipatory_learning.py (parent class is left alone).
+  - Touching files outside output_contract.
+
+  ## Implementation
+
   1. multi_horizon_anticipatory.py: add a `learn_population` method on
      MultiHorizonAnticipatoryLearning. Body:
        - Iterate each solution in population.
