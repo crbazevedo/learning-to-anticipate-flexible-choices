@@ -32,47 +32,72 @@ class DataLoader:
         """
         if not asset_files:
             return pd.DataFrame()
-        
+
+        # W9-2: glob-expand entries containing wildcard chars.
+        # The paper-window data ships as 98 per-asset CSVs at
+        # legacy-cpp/executable/data/ftse-original/table*.csv;
+        # before W9-2 the loader treated 'table*.csv' as a literal
+        # filename and silently loaded nothing.
+        from pathlib import Path
+        expanded: list[str] = []
+        for entry in asset_files:
+            p = Path(entry)
+            if any(ch in p.name for ch in "*?["):
+                matches = sorted(p.parent.glob(p.name))
+                expanded.extend(str(m) for m in matches)
+            else:
+                expanded.append(entry)
+
         # Load and combine all asset data
         all_data = []
-        
-        for file_path in asset_files:
+
+        for file_path in expanded:
             try:
                 # Load CSV file
                 df = pd.read_csv(file_path)
-                
+
                 # Convert date column
                 df['Date'] = pd.to_datetime(df['Date'])
-                
+
                 # Filter by date range if specified
                 if date_range:
                     start_date = pd.to_datetime(date_range.get('start', df['Date'].min()))
                     end_date = pd.to_datetime(date_range.get('end', df['Date'].max()))
                     df = df[(df['Date'] >= start_date) & (df['Date'] <= end_date)]
-                
+
                 # Calculate returns
                 df['Return'] = df['Close'].pct_change()
-                
+
+                # W9-2: tag each row with an asset_id derived from the
+                # filename stem; required for the post-concat pivot below
+                # (pre-W9-2 columns=None → KeyError(None) at pivot time).
+                df['asset_id'] = Path(file_path).stem
+
                 # Add to combined data
-                all_data.append(df[['Date', 'Return']])
-                
+                all_data.append(df[['Date', 'asset_id', 'Return']])
+
             except Exception as e:
                 print(f"Warning: Could not load {file_path}: {str(e)}")
                 continue
-        
+
         if not all_data:
             return pd.DataFrame()
-        
+
         # Combine all data
         combined_df = pd.concat(all_data, ignore_index=True)
-        
-        # Pivot to get assets as columns
-        returns_df = combined_df.pivot(index='Date', columns=None, values='Return')
-        
-        # Rename columns to asset names
-        if assets and len(assets) <= len(returns_df.columns):
-            returns_df.columns = assets[:len(returns_df.columns)]
-        
+
+        # W9-2: pivot on asset_id (the tag added above). Pre-W9-2 this
+        # was pivot(columns=None) → KeyError(None) in modern pandas.
+        returns_df = combined_df.pivot(index='Date', columns='asset_id', values='Return')
+
+        # Apply the `assets` filter when supplied: keep only those columns
+        # that match (and preserve the requested order). When `assets` is
+        # empty / None, return all loaded asset columns.
+        if assets:
+            kept = [a for a in assets if a in returns_df.columns]
+            if kept:
+                returns_df = returns_df[kept]
+
         return returns_df.fillna(0)
     
     def load_market_data(self, market_files: List[str], date_range: Dict[str, str]) -> pd.DataFrame:
