@@ -1,7 +1,7 @@
 {
-  "active_wave": "W17",
+  "active_wave": "W18",
   "events_source": ".dfg/events.jsonl",
-  "last_updated": "2026-05-17T18:12:23Z",
+  "last_updated": "2026-05-17T20:02:58Z",
   "schema_version": "2",
   "units": {
     "W1-1": {
@@ -144,6 +144,26 @@
       "checkpoint_chain": [],
       "state": "DRAFT"
     },
+    "W18-1": {
+      "checkpoint_chain": [],
+      "state": "DRAFT"
+    },
+    "W18-2": {
+      "checkpoint_chain": [],
+      "state": "DRAFT"
+    },
+    "W18-3": {
+      "checkpoint_chain": [],
+      "state": "DRAFT"
+    },
+    "W18-4": {
+      "checkpoint_chain": [],
+      "state": "DRAFT"
+    },
+    "W18-5": {
+      "checkpoint_chain": [],
+      "state": "DRAFT"
+    },
     "W2-1": {
       "checkpoint_chain": [],
       "state": "DRAFT"
@@ -257,6 +277,6 @@
       "state": "DRAFT"
     }
   },
-  "wave": 17,
+  "wave": 18,
   "wave_state": "PLANNED"
 }
