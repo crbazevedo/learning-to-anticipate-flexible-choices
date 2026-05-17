@@ -1,0 +1,92 @@
+[
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.000370316168931194,
+    "grand_std": 0.00046037201512582303,
+    "wall_clock_s": 7.605262041091919
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003722044248189054,
+    "grand_std": 0.00045572499627958033,
+    "wall_clock_s": 7.9237141609191895
+  },
+  {
+    "scenario": "ASMS_mHDM_K3",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003264456311653772,
+    "grand_std": 0.00036807408918429404,
+    "wall_clock_s": 1127.3355567455292
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2rate",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00033941514070572585,
+    "grand_std": 0.0004023887083679722,
+    "wall_clock_s": 1127.6789407730103
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003277185961592758,
+    "grand_std": 0.0003920292362664808,
+    "wall_clock_s": 1143.3355469703674
+  },
+  {
+    "scenario": "ASMS_mHDM_K3",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003283283235838683,
+    "grand_std": 0.0003816261342803928,
+    "wall_clock_s": 1151.7068061828613
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2rate",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003666243346430651,
+    "grand_std": 0.00043023116389294733,
+    "wall_clock_s": 1161.7192418575287
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2stab",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003328156505872096,
+    "grand_std": 0.0003815033730310493,
+    "wall_clock_s": 748.6981723308563
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003544882021812256,
+    "grand_std": 0.00042913442890431215,
+    "wall_clock_s": 758.8133099079132
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2stab",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003439851354201054,
+    "grand_std": 0.00038020562679705935,
+    "wall_clock_s": 741.7333700656891
+  }
+]
