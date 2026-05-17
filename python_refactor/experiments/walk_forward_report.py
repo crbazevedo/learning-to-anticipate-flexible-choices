@@ -34,7 +34,15 @@ import numpy as np
 import pandas as pd
 
 
-def _load_paper_window_returns() -> pd.DataFrame:
+def _load_paper_window_returns(
+    enforce_thesis_continuous_trades: bool = False,
+) -> pd.DataFrame:
+    """W17-5: optional 87-asset thesis-faithful filter (BACKLOG H4 closure).
+
+    When enforce_thesis_continuous_trades=True, restricts the load to
+    the 87 assets per docs/H4-ASSET-UNIVERSE-EDA.md. Default unchanged
+    (98 assets) for backward compatibility with W12-W16 reports.
+    """
     from experiments.validation_matrix import WINDOWS
     from src.experiments.data_loader import DataLoader
     window = WINDOWS["paper"]
@@ -43,6 +51,7 @@ def _load_paper_window_returns() -> pd.DataFrame:
         [window["asset_files_glob"]],
         date_range={"start": window["date_start"], "end": window["date_end"]},
         assets=[],
+        enforce_thesis_continuous_trades=enforce_thesis_continuous_trades,
     )
 
 
@@ -211,13 +220,25 @@ def main(argv: list[str] | None = None) -> int:
                           help="If set, ExperimentManager appends per-period "
                                "(period, generation, solution_rank, λ^H, λ^K, "
                                "λ, TIP, lambda_k_branch) rows to this CSV.")
+    # W17-5 (BACKLOG H4): opt-in 87-asset thesis-faithful filter
+    # (see docs/H4-ASSET-UNIVERSE-EDA.md).
+    parser.add_argument("--enforce-thesis-continuous-trades",
+                          action="store_true",
+                          help="Restrict asset universe to the 87 thesis-faithful "
+                               "assets per docs/H4-ASSET-UNIVERSE-EDA.md. "
+                               "Default is the full 98-asset legacy archive.")
     args = parser.parse_args(argv)
 
     scenarios = [s.strip() for s in args.scenarios.split(",") if s.strip()]
     seeds = parse_seeds(args.seeds)
     print(f"[wf-report] loading paper-window returns…", file=sys.stderr)
-    full_returns = _load_paper_window_returns()
+    full_returns = _load_paper_window_returns(
+        enforce_thesis_continuous_trades=args.enforce_thesis_continuous_trades,
+    )
     print(f"[wf-report] returns shape: {full_returns.shape}", file=sys.stderr)
+    if args.enforce_thesis_continuous_trades:
+        print(f"[wf-report] H4 87-asset filter ENABLED → {full_returns.shape[1]} assets",
+              file=sys.stderr)
 
     import pickle
     full_returns_pickle = pickle.dumps(full_returns)
