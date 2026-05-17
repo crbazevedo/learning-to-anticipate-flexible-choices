@@ -126,21 +126,48 @@ class SMSEMOA:
         return self.population
     
     def _initialize_population(self, data: Dict[str, Any]):
-        """Initialize population with random solutions."""
+        """Initialize population with random solutions.
+
+        W13-1: set Portfolio class-level statistics (mean_ROI,
+        median_ROI, covariance, robust_covariance) from the asset
+        returns BEFORE constructing Solution objects. Pre-W13-1
+        these were left as None, so Solution.__init__'s guarded
+        `Portfolio.compute_efficiency(self.P)` call silently
+        skipped, leaving every solution with ROI=0 and risk=0.
+        Downstream `_compute_hypervolume` then iterated a Pareto
+        front of zeros and produced hypervolume=0 by construction
+        (the W12-CARRY-1 family — degenerate objectives, not
+        decoupled evaluator).
+        """
+        from ..portfolio.portfolio import Portfolio
+
+        # Resolve asset returns from data['assets'] (DataFrame from
+        # the W9-2 data_loader pivot, already returns-shaped after
+        # W11-2 sanitation).
+        assets_df = data.get('assets')
+        if assets_df is not None and hasattr(assets_df, 'values') and not assets_df.empty:
+            returns = assets_df.values
+            num_assets = returns.shape[1]
+            Portfolio.mean_ROI = Portfolio.estimate_assets_mean_ROI(returns)
+            Portfolio.median_ROI = Portfolio.estimate_assets_median_ROI(returns)
+            Portfolio.covariance = Portfolio.estimate_covariance(
+                Portfolio.mean_ROI, returns)
+            # Robust covariance fallback: use sample cov (a proper
+            # MCD/MVE estimator can land in a later wave).
+            Portfolio.robust_covariance = Portfolio.covariance
+        else:
+            num_assets = data.get('num_assets', 3)
+
         self.population = []
-        
-        # Get number of assets from data
-        num_assets = data.get('num_assets', 3)  # Default to 3 if not specified
-        
         for _ in range(self.population_size):
             solution = Solution(num_assets=num_assets)
-            
+
             # Initialize Kalman filter state
             self._initialize_kalman_state(solution, data)
-            
+
             # Evaluate solution
             self._evaluate_solution(solution, data)
-            
+
             self.population.append(solution)
             self.function_evaluations += 1
     

@@ -107,7 +107,20 @@ class DataLoader:
             if kept:
                 returns_df = returns_df[kept]
 
-        return returns_df.fillna(0)
+        # W13-1 (closes W11-2 gap at source): pct_change crossing a
+        # zero-price quote produces Inf; data-source quirks produce
+        # one-day "returns" of 97999x. Sanitize at the SOURCE so
+        # every downstream consumer (experiment_manager, portfolio_
+        # evaluator, etc.) receives finite-bounded returns. Pre-W13-1
+        # the sanitation lived only in portfolio_evaluator → algorithm's
+        # _initialize_population received Inf → mean_ROI=Inf →
+        # Portfolio.ROI=Inf → hypervolume=NaN (W12-CARRY-1 family).
+        import numpy as _np
+        returns_df = (returns_df
+                       .replace([_np.inf, -_np.inf], 0.0)
+                       .clip(lower=-1.0, upper=1.0)
+                       .fillna(0))
+        return returns_df
     
     def load_market_data(self, market_files: List[str], date_range: Dict[str, str]) -> pd.DataFrame:
         """
