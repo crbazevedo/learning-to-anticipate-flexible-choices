@@ -85,9 +85,44 @@ class PortfolioEvaluator:
             return {'Asset_0': 1.0}
     
     def _get_asset_returns(self, data: Dict[str, Any]) -> pd.DataFrame:
-        """Get asset returns from data."""
+        """Get asset returns from data.
+
+        W11-2 (closes W10-CARRY-1): two-layer guard for the
+        downstream `(1 + portfolio_returns).cumprod()` overflow:
+
+        1. Price-level guard (defensive): if the input median |value|
+           > 1.5, treat as price-level and convert via pct_change.
+           The W9-2 data_loader pivot DOES return returns (not prices)
+           for the standard path, but this protects callers that
+           supply raw prices.
+
+        2. Returns sanitation (the actual W10-CARRY-1 root cause):
+           the real 98-CSV paper-window dataset contains Inf returns
+           (pct_change crosses a zero-price quote — 2 occurrences in
+           the FTSE archive) plus implausible outliers (97999, 42149,
+           28927 — one-day "returns" from data-source quirks).
+           Without sanitation, portfolio_value = Σ weight × Inf = Inf.
+           Cap any |return| > 1.0 (100% daily move) at ±1.0 and replace
+           Inf with 0.0 (no-information treatment).
+        """
         if 'assets' in data and isinstance(data['assets'], pd.DataFrame):
-            return data['assets']
+            df = data['assets']
+            if df.empty:
+                return df
+            # Layer 1: price-level detection.
+            try:
+                median_magnitude = df.abs().median().median()
+            except Exception:
+                median_magnitude = 0.0
+            if median_magnitude > 1.5:
+                df = df.pct_change().dropna(how='all').fillna(0.0)
+            # Layer 2: returns sanitation — eliminate Inf and clip
+            # implausible outliers. Operates on returns-shaped output
+            # regardless of which path produced it.
+            import numpy as _np
+            df = df.replace([_np.inf, -_np.inf], 0.0)
+            df = df.clip(lower=-1.0, upper=1.0)
+            return df
         elif 'assets' in data and isinstance(data['assets'], dict):
             # Combine multiple asset dataframes
             combined_data = []
