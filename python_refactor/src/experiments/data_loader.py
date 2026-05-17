@@ -4,21 +4,51 @@ Data Loader Module
 Handles loading and preprocessing of financial data for portfolio optimization experiments.
 """
 
+import json
 import pandas as pd
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
+# W17-1 (BACKLOG H4): path to the 87-asset thesis-faithful subset
+# artifact, produced by python_refactor/scripts/h4_asset_universe_eda.py.
+# When enforce_thesis_continuous_trades=True, the loader restricts
+# expanded asset_files to the artifact's kept_assets list.
+_H4_ARTIFACT_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "experiments" / "results" / "h4-eda" / "asset_universe_87.json"
+)
+
+_h4_kept_assets_cache: Optional[set] = None
+
+
+def _load_h4_kept_assets() -> set:
+    """W17-1: load the 87-asset thesis-faithful subset filenames once."""
+    global _h4_kept_assets_cache
+    if _h4_kept_assets_cache is not None:
+        return _h4_kept_assets_cache
+    if not _H4_ARTIFACT_PATH.exists():
+        # If the artifact isn't built yet, fail closed (return empty;
+        # caller will see "no assets pass filter" rather than silently
+        # using the un-filtered 98).
+        return set()
+    with open(_H4_ARTIFACT_PATH) as fh:
+        artifact = json.load(fh)
+    _h4_kept_assets_cache = set(artifact.get("kept_assets", []))
+    return _h4_kept_assets_cache
+
+
 class DataLoader:
     """Data loader for portfolio optimization experiments."""
-    
+
     def __init__(self):
         """Initialize the data loader."""
         self.data_cache = {}
-    
-    def load_asset_data(self, asset_files: List[str], date_range: Dict[str, str], 
-                       assets: List[str]) -> pd.DataFrame:
+
+    def load_asset_data(self, asset_files: List[str], date_range: Dict[str, str],
+                       assets: List[str],
+                       enforce_thesis_continuous_trades: bool = False) -> pd.DataFrame:
         """
         Load asset price data from CSV files.
         
@@ -47,6 +77,16 @@ class DataLoader:
                 expanded.extend(str(m) for m in matches)
             else:
                 expanded.append(entry)
+
+        # W17-1 (BACKLOG H4): apply continuous-trades filter when opted in.
+        # The artifact at experiments/results/h4-eda/asset_universe_87.json
+        # lists the 87 thesis-faithful files (per §7.2.3 p.145 "d = 87
+        # for FTSE"). Restrict expanded to those filenames; preserves
+        # order from the glob.
+        if enforce_thesis_continuous_trades:
+            kept_filenames = _load_h4_kept_assets()
+            if kept_filenames:
+                expanded = [s for s in expanded if Path(s).name in kept_filenames]
 
         # Load and combine all asset data
         all_data = []

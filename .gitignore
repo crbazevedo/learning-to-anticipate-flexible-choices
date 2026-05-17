@@ -227,4 +227,8 @@ __pycache__/
 
 # Experiment outputs (per-run artifacts; do not commit)
 python_refactor/experiments/metrics/
-python_refactor/experiments/results/
+# Most experiments/results/ subdirs are ephemeral smokes. Result-of-
+# truth artifacts (W17-1 H4 EDA, etc.) opt back IN via re-include.
+python_refactor/experiments/results/*
+# W17-1: result-of-truth artifacts (committed for test dependencies)
+!python_refactor/experiments/results/h4-eda/
