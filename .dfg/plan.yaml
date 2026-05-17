@@ -969,7 +969,7 @@ waves:
         purpose: "New evaluator module that takes a trained Pareto front + held-out asset returns; computes realized hypervolume per future window step; aggregates to mean OOS EFHV."
         files:
           - python_refactor/experiments/oos_evaluator.py
-          - python_refactor/tests/test_oos_evaluator.py
+          - python_refactor/tests/test_experiments_oos_evaluator.py  # corrected from test_oos_evaluator.py (wave-W13-20260517T081821Z)
         depends_on: [W13-1]
         size: M
         acceptance_criteria:
@@ -983,6 +983,9 @@ waves:
         name: Re-run sweep + report mean OOS EFHV (S0 vs S2)
         purpose: "Re-runs S0+S2 paper × 30 seeds with W13-1 fixes; for each seed runs W13-2 OOS evaluator against extended-window returns; populates VALIDATION-RESULTS.md §1 with mean OOS EFHV S0 vs S2."
         files:
+          - python_refactor/experiments/oos_report.py  # added wave-W13-20260517T081821Z
+          - python_refactor/tests/test_experiments_oos_report.py
+          - docs/OOS-EFHV-REPORT.md
           - docs/VALIDATION-RESULTS.populated.md
           - .dfg/retrospectives/W13/W13-3.md
         depends_on: [W13-2]
