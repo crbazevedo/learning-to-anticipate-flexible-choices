@@ -55,6 +55,9 @@ class SMSEMOA:
                  tournament_size: int = 3,
                  z_ref: tuple[float, float] = (0.0, 0.2),
                  use_v2_stability_weighting: bool = False,
+                 use_thesis_eq74_risk: bool = False,
+                 use_v2_kf_lifecycle: bool = False,
+                 use_v2_entropy_operators: bool = False,
                  # Deprecated kwargs kept for callers that still pass them:
                  reference_point_1: float | None = None,
                  reference_point_2: float | None = None):
@@ -108,6 +111,27 @@ class SMSEMOA:
         # Python's default stability (1/(1+pred_error) or 1/(1+std(weights)))
         # is < 1.0 and depresses Δ_S below the bare Gaussian expectation.
         self.use_v2_stability_weighting = use_v2_stability_weighting
+
+        # W21-5 V5 (W18-CARRY-1): when True, propagate Portfolio.use_thesis_eq74_risk = True
+        # so compute_risk returns bare variance (thesis Eq 7.4) instead of std-dev
+        # (pre-W21-5 default). This is a CLASS-LEVEL toggle; the SMSEMOA instance
+        # sets it at construction and restores on __del__ (best-effort). Set on Portfolio
+        # right now (constructor-time assignment matches the existing pattern for
+        # Portfolio.mean_ROI / Portfolio.covariance).
+        self.use_thesis_eq74_risk = use_thesis_eq74_risk
+        from src.portfolio.portfolio import Portfolio as _Portfolio
+        _Portfolio.use_thesis_eq74_risk = use_thesis_eq74_risk
+
+        # W21-5 V6 (Reading D): when True, mirror v2's combined KF lifecycle —
+        # update→predict per period instead of Python's pre-W21-5 update-only-per-generation.
+        # See _apply_anticipatory_learning for the branch.
+        self.use_v2_kf_lifecycle = use_v2_kf_lifecycle
+
+        # W21-5 V7 (W21-3 finding): when True, swap thesis_dual_mode_mutation
+        # for a 4-operator roulette wheel matching v2's mutation suite
+        # (modify_investment + modify_portfolio + raise_entropy + lower_entropy).
+        # See _run_generation for the branch.
+        self.use_v2_entropy_operators = use_v2_entropy_operators
         # Resolve z_ref with deprecated-kwarg overrides.
         r1 = reference_point_1 if reference_point_1 is not None else z_ref[0]
         r2 = reference_point_2 if reference_point_2 is not None else z_ref[1]
@@ -428,16 +452,27 @@ class SMSEMOA:
         # non-zero weights; or (2) adding/removing assets..."). Legacy
         # SBX `crossover` and `mutation` retained in operators.py for
         # backward compat but no longer used here.
+        #
+        # W21-5 V7 (use_v2_entropy_operators): when True, swap
+        # thesis_dual_mode_mutation for v2_roulette_mutation, which
+        # adds raise_entropy + lower_entropy to the mutation suite
+        # (matching v2's 4-operator pool not in thesis text). W21-3
+        # identified this as an over-implementation candidate.
         from .operators import (
             thesis_dual_mode_mutation, thesis_uniform_crossover,
+            v2_roulette_mutation,
         )
         offspring1, offspring2 = thesis_uniform_crossover(
             self.population[parent1_idx],
             self.population[parent2_idx],
             p=self.crossover_rate,
         )
-        offspring1 = thesis_dual_mode_mutation(offspring1)
-        offspring2 = thesis_dual_mode_mutation(offspring2)
+        if getattr(self, "use_v2_entropy_operators", False):
+            offspring1 = v2_roulette_mutation(offspring1)
+            offspring2 = v2_roulette_mutation(offspring2)
+        else:
+            offspring1 = thesis_dual_mode_mutation(offspring1)
+            offspring2 = thesis_dual_mode_mutation(offspring2)
         
         # Add offspring to population
         self.population.append(offspring1)

@@ -521,3 +521,91 @@ def thesis_dual_mode_mutation(solution: Solution,
                 w[asset] = max(equal_alloc + jitter, 1e-9)
     mutated.P.investment = project_to_simplex(w, c_l, c_u, rng)
     return mutated
+
+
+def v2_raise_entropy_mutation(solution: Solution,
+                                p_factor_lo: float = 0.05,
+                                p_factor_hi: float = 0.25,
+                                c_l: int = THESIS_CARDINALITY_MIN,
+                                c_u: int = THESIS_CARDINALITY_MAX,
+                                rng: np.random.Generator | None = None
+                                ) -> Solution:
+    """Port of v2's raise_entropy (legacy-cpp-v2/source/mutation_operators.cpp:145+).
+
+    Reduces the largest-weight asset's allocation by a uniformly drawn
+    factor in [p_factor_lo, p_factor_hi] = [0.05, 0.25] per v2.
+    Effect: weight distribution flattens (entropy rises).
+
+    Not in thesis text (W21-3 finding). Available via W21-5 V7 ablation
+    flag for empirical contribution-measurement.
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+    n = len(solution.P.investment)
+    w = solution.P.investment.copy()
+    mutated = Solution(num_assets=n)
+    if n > 0 and np.any(w > 0):
+        max_elem = int(np.argmax(w))
+        factor = rng.uniform(p_factor_lo, p_factor_hi)
+        w[max_elem] *= factor  # reduce (factor < 1)
+        w[max_elem] = max(w[max_elem], 0.0)
+    mutated.P.investment = project_to_simplex(w, c_l, c_u, rng)
+    return mutated
+
+
+def v2_lower_entropy_mutation(solution: Solution,
+                                p_factor_lo: float = 0.05,
+                                p_factor_hi: float = 0.25,
+                                c_l: int = THESIS_CARDINALITY_MIN,
+                                c_u: int = THESIS_CARDINALITY_MAX,
+                                rng: np.random.Generator | None = None
+                                ) -> Solution:
+    """Port of v2's lower_entropy (legacy-cpp-v2/source/mutation_operators.cpp:165+).
+
+    Raises the largest-weight asset's allocation by `1 + uniform(0.05, 0.25)`
+    factor per v2. Effect: weight distribution concentrates (entropy lowers).
+
+    Not in thesis text (W21-3 finding). Available via W21-5 V7 ablation flag.
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+    n = len(solution.P.investment)
+    w = solution.P.investment.copy()
+    mutated = Solution(num_assets=n)
+    if n > 0 and np.any(w > 0):
+        max_elem = int(np.argmax(w))
+        factor = 1.0 + rng.uniform(p_factor_lo, p_factor_hi)
+        w[max_elem] *= factor  # raise (factor > 1)
+    mutated.P.investment = project_to_simplex(w, c_l, c_u, rng)
+    return mutated
+
+
+def v2_roulette_mutation(solution: Solution,
+                          rng: np.random.Generator | None = None
+                          ) -> Solution:
+    """W21-5 V7: 4-operator roulette mutation matching v2's mutation_op suite.
+
+    Per legacy-cpp-v2/source/mutation_operators.cpp:17:
+        mutation_op::_operator[4] = {modify_investment, modify_portfolio,
+                                     raise_entropy, lower_entropy}
+
+    Equal-probability selection (since v2's uniform_prob_op gives each a
+    1/4 weight). Operator-specific knobs match v2 defaults.
+
+    Note: Python's thesis_dual_mode_mutation already covers
+    modify_investment + modify_portfolio. This roulette ADDS the two
+    entropy operators (raise/lower) that v2 has but the thesis text doesn't.
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+    pick = rng.integers(0, 4)
+    if pick == 0:
+        # modify_investment ≈ thesis Mode 1
+        return thesis_dual_mode_mutation(solution, rng=rng)  # routes through 50/50 modes
+    elif pick == 1:
+        # modify_portfolio ≈ thesis Mode 2
+        return thesis_dual_mode_mutation(solution, rng=rng)
+    elif pick == 2:
+        return v2_raise_entropy_mutation(solution, rng=rng)
+    else:
+        return v2_lower_entropy_mutation(solution, rng=rng)
