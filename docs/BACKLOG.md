@@ -529,8 +529,22 @@ canonical template in §6.
 # §6 — Canonical wave-unit contract template (grounding discipline)
 
 Every W15+ unit's `.dfg/agents/W<N>-<n>-<slug>.md` MUST follow this
-template for the `read_contract.must_read` section. **The grounding
-pointers come verbatim from the BACKLOG.md item; no paraphrasing.**
+template. **The grounding pointers come verbatim from the BACKLOG.md
+item; no paraphrasing.**
+
+## Schema constraint (W15-gate receipt)
+
+The dfg substrate schema for `read_contract.must_read` requires a
+**plain-string list of relative paths** — NOT a list of dicts with
+`path:`, `pages:`, `sections:`, `excerpt:`, `reason:` fields. Attempting
+the dict form fails `dfg validate` with errors of the form
+"<dict> is not of type 'string'".
+
+**The rich grounding (page numbers, sections, verbatim excerpts,
+per-file reasons) belongs in the contract body markdown below the
+YAML frontmatter**, not in the YAML field itself. The body is human-
+readable, survives schema evolution, and is echoed verbatim into the
+PR description per Rule 7.
 
 ## Template
 
@@ -550,33 +564,12 @@ hardening_max_cycles: 1
 prompt_version: 1
 read_contract:
   must_read:
-    # ─── Item-1 grounding (e.g., B1) ─────────────────────────────────
-    - path: docs/BACKLOG.md
-      sections: ["§1.1 B1 — Internal HV reference point wrong scale"]
-      reason: "Catalog entry — read FIRST"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [147]
-      sections: ["§7.2.3 ASMS Parameters"]
-      excerpt: "the reference point for computing Hypv was set to z^ref = (0.2, 0.0)^T..."
-      reason: "Source of truth for z_ref value"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [57]
-      sections: ["§3.1.1 The Hypervolume (S-Metric) Indicator"]
-      reason: "Formal HV definition (reference-point role)"
-    # ─── Item-2 grounding (e.g., B4) ─────────────────────────────────
-    - path: docs/BACKLOG.md
-      sections: ["§1.1 B4 — Non-simplex weights AND wrong crossover operator"]
-      reason: "Catalog entry — read FIRST"
-    - path: docs/Azevedo_CarlosRenatoBelo_D.pdf
-      pages: [141, 147]
-      sections: ["§7.2", "§7.2.3 Search Operators"]
-      excerpt: "We utilized uniform crossover over the mean DD vectors. For mutation, we randomly choose between (1) modifying the non-zero weights; or (2) adding/removing assets..."
-      reason: "Defines the EXACT operators to implement; uniform crossover NOT SBX"
-    # ─── Files to touch (existing code context) ──────────────────────
-    - path: python_refactor/src/algorithms/operators.py
-      reason: "Module being edited — read current implementation"
-    - path: python_refactor/src/algorithms/sms_emoa.py
-      reason: "Caller of crossover/mutation; need to verify integration"
+    # Grounding details (pages, excerpts, reasons) in contract body
+    # below per BACKLOG §6 (schema requires plain-string list here).
+    - docs/BACKLOG.md
+    - docs/Azevedo_CarlosRenatoBelo_D.pdf
+    - python_refactor/src/algorithms/operators.py
+    - python_refactor/src/algorithms/sms_emoa.py
 output_contract:
   files:
     - <files this unit produces or modifies>
@@ -586,36 +579,65 @@ output_contract:
 dispatch_instructions: |
   <Implementation guidance referencing the grounding>
   Closes BACKLOG: <B1, B4, etc.>
-  
+
   What NOT to do:
     - <constraints, e.g., don't modify other modules>
 ---
 
-# <Title>
+# W<N>-<n> — <Title>
 
-Closes BACKLOG.md items: <list>.
+Closes BACKLOG.md items: **<B1>**, **<B4>**.
 
-<Brief unit description>
+## Thesis grounding
+
+### Item B1 — Internal HV reference point wrong scale
+
+**docs/BACKLOG.md §1.1 B1** — read FIRST for full diagnostic context.
+
+**Thesis §7.2.3 ASMS Parameters (p. 147)** — verbatim:
+> "the reference point for computing Hypv was set to z^ref = (0.2, 0.0)^T..."
+
+**Thesis §3.1.1 The Hypervolume (S-Metric) Indicator (p. 57)** —
+formal HV definition (reference-point role).
+
+### Item B4 — Non-simplex weights AND wrong crossover operator
+
+**docs/BACKLOG.md §1.1 B4** — read FIRST for full diagnostic context.
+
+**Thesis §7.2 + §7.2.3 Search Operators (p. 141, 147)** — verbatim:
+> "We utilized uniform crossover over the mean DD vectors. For mutation,
+>  we randomly choose between (1) modifying the non-zero weights; or
+>  (2) adding/removing assets..."
+
+This defines the EXACT operators to implement; uniform crossover, NOT SBX.
+
+## Files to touch (existing code context)
+
+- `python_refactor/src/algorithms/operators.py` — module being edited
+- `python_refactor/src/algorithms/sms_emoa.py` — caller of crossover/mutation
+
+## Acceptance
+
+<Specific testable criteria>
 ```
 
 ## Rules
 
-1. **Catalog entry first**: every `must_read` block leads with the
+1. **Catalog entry first**: every contract body leads with the
    `docs/BACKLOG.md` section pointer for that item. This forces
    readers to absorb the grounding before reading source files.
 
-2. **Verbatim excerpts**: the `excerpt:` field must be a verbatim
-   quote from the thesis (or paper). No paraphrasing. Use thesis
-   printed page numbers (not PDF page numbers).
+2. **Verbatim excerpts**: thesis excerpts in the body markdown must
+   be verbatim quotes (no paraphrasing). Use thesis printed page
+   numbers (not PDF page numbers).
 
 3. **Multiple grounding sources per item**: when an item is grounded
    in both thesis AND paper AND a third-party reference, list all
-   three in the `must_read` block.
+   three in the body's grounding section.
 
-4. **Reason field always present**: every `must_read` entry includes
-   a `reason:` field explaining WHY the agent must read it. Vague
-   reasons like "background context" are not acceptable — be
-   specific (e.g., "Source of truth for c_l, c_u parameter values").
+4. **Per-file reasons in body**: the body section "Files to touch"
+   explains WHY each file in `must_read` is required. Vague reasons
+   like "background context" are not acceptable.
 
 5. **Implementation patterns (STD)**: when grounding is STD (no
    direct paper requirement), cite the community-standard practice
@@ -624,12 +646,16 @@ Closes BACKLOG.md items: <list>.
 
 6. **Multi-item units**: when a unit closes ≥ 2 BACKLOG items, the
    `purpose` field lists ALL closures, and each item gets its own
-   grounding block in `must_read`. No collapsing.
+   ### subheading in the body's grounding section. No collapsing.
 
 7. **PR description echo**: when shipping the PR for a unit, the PR
    body must reproduce the grounding excerpts in a "Grounding"
    section. This ensures the grounding survives squash-merge into
    master and is searchable via `gh pr view`.
+
+8. **YAML must_read = plain strings only**: per W15-gate schema
+   receipt — the YAML field cannot use dicts. Rich grounding lives
+   in the body. `dfg validate` enforces this.
 
 ## Anti-patterns to avoid
 
@@ -638,8 +664,10 @@ Closes BACKLOG.md items: <list>.
 - ❌ Paraphrasing the thesis — quote verbatim
 - ❌ "this is well known in EA literature" — cite the specific
   reference and quote
-- ❌ Reading code without reading the catalog first — every
-  grounded item LEADS with the BACKLOG.md pointer
+- ❌ Reading code without reading the catalog first — every grounded
+  item LEADS with the BACKLOG.md pointer in the body's grounding section
+- ❌ Dict-form `must_read` entries in YAML — schema rejects them
+  ("is not of type 'string'"); use plain-string list + body markdown
 
 ---
 
