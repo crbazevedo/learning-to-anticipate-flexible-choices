@@ -1,0 +1,22 @@
+proposal_id: wave-W12-20260517T033157Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T03:31:57Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W12
+  action: add
+trigger: retro-driven
+rationale: "W11 closed PASS with all blockers cleared (W10-CARRY-1, W10-CARRY-2, W7-1-CARRY-1).\
+  \ W12 produces the first real multi-seed summary CSV: S0 + S2 \xD7 paper \xD7 30\
+  \ seeds (most-different scenarios per W11-3 receipts; also stress-tests W11-CARRY-1\
+  \ soft scar of identical portfolio_value across scenarios on seed=1). W12-1 ships\
+  \ sweep driver; W12-2 runs + aggregates + reports the first populated VALIDATION-RESULTS.md\
+  \ slice."
+evidence:
+- .dfg/checkpoints/W11-gate.md
+- .dfg/retrospectives/W11/W11-3.md
+accepted_at: '2026-05-17T03:33:13Z'
+operator_note: W12 plan validated; 2 units (sweep driver + 60-run sweep + populated
+  doc)
