@@ -84,44 +84,61 @@ def kalman_prediction(params: KalmanParams) -> None:
     params.P_next = params.F @ params.P @ params.F.T
 
 
-def kalman_update(params: KalmanParams, measurement: np.ndarray) -> None:
+def kalman_update(params: KalmanParams, measurement: np.ndarray) -> float:
     """
     Perform Kalman filter update step.
-    
+
     Args:
         params: Kalman filter parameters
         measurement: Measurement vector [ROI, risk]
+
+    Returns:
+        Squared-residual scalar (innovation^T @ innovation) — W17-2
+        addition. Caller (typically AnticipatoryLearning) accumulates
+        this per-period to feed λ^K per thesis Eq 6.9. Pre-W17-2 the
+        update returned None and the residual was lost; per W16-1-CARRY-1
+        retro this is why λ^K stayed in warm-up fallback throughout the
+        W16-5 smoke. Return value is additive (callers that ignore it
+        are unaffected).
     """
     # Create measurement vector Z
     Z = np.array([measurement[0], measurement[1]])  # [ROI, risk]
-    
+
     # Innovation: y = Z - H * x_next
     y = Z - params.H @ params.x_next
-    
+
     # Innovation covariance: S = H * P_next * H^T + R
     S = params.H @ params.P_next @ params.H.T + params.R
-    
+
     # Kalman gain: K = P_next * H^T * S^(-1)
     K = params.P_next @ params.H.T @ np.linalg.inv(S)
-    
+
     # State update: x = x_next + K * y
     params.x = params.x_next + K @ y
-    
+
     # Covariance update: P = (I - K * H) * P_next
     I = np.eye(params.F.shape[0])
     params.P = (I - K @ params.H) @ params.P_next
 
+    # W17-2: return squared-residual scalar for λ^K (Eq 6.9).
+    # innovation^T @ innovation = sum of squared per-objective residuals.
+    return float(y @ y)
 
-def kalman_filter(params: KalmanParams, measurement: np.ndarray) -> None:
+
+def kalman_filter(params: KalmanParams, measurement: np.ndarray) -> float:
     """
     Perform complete Kalman filter step (prediction + update).
-    
+
     Args:
         params: Kalman filter parameters
         measurement: Measurement vector [ROI, risk]
+
+    Returns:
+        Squared-residual from the update step (W17-2; forwards
+        kalman_update's return value).
     """
     kalman_prediction(params)
-    kalman_update(params, measurement)
+    return kalman_update(params, measurement)
 
 
 def initialize_kalman_matrices() -> tuple[np.ndarray, np.ndarray, np.ndarray]:

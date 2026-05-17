@@ -180,10 +180,14 @@ class TestLambdaTracePlumbing:
         rows = al.get_lambda_trace()
         assert len(rows) == 3
         for r in rows:
-            assert set(r.keys()) == {
+            # W17-2 added lambda_k_branch column; verify ⊆ relationship
+            # so this test stays robust against future schema growth.
+            expected_keys = {
                 "period", "generation", "solution_rank",
                 "lambda_h", "lambda_k", "lambda", "tip",
+                "lambda_k_branch",  # W17-2 addition
             }
+            assert set(r.keys()) == expected_keys
             assert r["generation"] == 42
             assert r["solution_rank"] == 7
             assert r["period"] == 5
