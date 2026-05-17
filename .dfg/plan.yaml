@@ -336,3 +336,49 @@ waves:
         - "W2-4-CARRY-2 closed: uv.lock committed; uv sync --frozen reproducible"
         - "Retro for each unit at .dfg/retrospectives/W3/W3-N.md with ADR-004 YAML frontmatter"
       checkpoint_file: .dfg/checkpoints/W3-gate.md
+
+  - id: W4
+    name: Algorithm + integration carry closure
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W4-20260517T003031Z.
+    # 2 units in 1 parallel group (file-disjoint).
+    units:
+      - id: W4-1
+        slug: traditional-rate-output-clamp
+        name: Clamp _compute_traditional_learning_rate output to [0, 0.5]
+        purpose: "Closes W3-3-CARRY-1. 1-line clamp at anticipatory_learning.py:328 + revert W3-3's test mock to allow random prediction_error."
+        files:
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/tests/test_correspondence_integration.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "_compute_traditional_learning_rate returns `max(rate_lwb, min(rate_upb, anticipation_rate))`"
+          - "W3-3's test mock prediction_error reverted to randomised (clamp guarantees rate in [0, 0.5] regardless)"
+          - "All correspondence_integration tests PASS with random prediction_error"
+
+      - id: W4-2
+        slug: multi-horizon-learn-population-override
+        name: Override MultiHorizon.learn_population to drive multi-horizon machinery
+        purpose: "Closes W1-3-CARRY-3. Adds MultiHorizonAnticipatoryLearning.learn_population that uses apply_anticipatory_learning_rule (paper Eq 14) instead of parent's single-horizon path."
+        files:
+          - python_refactor/src/algorithms/multi_horizon_anticipatory.py
+          - python_refactor/tests/test_multi_horizon_anticipatory.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "MultiHorizonAnticipatoryLearning.learn_population overrides parent's; uses calculate_multi_horizon_lambda_rates + apply_anticipatory_learning_rule"
+          - "New regression test asserts the override is called (not parent's path) — e.g. via spy/mock or by asserting an attribute set during multi-horizon application"
+          - "All 22 existing multi_horizon tests + new test PASS in .venv-w1"
+
+    parallel_groups:
+      - [W4-1, W4-2]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 2 units MERGED with green pre-pr battery"
+        - "W3-3-CARRY-1 closed: traditional rate never negative even under random inputs"
+        - "W1-3-CARRY-3 closed: multi-horizon learn_population is the live path for MultiHorizonAnticipatoryLearning"
+        - "Retros at .dfg/retrospectives/W4/W4-N.md with ADR-004 frontmatter"
+      checkpoint_file: .dfg/checkpoints/W4-gate.md
