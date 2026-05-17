@@ -224,3 +224,7 @@ kit/
 .venv-*/
 __pycache__/
 .pytest_cache/
+
+# Experiment outputs (per-run artifacts; do not commit)
+python_refactor/experiments/metrics/
+python_refactor/experiments/results/
