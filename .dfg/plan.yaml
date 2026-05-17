@@ -382,3 +382,48 @@ waves:
         - "W1-3-CARRY-3 closed: multi-horizon learn_population is the live path for MultiHorizonAnticipatoryLearning"
         - "Retros at .dfg/retrospectives/W4/W4-N.md with ADR-004 frontmatter"
       checkpoint_file: .dfg/checkpoints/W4-gate.md
+
+  - id: W5
+    name: Test determinism + covariance threading
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W5-20260517T004556Z.
+    # 2 units in 1 parallel group (file-disjoint).
+    units:
+      - id: W5-1
+        slug: correspondence-test-rng-seed
+        name: Seed RNG in test_correspondence_integration setUp
+        purpose: "Closes W3-5-CARRY-1. Seed np.random in setUp + use deterministic mock weights. ~5 lines."
+        files:
+          - python_refactor/tests/test_correspondence_integration.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "test_correspondence_mapping_with_multiple_time_steps PASSES deterministically 5/5 runs in .venv-w1"
+          - "All other correspondence_integration tests continue to PASS"
+
+      - id: W5-2
+        slug: multihorizon-covariance-threading
+        name: Thread covariance updates (paper Eq 15) through MultiHorizon.learn_population
+        purpose: "Closes W4-2-CARRY-1. Mean-only override now also threads covariance via paper Eq (15) linear-Gaussian combination."
+        files:
+          - python_refactor/src/algorithms/multi_horizon_anticipatory.py
+          - python_refactor/tests/test_multi_horizon_anticipatory.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "MultiHorizon.learn_population computes anticipatory covariance Σ_t|t+1:t+H-1 = Σ_h λ_h^2 · Σ_{t+h} per paper Eq (15) for the linear-Gaussian convex-combo form"
+          - "Anticipatory covariance is written back to solution.P.kalman_state.P[:2,:2] when kalman_state is present (defensive on None)"
+          - "New regression test asserts the covariance is updated and remains positive-semidefinite"
+          - "All 25 existing multi_horizon tests continue to PASS"
+
+    parallel_groups:
+      - [W5-1, W5-2]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "Both units MERGED with green pre-pr battery"
+        - "W3-5-CARRY-1 closed: correspondence integration test deterministic across 5 runs"
+        - "W4-2-CARRY-1 closed: MultiHorizon.learn_population threads covariance per paper Eq (15)"
+        - "Retros at .dfg/retrospectives/W5/W5-N.md with ADR-004 frontmatter"
+      checkpoint_file: .dfg/checkpoints/W5-gate.md

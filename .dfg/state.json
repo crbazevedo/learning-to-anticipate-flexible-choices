@@ -1,7 +1,7 @@
 {
   "active_wave": "W4",
   "events_source": ".dfg/events.jsonl",
-  "last_updated": "2026-05-17T00:40:52Z",
+  "last_updated": "2026-05-17T00:46:48Z",
   "schema_version": "2",
   "units": {
     "W1-1": {
@@ -69,6 +69,14 @@
       "state": "DRAFT"
     },
     "W4-2": {
+      "checkpoint_chain": [],
+      "state": "DRAFT"
+    },
+    "W5-1": {
+      "checkpoint_chain": [],
+      "state": "DRAFT"
+    },
+    "W5-2": {
       "checkpoint_chain": [],
       "state": "DRAFT"
     }
