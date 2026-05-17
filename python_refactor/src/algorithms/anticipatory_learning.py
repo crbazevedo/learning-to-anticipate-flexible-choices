@@ -323,11 +323,14 @@ class AnticipatoryLearning:
             rate_lwb = 0.0
         
         # Anticipatory learning rate formula (exact C++ implementation)
-        anticipation_rate = (rate_lwb + 
-                           0.5 * uncertainty_factor * (rate_upb - rate_lwb) + 
+        anticipation_rate = (rate_lwb +
+                           0.5 * uncertainty_factor * (rate_upb - rate_lwb) +
                            0.5 * accuracy_factor * (rate_upb - rate_lwb))
-        
-        return anticipation_rate
+
+        # W4-1 (closes W3-3-CARRY-1): clamp output to [rate_lwb, rate_upb]
+        # per the C++ comment intent. Pre-W4-1 the rate could go negative
+        # when prediction_error > max_error (accuracy_factor < 0).
+        return max(rate_lwb, min(rate_upb, anticipation_rate))
 
 
 class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
