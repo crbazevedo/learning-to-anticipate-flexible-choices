@@ -9,7 +9,7 @@ Revised implementation to include:
 """
 
 import numpy as np
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -121,9 +121,40 @@ class SMSEMOA:
         # risk_max, risk_min}.
         self.extrema_trace: List[Dict[str, float]] = []
 
+        # W16-2 (BACKLOG H1): previous-period implemented portfolio
+        # u*_{t-1}. When set, _evaluate_solution subtracts the thesis
+        # Table 7.1 transaction cost h(u_t, u*_{t-1}) from the ROI
+        # objective so the optimizer sees and avoids high-churn
+        # rebalancings (per thesis §7.2 Eqs (7.4)-(7.5)).
+        #
+        # None on the first period (no prior portfolio yet → no
+        # rebalancing → no cost). Caller (walk_forward driver) calls
+        # set_previous_weights(u_prev) before each period's optimization.
+        self.previous_weights: Optional[np.ndarray] = None
+        self.portfolio_value: float = 1.0  # default wealth scale
+
         # Performance tracking
         self.function_evaluations = 0
         self.current_generation = 0
+
+    def set_previous_weights(self, weights: Optional[np.ndarray],
+                              portfolio_value: float = 1.0) -> None:
+        """
+        Set the previous-period implemented portfolio u*_{t-1} (W16-2).
+
+        The walk-forward driver calls this before each period's
+        optimization, passing the prior period's realized maximal
+        flexible choice. None on period 1 (no prior period).
+
+        Args:
+            weights: u*_{t-1} length-d array (or None on period 1)
+            portfolio_value: total wealth (for sizing the bracket lookup)
+        """
+        if weights is None:
+            self.previous_weights = None
+        else:
+            self.previous_weights = np.asarray(weights, dtype=float).copy()
+        self.portfolio_value = float(portfolio_value)
         
     def set_learning(self, learning: AnticipatoryLearning):
         """Set anticipatory learning component."""
@@ -260,19 +291,53 @@ class SMSEMOA:
         ])
     
     def _evaluate_solution(self, solution: Solution, data: Dict[str, Any]):
-        """Evaluate solution and update objectives."""
-        # Compute portfolio metrics
+        """Evaluate solution and update objectives.
+
+        W16-2 (BACKLOG H1): if self.previous_weights is set, subtract
+        the thesis Table 7.1 transaction cost from the OBJECTIVE ROI
+        so the optimizer sees the rebalancing cost. The PORTFOLIO
+        ROI (portfolio.ROI) is preserved as gross-of-cost for
+        downstream reporting (so wealth-evaluation code still has
+        the un-netted ROI).
+
+        Per thesis §7.2 Eq (7.4)-(7.5), p. 142:
+            z_t|u*_{t-1} = g(u_t, χ_t) + h(u_t, u*_{t-1})
+        i.e. the optimizer's z-vector ROI component is
+        net-of-transaction-cost.
+        """
         portfolio = solution.P
-        
+
         # Update Kalman filter with current observation if available
         if hasattr(solution.P, 'kalman_state') and solution.P.kalman_state is not None:
             from .kalman_filter import kalman_update
             measurement = np.array([portfolio.ROI, portfolio.risk])
             kalman_update(solution.P.kalman_state, measurement)
-        
-        # Store objectives
-        solution.objectives = [portfolio.ROI, portfolio.risk]
-        
+
+        # W16-2: compute net-of-cost ROI for the NDS/HV objective.
+        # Gross ROI stays on portfolio.ROI for reporting; only the
+        # objective vector (used by dominance + HV contribution)
+        # uses ROI_net.
+        roi_objective = portfolio.ROI
+        if self.previous_weights is not None:
+            from ..portfolio.portfolio import Portfolio
+            txn_cost = Portfolio.compute_thesis_transaction_cost(
+                weights_new=np.asarray(portfolio.investment, dtype=float),
+                weights_prev=self.previous_weights,
+                portfolio_value=self.portfolio_value,
+            )
+            roi_objective = portfolio.ROI - txn_cost
+            # Stash on solution for diagnostics (W16-5 trace + W18 viz)
+            solution.transaction_cost = txn_cost
+            solution.roi_gross = portfolio.ROI
+            solution.roi_net = roi_objective
+        else:
+            solution.transaction_cost = 0.0
+            solution.roi_gross = portfolio.ROI
+            solution.roi_net = portfolio.ROI
+
+        # Store objectives (NET-of-cost ROI per Eq 7.4-7.5; risk unchanged)
+        solution.objectives = [roi_objective, portfolio.risk]
+
         # Compute stability (simplified)
         portfolio.stability = 1.0 / (1.0 + np.std(solution.P.investment))
     

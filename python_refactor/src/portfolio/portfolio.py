@@ -288,14 +288,86 @@ class Portfolio:
     def card(cls, portfolio: 'Portfolio') -> float:
         """
         Compute portfolio cardinality (number of non-zero weights).
-        
+
         Args:
             portfolio: Portfolio object
-        
+
         Returns:
             Portfolio cardinality
         """
         return np.sum(portfolio.investment > 1e-6)
+
+    # ─── W16-2: thesis Table 7.1 transaction-cost computation ─────
+    # Closes BACKLOG H1. The cost is computed per asset based on the
+    # absolute traded value (|Δweight| × portfolio_value); each asset's
+    # cost picks the bracket from Table 7.1 (p. 144) whose lower_bound
+    # is met. Total cost is the sum across assets, returned as a
+    # fraction of portfolio_value so it can be subtracted from the
+    # ROI objective directly.
+    @staticmethod
+    def compute_thesis_transaction_cost(weights_new: np.ndarray,
+                                        weights_prev: np.ndarray,
+                                        portfolio_value: float = 1.0,
+                                        brackets: list | None = None) -> float:
+        """
+        Compute total transaction cost per thesis Table 7.1 (W16-2).
+
+        Per thesis §7.2 Eqs (7.4)-(7.5): the optimizer's ROI objective
+        must net out h(u_t, u*_{t-1}), the brokerage fee on the trades
+        implied by rebalancing from u*_{t-1} → u_t.
+
+        Args:
+            weights_new: target weights u_t (length d, sums to 1)
+            weights_prev: previous-period implemented weights u*_{t-1}
+                (length d, sums to 1)
+            portfolio_value: total wealth (default 1.0; cost returned
+                in same units)
+            brackets: optional override of Table 7.1 brackets; default
+                is loaded from ThesisParameters().THESIS_TABLE_71_BRACKETS
+
+        Returns:
+            Total transaction cost (fraction of portfolio_value),
+            i.e. (sum of per-asset fees) / portfolio_value.
+
+        Thesis grounding:
+            §7.2 Eqs (7.4)-(7.5), p. 142:
+                z_t|u*_{t-1} = g(u_t, χ_t) + h(u_t, u*_{t-1})
+                h(u_t, u*_{t-1}) = (0, h)^T  where h is the trade cost
+
+            §7.2.3 Table 7.1, p. 144 — Brazilian SEC fee schedule
+            (Brackets in thesis_parameters.THESIS_TABLE_71_BRACKETS).
+        """
+        if weights_prev is None:
+            return 0.0  # no previous → first period → no rebalancing
+        weights_new = np.asarray(weights_new, dtype=float)
+        weights_prev = np.asarray(weights_prev, dtype=float)
+        if weights_new.shape != weights_prev.shape:
+            return 0.0  # shape mismatch → no meaningful cost
+
+        if brackets is None:
+            # Lazy import to avoid circular dep at module load.
+            from ..config.thesis_parameters import ThesisParameters
+            brackets = ThesisParameters().THESIS_TABLE_71_BRACKETS
+
+        # Per-asset absolute traded value.
+        traded_value_per_asset = np.abs(weights_new - weights_prev) * portfolio_value
+
+        total_fee = 0.0
+        # Sort brackets descending by lower_bound so we pick the
+        # FIRST bracket the value qualifies for.
+        brackets_desc = sorted(brackets, key=lambda b: -b[0])
+
+        for tv in traded_value_per_asset:
+            if tv == 0.0:
+                continue  # no trade, no fee (still skip bracket 0 fixed fee)
+            for lower_bound, prop_fee, fixed_fee in brackets_desc:
+                if tv >= lower_bound:
+                    total_fee += tv * prop_fee + fixed_fee
+                    break
+
+        # Return as fraction of portfolio_value so it's directly
+        # subtractable from a normalized ROI.
+        return float(total_fee / portfolio_value) if portfolio_value > 0.0 else 0.0
     
     @classmethod
     def moving_average(cls, returns_data: np.ndarray) -> np.ndarray:

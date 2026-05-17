@@ -104,7 +104,27 @@ class ThesisParameters:
     
     # Portfolio Parameters
     INITIAL_WEALTH: float = 100000.0  # R$ 100,000
-    TRANSACTION_COST_RATE: float = 0.001  # 0.1% per trade
+    TRANSACTION_COST_RATE: float = 0.001  # 0.1% per trade — DEPRECATED;
+    # W16-2 (BACKLOG H1) replaces flat-rate with thesis Table 7.1
+    # bracket schedule (see THESIS_TABLE_71_BRACKETS below). Kept
+    # for backward-compat with config dicts that still reference it.
+
+    # ─── W16-2: Brazilian SEC fee schedule per thesis Table 7.1 (p. 144) ──
+    # Bracket = (traded_value_lower_bound, proportional_fee, fixed_fee).
+    # Per the thesis verbatim:
+    #
+    #   Traded value         | Proportional Fee | Fixed Fee
+    #   --------------------+------------------+----------
+    #   < 135.07            | 0.0%             | 2.70
+    #   ≥ 135.08, < 498.62  | 2.0%             | 0.00
+    #   ≥ 498.63, < 1514.69 | 1.5%             | 2.49
+    #   ≥ 1514.70, < 3029.38| 1.0%             | 10.06
+    #   ≥ 3029.39           | 0.5%             | 25.21
+    #
+    # Brackets listed in ascending-lower-bound order; consumer
+    # iterates and picks the bracket whose lower_bound ≤ value <
+    # next_bracket_lower_bound (or +∞ for last).
+    THESIS_TABLE_71_BRACKETS: list = None  # set in __post_init__
     
     # =============================================================================
     # Decision Maker Parameters (Section 7.3)
@@ -150,6 +170,16 @@ class ThesisParameters:
         """Initialize derived parameters after dataclass creation."""
         if self.DECISION_MAKER_TYPES is None:
             self.DECISION_MAKER_TYPES = ['Hv-DM', 'R-DM', 'M-DM']
+        # W16-2: Brazilian SEC fee schedule per thesis Table 7.1 (p. 144).
+        # Each entry: (lower_bound_inclusive, proportional_fee, fixed_fee).
+        if self.THESIS_TABLE_71_BRACKETS is None:
+            self.THESIS_TABLE_71_BRACKETS = [
+                (0.00,    0.000, 2.70),    # < 135.07
+                (135.08,  0.020, 0.00),    # 135.08 ≤ v < 498.62
+                (498.63,  0.015, 2.49),    # 498.63 ≤ v < 1514.69
+                (1514.70, 0.010, 10.06),   # 1514.70 ≤ v < 3029.38
+                (3029.39, 0.005, 25.21),   # ≥ 3029.39
+            ]
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert parameters to dictionary for easy access."""

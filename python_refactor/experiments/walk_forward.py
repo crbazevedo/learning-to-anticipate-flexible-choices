@@ -78,12 +78,19 @@ def enumerate_periods(n_days: int, train_window_days: int = 378,
 # ---------------------------------------------------------------------------
 
 def _train_and_extract_pareto(scenario: str, seed: int,
-                               train_returns: pd.DataFrame
+                               train_returns: pd.DataFrame,
+                               previous_weights: np.ndarray | None = None,
                                ) -> tuple[list[np.ndarray], int]:
     """Train SMS-EMOA on the train window; extract Pareto weights.
 
     Mirrors oos_report._run_one_scenario_seed but takes the pre-sliced
     train block instead of loading the full window.
+
+    W16-2 (BACKLOG H1): optional ``previous_weights`` threads u*_{t-1}
+    into the SMS-EMOA evaluator so the optimizer subtracts thesis
+    Table 7.1 transaction costs from the ROI objective per §7.2
+    Eqs (7.4)-(7.5). On period 1 / no prior portfolio, pass None →
+    no cost subtraction.
     """
     from experiments.validation_matrix import build_experiment_config
     from src.experiments.experiment_manager import ExperimentManager
@@ -100,6 +107,11 @@ def _train_and_extract_pareto(scenario: str, seed: int,
     n_assets = train_returns.values.shape[1]
     data = {"assets": train_returns, "market": pd.DataFrame(),
             "config": config.get("data", {})}
+    # W16-2: thread previous-period implemented portfolio to
+    # ExperimentManager → SMS-EMOA via the data dict (so the manager's
+    # algorithm setter can call set_previous_weights post-init).
+    if previous_weights is not None:
+        data["previous_weights"] = np.asarray(previous_weights, dtype=float)
     results = mgr._run_algorithm(config, data)
     pareto = results.get("pareto_front", [])
     weights: list[np.ndarray] = []
@@ -138,11 +150,18 @@ def run_walk_forward(scenario: str,
         rng = np.random.default_rng(seed)
     periods = enumerate_periods(len(full_returns), train_window_days, step_days)
     results: list[dict[str, Any]] = []
+    # W16-2 (BACKLOG H1): u*_{t-1} thread across rolling periods.
+    # Per thesis convention, the "implemented" portfolio is the
+    # argmax-EFHV (or first if EFHV not yet computed) from the
+    # previous period's Pareto front. None on period 1 (no prior).
+    previous_weights: np.ndarray | None = None
     for p in periods:
         train = full_returns.iloc[p["train_start"]:p["train_end"]]
         oos = full_returns.iloc[p["oos_start"]:p["oos_end"]]
         try:
-            weights, n_assets = _train_and_extract_pareto(scenario, seed, train)
+            weights, n_assets = _train_and_extract_pareto(
+                scenario, seed, train, previous_weights=previous_weights,
+            )
         except Exception as exc:
             results.append({**p, "error": f"{type(exc).__name__}: {exc}",
                               "efhv_mean": float("nan"), "efhv_std": float("nan"),
@@ -164,6 +183,11 @@ def run_walk_forward(scenario: str,
             n_samples=n_mc,
             rng=rng,
         )
+        # W16-2: persist the period's implemented portfolio as
+        # u*_{t-1} for the NEXT period's optimization. Convention:
+        # the first portfolio in the Pareto front (or argmax-EFHV
+        # if richer DM logic is available — W17 territory).
+        previous_weights = weights[0]
         results.append({
             **p,
             "n_pareto": len(weights),
