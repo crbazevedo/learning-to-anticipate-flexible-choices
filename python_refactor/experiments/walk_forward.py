@@ -182,7 +182,9 @@ def aggregate_per_seed(per_period_results: list[dict[str, Any]]) -> dict[str, fl
     valid = [r["efhv_mean"] for r in per_period_results
               if "error" not in r and np.isfinite(r["efhv_mean"])]
     if not valid:
-        return {"n_periods_ok": 0, "grand_mean": float("nan"),
+        return {"n_periods_ok": 0,
+                "n_periods_total": len(per_period_results),
+                "grand_mean": float("nan"),
                 "grand_std": float("nan")}
     arr = np.asarray(valid, dtype=float)
     return {

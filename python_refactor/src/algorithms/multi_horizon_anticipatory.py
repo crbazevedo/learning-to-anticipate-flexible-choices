@@ -62,13 +62,21 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
     directly inside the run loop.
     """
 
-    def __init__(self, max_horizon: int = 3, monte_carlo_samples: int = 1000):
+    def __init__(self, max_horizon: int = 3, monte_carlo_samples: int = 1000,
+                  window_size: int = 20):
         """
         Initialize multi-horizon anticipatory learning.
 
         Args:
-            max_horizon: Maximum prediction horizon (H parameter)
+            max_horizon: Maximum prediction horizon (H parameter); thesis
+                §7.2.3 Eq (7.16) fixes H=2.
             monte_carlo_samples: Number of Monte Carlo samples for TIP calculation
+            window_size: K parameter (OAL historical-window size) per
+                thesis §7.1.1 (p. 140): K ∈ {0, 1, 2, 3}. Drives the
+                λ^K arm of Eq (7.16) (squared-KF-residual sum from the
+                latest K periods). W15-3-CARRY-1 closure: pre-W15
+                this kwarg was hardcoded to 20 inside super().__init__,
+                preventing the SCENARIOS dict from controlling K.
         """
         # Initialise the inherited TIPIntegratedAnticipatoryLearning surface
         # (which itself initialises AnticipatoryLearning). That gives this
@@ -77,7 +85,8 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
         # correspondence_mapping / tip_calculator — all for free.
         # IMPORTANT: keyword args only — the pre-W1-2 super-bug pattern
         # silently maps `super().__init__(N)` to the parent's first positional arg.
-        super().__init__(window_size=20, monte_carlo_samples=monte_carlo_samples)
+        super().__init__(window_size=window_size,
+                          monte_carlo_samples=monte_carlo_samples)
 
         self.max_horizon = max_horizon
         # Override the parent's prediction_horizon to match max_horizon
