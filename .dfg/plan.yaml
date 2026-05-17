@@ -1265,3 +1265,107 @@ waves:
         - "W16-5 integration smoke completes; trace assertions pass; Δ(S2 vs S0) reported honestly with verdict per W16-5 matrix"
         - "Retros at .dfg/retrospectives/W16/W16-N.md with ADR-004 canonical keys"
       checkpoint_file: .dfg/checkpoints/W16-gate.md
+
+  - id: W17
+    name: H4 asset universe + W16 carries (λ^K firing + trace path + AMFC selector)
+    state: PLANNED
+    # Added 2026-05-17 post-W16 close. Targets the residual -5.53%
+    # gap. Keystone = W17-1 (H4 87-asset continuous-trades subset).
+    # Plus 3 W16 carry-forwards closed: W16-1-CARRY-1 (W17-2),
+    # W16-5-CARRY-1 + W16-4-CARRY-1 (W17-3), W16-2-CARRY-1 (W17-4).
+    units:
+      - id: W17-1
+        slug: asset-universe-eda
+        name: H4 asset universe EDA + continuous-trades filter (87-asset subset)
+        purpose: "Closes BACKLOG H4. EDA over 98-asset FTSE legacy-cpp universe in paper window 2006-2012; drop discontinuous-trades assets; document 87-asset thesis-faithful subset per §7.2.3 p.145."
+        files:
+          - docs/H4-ASSET-UNIVERSE-EDA.md
+          - python_refactor/src/experiments/data_loader.py
+          - python_refactor/experiments/results/h4-eda/asset_universe_87.json
+          - python_refactor/tests/test_asset_universe_filter.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "EDA doc with trading-coverage histogram + dropped-asset table per the continuous-trades criterion"
+          - "asset_universe_87.json artifact with the kept subset + dropped reasons"
+          - "data_loader honors enforce_thesis_continuous_trades=False (default) and =True (87-asset)"
+          - "≥ 3 regression tests: artifact schema + filter behavior + default unchanged"
+          - "Honest scar if N ≠ 87 (could be 86 or 89; explain)"
+
+      - id: W17-2
+        slug: record-kf-residual-wiring
+        name: Wire record_kf_residual into Kalman update path (W16-1-CARRY-1)
+        purpose: "Closes W16-1-CARRY-1. λ^K formula correct (W16-1) but residual buffer never populated in production; wire record_kf_residual into Kalman update path so λ^K actually fires."
+        files:
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/src/algorithms/kalman_filter.py
+          - python_refactor/tests/test_lambda_k_production_firing.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "After K periods of Kalman updates, _kf_residual_window has length min(K, n_periods)"
+          - "λ^K branches to non-warm-up path (kperiod_sum) for K>0"
+          - "K=0 path unchanged (record_kf_residual is no-op)"
+          - "lambda_k_branch column surfaced in trace"
+          - "≥ 3 regression tests"
+
+      - id: W17-3
+        slug: trace-csv-driver-wiring
+        name: Thread --lambda-trace-csv-path through walk_forward_report (W16-5-CARRY-1)
+        purpose: "Closes W16-5-CARRY-1 + W16-4-CARRY-1. Add --lambda-trace-csv-path CLI arg to walk_forward_report.py; thread to run_walk_forward via the kwarg from W16-4 so smokes emit lambda_tip_trace.csv."
+        files:
+          - python_refactor/experiments/walk_forward_report.py
+          - python_refactor/tests/test_walk_forward_report_lambda_trace.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "--lambda-trace-csv-path CLI arg exposed (default None)"
+          - "Path propagates to run_walk_forward(lambda_trace_csv_path=...) via mock test"
+          - "Smoke run produces CSV with W16-4 header + at least 1 row"
+          - "≥ 2 regression tests"
+
+      - id: W17-4
+        slug: amfc-u-star-selector
+        name: AMFC u*_{t-1} selector per thesis Eq 6.42 (W16-2-CARRY-1 + M5 partial)
+        purpose: "Closes W16-2-CARRY-1. Replace 'first Pareto-front portfolio' proxy with argmax-EFHV (AMFC) per thesis §6.4 Eq 6.42 as the implemented portfolio carried across rolling periods."
+        files:
+          - python_refactor/experiments/walk_forward.py
+          - python_refactor/experiments/oos_evaluator.py
+          - python_refactor/tests/test_amfc_u_star_selector.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "u*_{t-1} = argmax over per-portfolio EFHV from prior period's Pareto front"
+          - "Tie-break deterministic (smallest portfolio_index wins)"
+          - "All-NaN-EFHV fallback to first-portfolio + logged warning"
+          - "u_star_idx field added to per-period result dict"
+          - "≥ 3 regression tests"
+
+      - id: W17-5
+        slug: integration-smoke
+        name: Integration smoke with W17 fixes + trace assertions
+        purpose: "Verify W17-1..W17-4 combined effect: re-run walk-forward smoke (87-asset + λ trace + λ^K firing + AMFC) on {SMS_RDM_K0, ASMS_mHDM_K3}; report Δ(S2 − S0) + trace assertions."
+        files:
+          - docs/OOS-EFHV-W17-INTEGRATION-SMOKE.md
+          - .dfg/retrospectives/W17/W17-5.md
+        depends_on: [W17-1, W17-2, W17-3, W17-4]
+        size: S
+        acceptance_criteria:
+          - "Re-run W16-5 smoke shape with enforce_thesis_continuous_trades=True + --lambda-trace-csv-path"
+          - "Empirical Δ(S2 − S0) reported with comparison vs W16-5 baseline (-5.53%)"
+          - "Trace assertions: mean(λ^K) > 0.01 for K=3 (PROOF λ^K fires); λ ≈ 0.5*(λ^H + λ^K) within 1e-9"
+          - "Verdict per W17-5 matrix: PASS-DIRECTION-REPLICATED / PASS-FURTHER-GAP-CLOSURE / HOLD-FOR-DEBUG"
+
+    parallel_groups:
+      - [W17-1, W17-2, W17-3, W17-4]
+      - [W17-5]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 5 units MERGED with green pre-pr battery"
+        - "BACKLOG items H4 closed; W16-1-CARRY-1 + W16-4-CARRY-1 + W16-5-CARRY-1 + W16-2-CARRY-1 closed"
+        - "All 5 unit contracts follow BACKLOG §6 canonical template (plain-string must_read + body grounding with verbatim thesis excerpts)"
+        - "W17-5 integration smoke completes; trace assertions pass; Δ(S2 vs S0) reported honestly with verdict per W17-5 matrix"
+        - "Retros at .dfg/retrospectives/W17/W17-N.md with ADR-004 canonical keys"
+      checkpoint_file: .dfg/checkpoints/W17-gate.md
