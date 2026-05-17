@@ -1,0 +1,20 @@
+proposal_id: wave-W3-20260517T000745Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T00:07:45Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W3
+  action: add
+trigger: retro-driven
+rationale: "W3 \u2014 closes W2 carry-forwards. 6 units: W3-1a/b/c triage 3 dead-code-coming-alive\
+  \ test failures (W2-2-CARRY-1/2/3); W3-1d replaces TIP magic numbers with documented\
+  \ constants (W1-4-CARRY-2); W3-2 wider ruff F401 sweep on src/ (W2-4-CARRY-1); W3-3\
+  \ adds uv.lock (W2-4-CARRY-2). Group 1 = [W3-1a, W3-1b, W3-1c, W3-1d] (file-disjoint);\
+  \ Group 2 = [W3-2]; Group 3 = [W3-3]. W1-3-CARRY-3 (MultiHorizon deeper integration)\
+  \ deferred to W4 \u2014 larger architectural change."
+evidence: []
+accepted_at: '2026-05-17T00:09:16Z'
+operator_note: 'Approved: add wave W3 (W2 carry closure + packaging finish) with 6
+  units in 3 groups. Per directive #4 (paired diff).'
