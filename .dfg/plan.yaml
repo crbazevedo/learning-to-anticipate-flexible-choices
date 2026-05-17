@@ -1369,3 +1369,115 @@ waves:
         - "W17-5 integration smoke completes; trace assertions pass; Δ(S2 vs S0) reported honestly with verdict per W17-5 matrix"
         - "Retros at .dfg/retrospectives/W17/W17-N.md with ADR-004 canonical keys"
       checkpoint_file: .dfg/checkpoints/W17-gate.md
+
+  - id: W18
+    name: Cross-validation foundation (harness + risk + ROI + TIP saturation diagnosis)
+    state: PLANNED
+    # Added 2026-05-17 post-W17-5-CARRY-1 RESMOKE finding. Operator
+    # directive: investigate everything across 14 checks (A-N) via
+    # mutual-skepticism comparison vs the C++ legacy reference. W18
+    # covers harness + 3 most-strategic checks (A/B/F). W19-W22 inherit
+    # harness for the remaining 11 (C/D/E/G/H/I/J/K/L/M/N).
+    units:
+      - id: W18-1
+        slug: cross-validation-harness
+        name: Cross-validation harness scaffold (C++ build adapter + per-check driver pattern)
+        purpose: "Build reproducible cross-validation framework: same fixtures fed to BOTH C++ legacy and Python port; outputs compared with tolerance. Mutual-skepticism reporting (neither side is oracle)."
+        files:
+          - legacy-cpp/build/Makefile
+          - legacy-cpp/build/README-BUILD-ADAPTER.md
+          - python_refactor/scripts/cross_validation/__init__.py
+          - python_refactor/scripts/cross_validation/fixtures.py
+          - python_refactor/scripts/cross_validation/compare.py
+          - python_refactor/tests/test_cross_validation_harness.py
+        depends_on: []
+        size: L
+        acceptance_criteria:
+          - "C++ build succeeds on Apple clang 17 + C++14 + Eigen 3.4 (10 of 10 .o files)"
+          - "4 mechanical build adapters documented in README-BUILD-ADAPTER.md (Eigen include path; narrowing-conversion; -std=c++14; -DEIGEN_DONT_VECTORIZE)"
+          - "Per-check driver pattern documented + 1 example driver demoed end-to-end"
+          - "Python compare framework: identical inputs → 0 diff; tol-violating → flagged"
+          - "≥ 3 regression tests for harness itself"
+
+      - id: W18-2
+        slug: cross-check-a-risk
+        name: Cross-check A — risk computation parity (C++ vs Python)
+        purpose: "Closes operator check A. Cross-validate Portfolio::compute_risk against thesis Eq (7.4) verbatim."
+        files:
+          - legacy-cpp/build/drivers/risk_driver.cpp
+          - python_refactor/scripts/cross_validation/run_risk.py
+          - python_refactor/tests/test_cross_check_risk.py
+          - docs/CROSS-VALIDATION-A-RISK.md
+        depends_on: [W18-1]
+        size: S
+        acceptance_criteria:
+          - "Both sides run on identical fixture (20 portfolios × 87 assets × seed=42)"
+          - "Markdown diff with abs+rel tolerance reported (1e-9 first, relax if needed)"
+          - "Verdict ∈ {AGREE, DISAGREE-PYTHON-WRONG, DISAGREE-CPP-WRONG, DISAGREE-AMBIGUOUS} per thesis Eq (7.4)"
+          - "Honest scar if scale mismatch (variance vs std-dev; ddof; sign convention)"
+
+      - id: W18-3
+        slug: cross-check-b-roi
+        name: Cross-check B — ROI computation parity (C++ vs Python)
+        purpose: "Closes operator check B. Cross-validate Portfolio::compute_ROI against thesis Eq (7.4)."
+        files:
+          - legacy-cpp/build/drivers/roi_driver.cpp
+          - python_refactor/scripts/cross_validation/run_roi.py
+          - python_refactor/tests/test_cross_check_roi.py
+          - docs/CROSS-VALIDATION-B-ROI.md
+        depends_on: [W18-1]
+        size: S
+        acceptance_criteria:
+          - "Both sides on identical fixture; ROI vector compared"
+          - "Markdown diff + thesis cross-ref"
+          - "Verdict per W18-2 matrix"
+          - "Honest scar for scale (decimal vs %, daily vs annualized)"
+
+      - id: W18-4
+        slug: cross-check-f-tip
+        name: Cross-check F — TIP parity + saturation diagnosis
+        purpose: "Closes operator check F + diagnoses W17-5-CARRY-1 RESMOKE TIP-saturation finding via Pure-input (F1) + Production-replay (F2) sub-checks."
+        files:
+          - legacy-cpp/build/drivers/tip_driver.cpp
+          - python_refactor/scripts/cross_validation/run_tip.py
+          - python_refactor/tests/test_cross_check_tip.py
+          - docs/CROSS-VALIDATION-F-TIP.md
+        depends_on: [W18-1]
+        size: M
+        acceptance_criteria:
+          - "F1 (pure-input synthetic Gaussians with known TIP) both sides agree within MC noise"
+          - "F2 (production-input replay from W17-5-CARRY-1 trace CSV) both sides reproduce saturation OR diverge"
+          - "Verdict per W18-4 matrix: structural / production-divergence / TIP-code-bug"
+          - "Markdown receipt with both raw outputs + diff + thesis Eq (6.4) cross-ref"
+
+      - id: W18-5
+        slug: synthesis
+        name: W18 synthesis + W19-W22 roadmap for C/D/E/G/H/I/J/K/L/M/N
+        purpose: "Aggregate W18-2/W18-3/W18-4 verdicts; pre-stub W19-W22 unit contracts for the 10 remaining cross-checks."
+        files:
+          - docs/W18-CROSS-VALIDATION-SYNTHESIS.md
+          - .dfg/retrospectives/W18/W18-5.md
+        depends_on: [W18-2, W18-3, W18-4]
+        size: S
+        acceptance_criteria:
+          - "Synthesis doc with single verdict table for A/B/F"
+          - "Reading A vs B vs C determination per check"
+          - "Updated strategic re-read of W17-5 findings"
+          - "W19-W22 pre-stubbed unit contracts for C/D/E/G/H/I/J/K/L/M/N"
+          - "ADR-004 retro"
+
+    parallel_groups:
+      - [W18-1]
+      - [W18-2, W18-3, W18-4]
+      - [W18-5]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 5 units MERGED with green pre-pr battery"
+        - "C++ legacy buildable on Apple clang 17 + C++14 (10 of 10 .o files)"
+        - "Cross-validation harness scaffold + ≥ 3 cross-checks (A/B/F) shipped with markdown receipts"
+        - "W18-4 directly addresses the W17-5-CARRY-1 RESMOKE TIP-saturation finding with verdict"
+        - "W19-W22 roadmap with pre-stubbed contracts for C/D/E/G/H/I/J/K/L/M/N"
+        - "Retros at .dfg/retrospectives/W18/W18-N.md with ADR-004 canonical keys"
+      checkpoint_file: .dfg/checkpoints/W18-gate.md
