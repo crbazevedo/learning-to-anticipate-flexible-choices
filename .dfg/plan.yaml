@@ -427,3 +427,65 @@ waves:
         - "W4-2-CARRY-1 closed: MultiHorizon.learn_population threads covariance per paper Eq (15)"
         - "Retros at .dfg/retrospectives/W5/W5-N.md with ADR-004 frontmatter"
       checkpoint_file: .dfg/checkpoints/W5-gate.md
+
+  - id: W6
+    name: Public-ready state
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W6-20260517T010425Z.
+    # 3 units: W6-1 + W6-3 parallel (file-disjoint); W6-2 depends on W6-1.
+    units:
+      - id: W6-1
+        slug: publication-quality-readme
+        name: Rewrite README.md for public release
+        purpose: "Replaces W2-bootstrap minimal README with publication-quality content: paper citation, quick-start, algorithm overview, project layout, reproducibility."
+        files:
+          - README.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "README.md opens with paper title + DOI + author + journal"
+          - "Quick-start: `pip install -e . && pytest` works for a reader"
+          - "Algorithm overview cites paper Eqs (11)–(18) explicitly"
+          - "Project layout table (top-level dirs + purpose)"
+          - "Reproducibility section with command + dataset paths"
+          - "Tests section + citation discipline note"
+          - "License + contributing pointer"
+
+      - id: W6-3
+        slug: experiment-validation-plan
+        name: Author live experiment validation plan
+        purpose: "Doc-only — plans the live FTSE / Markowitz experiments that would validate the wired algorithm. Execution deferred to W7+."
+        files:
+          - docs/EXPERIMENT-VALIDATION-PLAN.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "docs/EXPERIMENT-VALIDATION-PLAN.md exists at repo root"
+          - "Covers: dataset, scenarios (with/without TIP, with/without multi-horizon), expected outputs, acceptance criteria, reproducibility recipe, comparison-to-paper anchor"
+          - "Each scenario references the paper's reported metrics where applicable"
+
+      - id: W6-2
+        slug: visibility-public-flip
+        name: Flip repo visibility to public
+        purpose: "gh repo edit --visibility public. One-way door — operator-approved 2026-05-17. Depends on W6-1 (README must be public-ready first)."
+        files:
+          - .dfg/checkpoints/W6-2-visibility-receipt.md
+        depends_on: ['W6-1']
+        size: S
+        acceptance_criteria:
+          - "gh repo view returns visibility=PUBLIC"
+          - "Receipt commit at .dfg/checkpoints/W6-2-visibility-receipt.md records the flip + timestamp"
+
+    parallel_groups:
+      - [W6-1, W6-3]
+      - [W6-2]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 3 units MERGED with green pre-pr battery"
+        - "Repo visibility = PUBLIC verified via gh"
+        - "README.md is the new publication-quality content (not the W2-bootstrap stub)"
+        - "docs/EXPERIMENT-VALIDATION-PLAN.md committed"
+        - "Retros at .dfg/retrospectives/W6/W6-N.md with ADR-004 frontmatter"
+      checkpoint_file: .dfg/checkpoints/W6-gate.md
