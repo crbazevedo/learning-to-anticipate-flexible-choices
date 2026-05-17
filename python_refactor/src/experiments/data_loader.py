@@ -86,6 +86,15 @@ class DataLoader:
         # Combine all data
         combined_df = pd.concat(all_data, ignore_index=True)
 
+        # W9-4 hotfix to W9-2: real data has duplicate (Date, asset_id)
+        # tuples (e.g. FTSE_100_20121121_20241231.csv has 2 rows for each
+        # year-end day — a regular EOD plus a consolidated-summary entry).
+        # Synthetic test fixtures didn't surface this; smoke-test did.
+        # Keep last observation per (Date, asset_id) — consolidated summary
+        # if present, otherwise the only row.
+        # Sub-papercut #15 receipt: "synthesized fixtures must match real substrate."
+        combined_df = combined_df.drop_duplicates(subset=['Date', 'asset_id'], keep='last')
+
         # W9-2: pivot on asset_id (the tag added above). Pre-W9-2 this
         # was pivot(columns=None) → KeyError(None) in modern pandas.
         returns_df = combined_df.pivot(index='Date', columns='asset_id', values='Return')
