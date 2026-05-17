@@ -63,7 +63,8 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
     """
 
     def __init__(self, max_horizon: int = 3, monte_carlo_samples: int = 1000,
-                  window_size: int = 20):
+                  window_size: int = 20,
+                  use_v2_anticipative_rate: bool = False):
         """
         Initialize multi-horizon anticipatory learning.
 
@@ -77,6 +78,11 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
                 latest K periods). W15-3-CARRY-1 closure: pre-W15
                 this kwarg was hardcoded to 20 inside super().__init__,
                 preventing the SCENARIOS dict from controlling K.
+            use_v2_anticipative_rate: W20-1 / Reading-E experimental flag.
+                When True, the inherited compute_anticipatory_learning_rate
+                AND this class's calculate_multi_horizon_lambda_rates use
+                v2's `α = 1 - TIP` formula instead of thesis Eq 7.16
+                `λ = 0.5*(λ^H + λ^K)`. Forwarded to super().__init__.
         """
         # Initialise the inherited TIPIntegratedAnticipatoryLearning surface
         # (which itself initialises AnticipatoryLearning). That gives this
@@ -86,7 +92,8 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
         # IMPORTANT: keyword args only — the pre-W1-2 super-bug pattern
         # silently maps `super().__init__(N)` to the parent's first positional arg.
         super().__init__(window_size=window_size,
-                          monte_carlo_samples=monte_carlo_samples)
+                          monte_carlo_samples=monte_carlo_samples,
+                          use_v2_anticipative_rate=use_v2_anticipative_rate)
 
         self.max_horizon = max_horizon
         # Override the parent's prediction_horizon to match max_horizon
@@ -215,7 +222,14 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
 
             # W17-5-CARRY-1: combine per Eq 7.16 verbatim
             #   λ_{t+h} = (1/2) * (λ^H_{t+h} + λ^K_{t+h})
-            lambda_combined = 0.5 * (lambda_h + lambda_k)
+            #
+            # W20-1 / Reading-E experimental override: when
+            # use_v2_anticipative_rate=True, replace Eq 7.16 with v2's
+            # monotonic formula α = 1 - TIP per asms_emoa.cpp:44.
+            if getattr(self, "use_v2_anticipative_rate", False):
+                lambda_combined = 1.0 - tip
+            else:
+                lambda_combined = 0.5 * (lambda_h + lambda_k)
 
             # Trace row per horizon (consumed by W16-4 flush_lambda_trace_csv)
             self._lambda_trace_rows.append({
