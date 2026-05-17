@@ -1162,3 +1162,106 @@ waves:
         - "W15-5 integration smoke completes; Δ(S2 vs S0) reported honestly"
         - "Retros at .dfg/retrospectives/W15/W15-N.md with ADR-004 canonical keys"
       checkpoint_file: .dfg/checkpoints/W15-gate.md
+
+  - id: W16
+    name: λ^K consumption + txn costs in HV + extrema preservation + trace export
+    state: PLANNED
+    # Added 2026-05-17 via post-W15 replan. W16 keystone = W16-1
+    # (λ^K consumption per Eq 7.16) per W15-gate critical-path
+    # analysis. Targets the remaining -8.75% Δ(S2−S0) gap.
+    units:
+      - id: W16-1
+        slug: lambda-k-consumption
+        name: Implement λ^K consumption in compute_anticipatory_learning_rate (BACKLOG H2 + W15-3-CARRY-1)
+        purpose: "Closes BACKLOG H2 + W15-3-CARRY-1 consumption half. Verify both λ^H and λ^K arms fire per thesis Eq 7.16; implement λ^K (normalized KF squared-residual sum) if missing. W16 keystone."
+        files:
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/tests/test_lambda_k_consumption.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "compute_anticipatory_learning_rate consumes self.window_size (K)"
+          - "λ = (1/2)(λ^H + λ^K) formula matches thesis Eq 7.16 verbatim"
+          - "K=0 collapses to λ = (1/2)(λ^H + 0) — only future arm fires"
+          - "K>0 both arms fire — λ^K is normalized sum of KF squared residuals over last K periods"
+          - "≥ 4 regression tests covering the cases above"
+
+      - id: W16-2
+        slug: transaction-costs-in-hv
+        name: Integrate transaction costs into anticipatory HV objective (BACKLOG H1)
+        purpose: "Closes BACKLOG H1. Subtract h(u_t, u*_{t-1}) brokerage fees per Table 7.1 from ROI before HV so optimizer sees churn per §7.2 Eqs (7.4)-(7.5)."
+        files:
+          - python_refactor/src/portfolio/portfolio.py
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/experiments/walk_forward.py
+          - python_refactor/tests/test_transaction_costs_in_hv.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "compute_transaction_cost helper implements Brazilian SEC fee schedule per thesis Table 7.1"
+          - "Optimizer sees the cost: ROI_net = ROI - h in NDS objective vector"
+          - "u*_{t-1} threaded across periods in walk_forward.py (equal-weight on period 1)"
+          - "non_robust_ROI preserved as gross-of-cost for reporting (only objective vector uses net)"
+          - "≥ 4 regression tests: fee schedule brackets + optimizer-sees-cost integration"
+
+      - id: W16-3
+        slug: extrema-preservation
+        name: Preserve rank-1 extrema (anchor) points in SMS-EMOA reduce step (BACKLOG H6)
+        purpose: "Closes BACKLOG H6. Make rank-1 best-ROI and best-risk anchor solutions immune to SMS-EMOA reduce step so HV bounding box doesn't shrink over generations per standard SMS-EMOA practice."
+        files:
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/tests/test_extrema_preservation.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "argmax(ROI) and argmin(risk) within rank-1 protected from reduce eviction"
+          - "Per-generation [ROI_max, ROI_min, risk_max, risk_min] trace exported"
+          - "≥ 3 regression tests (synthetic + stress + trace)"
+          - "Edge case: rank-1 with < 3 solutions handled"
+
+      - id: W16-4
+        slug: lambda-tip-trace-export
+        name: Per-call λ + TIP trace export for W16-1 verification (BACKLOG M3+M4 partial)
+        purpose: "Closes BACKLOG M3 + M4 (partial trace-export scope). Export per-call (period, generation, solution_rank, λ^H, λ^K, λ, TIP) as CSV so W16-5 can confirm both λ arms fire."
+        files:
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/experiments/walk_forward.py
+          - python_refactor/tests/test_lambda_tip_trace.py
+        depends_on: [W16-1]
+        size: S
+        acceptance_criteria:
+          - "Trace rows schema: {period, generation, solution_rank, lambda_h, lambda_k, lambda, tip}"
+          - "lambda_tip_trace.csv emitted in each experiment-output dir"
+          - "≥ 2 regression tests covering row schema + CSV emit"
+          - "Honest NaN for λ^K if W16-1 cycle-1 leaves it unset"
+
+      - id: W16-5
+        slug: integration-smoke
+        name: Integration smoke with W16 fixes (λ^K + txn costs + extrema)
+        purpose: "Verify W16-1..W16-4 combined effect: re-run walk-forward smoke; report Δ(S2 vs S0); commit empirical receipt + λ^K + λ^H trace assertions."
+        files:
+          - docs/OOS-EFHV-W16-INTEGRATION-SMOKE.md
+          - .dfg/retrospectives/W16/W16-5.md
+        depends_on: [W16-1, W16-2, W16-3, W16-4]
+        size: S
+        acceptance_criteria:
+          - "Re-run W15-5 smoke shape (2 seeds × {SMS_RDM_K0, ASMS_mHDM_K3} × paper window)"
+          - "Empirical Δ(S2 − S0) reported honestly with comparison vs W15-5 baseline (-8.75%)"
+          - "Trace assertions: λ ≈ 0.5*(λ^H + λ^K) within 1e-9; mean(λ^K) > 0.01 for K=3"
+          - "Wave-close verdict per W16-5 matrix: PASS-DIRECTION-REPLICATED / PASS-FURTHER-GAP-CLOSURE / HOLD-FOR-DEBUG"
+
+    parallel_groups:
+      - [W16-1, W16-3]
+      - [W16-2]
+      - [W16-4]
+      - [W16-5]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 5 units MERGED with green pre-pr battery"
+        - "BACKLOG items H1, H2, H6 closed; M3+M4 partially closed (trace-export half)"
+        - "All 5 unit contracts follow BACKLOG §6 canonical template (plain-string must_read + body grounding with verbatim thesis excerpts)"
+        - "W16-5 integration smoke completes; trace assertions pass; Δ(S2 vs S0) reported honestly with verdict per W16-5 matrix"
+        - "Retros at .dfg/retrospectives/W16/W16-N.md with ADR-004 canonical keys"
+      checkpoint_file: .dfg/checkpoints/W16-gate.md
