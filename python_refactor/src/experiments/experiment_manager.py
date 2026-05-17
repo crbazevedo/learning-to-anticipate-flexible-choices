@@ -268,22 +268,28 @@ class ExperimentManager:
             # Run algorithm
             population = algorithm.run(data)
 
-            # W16-4: flush per-period λ + TIP trace CSV. Caller passes
-            # data["lambda_trace_csv_path"] (typically the walk-forward
-            # driver, once per period). Trace is APPENDED across periods.
+            # W16-4 + W17-5-CARRY-1: flush per-period λ + TIP trace CSV.
+            # Caller passes data["lambda_trace_csv_path"] (typically the
+            # walk-forward driver, once per period). Trace is APPENDED
+            # across periods.
             trace_csv_path = data.get("lambda_trace_csv_path")
-            if (trace_csv_path is not None
-                    and hasattr(algorithm, "anticipatory_learning")
-                    and algorithm.anticipatory_learning is not None
-                    and hasattr(algorithm.anticipatory_learning, "flush_lambda_trace_csv")):
-                try:
-                    algorithm.anticipatory_learning.flush_lambda_trace_csv(
-                        trace_csv_path, append=True,
-                    )
-                except Exception as exc:
-                    self.logger.warning(
-                        f"W16-4 λ trace flush failed (non-fatal): {exc}"
-                    )
+            if trace_csv_path is not None:
+                learner = getattr(algorithm, "anticipatory_learning", None)
+                if learner is not None and hasattr(learner, "flush_lambda_trace_csv"):
+                    import logging as _stdlib_logging
+                    _trace_logger = _stdlib_logging.getLogger(__name__)
+                    try:
+                        n_written = learner.flush_lambda_trace_csv(
+                            trace_csv_path, append=True,
+                        )
+                        _trace_logger.info(
+                            f"W16-4/W17-5-CARRY-1 λ trace flush: wrote "
+                            f"{n_written} rows to {trace_csv_path}"
+                        )
+                    except Exception as exc:
+                        _trace_logger.warning(
+                            f"W16-4 λ trace flush failed (non-fatal): {exc}"
+                        )
 
             execution_time = time.time() - start_time
             
