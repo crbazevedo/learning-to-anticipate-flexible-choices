@@ -420,6 +420,64 @@ class AnticipatoryLearning:
     def get_lambda_trace(self) -> List[Dict[str, Any]]:
         """Return a copy of the per-call λ trace rows (W16-1 / W16-4)."""
         return list(self._lambda_trace_rows)
+
+    # ─── W16-4: λ + TIP trace CSV emit ─────────────────────────────
+    # Closes BACKLOG M3 + M4 (trace-export scope only; full Fig 7.4-
+    # 7.13 rendering is W17/W18). The walk_forward driver calls
+    # flush_lambda_trace_csv(path, append=True) at the end of each
+    # period; rows accumulated during all anticipatory rate calls of
+    # that period are written and the buffer is reset.
+    LAMBDA_TRACE_CSV_HEADER = [
+        "period", "generation", "solution_rank",
+        "lambda_h", "lambda_k", "lambda", "tip",
+    ]
+
+    def flush_lambda_trace_csv(self, path,
+                                 append: bool = True) -> int:
+        """
+        Write accumulated λ trace rows to CSV at ``path`` (W16-4).
+
+        Args:
+            path: target CSV path (created with header if not exists OR
+                if append=False)
+            append: True → append rows to existing file; False →
+                truncate and write header + rows
+
+        Returns:
+            Number of rows written.
+
+        Side effects:
+            Clears self._lambda_trace_rows after writing.
+        """
+        import csv
+        import os
+        from pathlib import Path
+
+        rows = list(self._lambda_trace_rows)
+        if not rows:
+            return 0
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        need_header = (not append) or (not p.exists()) or p.stat().st_size == 0
+        mode = "w" if not append else "a"
+        with open(p, mode, newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=self.LAMBDA_TRACE_CSV_HEADER)
+            if need_header:
+                writer.writeheader()
+            for r in rows:
+                # Coerce dtypes for CSV friendliness; preserve NaN as ""
+                writer.writerow({
+                    "period": r.get("period", -1),
+                    "generation": r.get("generation", -1),
+                    "solution_rank": r.get("solution_rank", -1),
+                    "lambda_h": r.get("lambda_h", float("nan")),
+                    "lambda_k": r.get("lambda_k", float("nan")),
+                    "lambda": r.get("lambda", float("nan")),
+                    "tip": r.get("tip", float("nan")),
+                })
+        n_written = len(rows)
+        self._lambda_trace_rows = []
+        return n_written
     
     def _compute_traditional_learning_rate(self, solution: Solution, min_error: float, 
                                          max_error: float, min_alpha: float, max_alpha: float, 

@@ -80,6 +80,7 @@ def enumerate_periods(n_days: int, train_window_days: int = 378,
 def _train_and_extract_pareto(scenario: str, seed: int,
                                train_returns: pd.DataFrame,
                                previous_weights: np.ndarray | None = None,
+                               lambda_trace_csv_path: str | None = None,
                                ) -> tuple[list[np.ndarray], int]:
     """Train SMS-EMOA on the train window; extract Pareto weights.
 
@@ -112,6 +113,9 @@ def _train_and_extract_pareto(scenario: str, seed: int,
     # algorithm setter can call set_previous_weights post-init).
     if previous_weights is not None:
         data["previous_weights"] = np.asarray(previous_weights, dtype=float)
+    # W16-4: thread λ trace CSV path; ExperimentManager flushes per-period.
+    if lambda_trace_csv_path is not None:
+        data["lambda_trace_csv_path"] = str(lambda_trace_csv_path)
     results = mgr._run_algorithm(config, data)
     pareto = results.get("pareto_front", [])
     weights: list[np.ndarray] = []
@@ -131,7 +135,8 @@ def run_walk_forward(scenario: str,
                       train_window_days: int = 378,
                       step_days: int = 50,
                       n_mc: int = 1000,
-                      rng: np.random.Generator | None = None
+                      rng: np.random.Generator | None = None,
+                      lambda_trace_csv_path: str | None = None,
                       ) -> list[dict[str, Any]]:
     """Walk-forward evaluate one (scenario, seed) across all rolling periods.
 
@@ -160,7 +165,9 @@ def run_walk_forward(scenario: str,
         oos = full_returns.iloc[p["oos_start"]:p["oos_end"]]
         try:
             weights, n_assets = _train_and_extract_pareto(
-                scenario, seed, train, previous_weights=previous_weights,
+                scenario, seed, train,
+                previous_weights=previous_weights,
+                lambda_trace_csv_path=lambda_trace_csv_path,
             )
         except Exception as exc:
             results.append({**p, "error": f"{type(exc).__name__}: {exc}",
