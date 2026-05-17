@@ -59,7 +59,8 @@ def _run_one(scenario: str, seed: int,
               full_returns_pickle: bytes,
               train_window_days: int, step_days: int,
               n_mc: int,
-              lambda_trace_csv_path: str | None = None) -> dict[str, Any]:
+              lambda_trace_csv_path: str | None = None,
+              use_closed_form_efhv: bool = False) -> dict[str, Any]:
     """ProcessPoolExecutor entry: unpickle returns + run one
     (scenario, seed) walk-forward, return aggregate.
 
@@ -82,6 +83,7 @@ def _run_one(scenario: str, seed: int,
         n_mc=n_mc,
         rng=rng,
         lambda_trace_csv_path=lambda_trace_csv_path,
+        use_closed_form_efhv=use_closed_form_efhv,
     )
     agg = aggregate_per_seed(per_period)
     return {
@@ -227,6 +229,16 @@ def main(argv: list[str] | None = None) -> int:
                           help="Restrict asset universe to the 87 thesis-faithful "
                                "assets per docs/H4-ASSET-UNIVERSE-EDA.md. "
                                "Default is the full 98-asset legacy archive.")
+    # W22 closed-form OOS eHypV variant (operator directive 2026-05-17):
+    # skip bootstrap MC; use single full-window MLE per period →
+    # deterministic Ŝ. n_mc is IGNORED when this flag is set.
+    parser.add_argument("--use-closed-form-efhv",
+                          action="store_true",
+                          help="W22 methodology pivot: skip bootstrap MC in "
+                               "compute_oos_efhv; use single full-window MLE "
+                               "(μ̂, Σ̂) per period for a deterministic Ŝ "
+                               "point-estimate. Faster + zero MC noise; not "
+                               "directly comparable to the W14-2 MC chain.")
     args = parser.parse_args(argv)
 
     scenarios = [s.strip() for s in args.scenarios.split(",") if s.strip()]
@@ -263,7 +275,8 @@ def main(argv: list[str] | None = None) -> int:
         futures = {
             pool.submit(_run_one, s, sd, full_returns_pickle,
                           args.train_window_days, args.step_days, args.n_mc,
-                          lambda_trace_csv_path_str): (s, sd)
+                          lambda_trace_csv_path_str,
+                          args.use_closed_form_efhv): (s, sd)
             for (s, sd) in pairs
         }
         done = 0

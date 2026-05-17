@@ -160,6 +160,7 @@ def run_walk_forward(scenario: str,
                       n_mc: int = 1000,
                       rng: np.random.Generator | None = None,
                       lambda_trace_csv_path: str | None = None,
+                      use_closed_form_efhv: bool = False,
                       ) -> list[dict[str, Any]]:
     """Walk-forward evaluate one (scenario, seed) across all rolling periods.
 
@@ -212,6 +213,7 @@ def run_walk_forward(scenario: str,
             oos_returns=oos,
             n_samples=n_mc,
             rng=rng,
+            use_closed_form=use_closed_form_efhv,
         )
         # W17-4 (closes W16-2-CARRY-1 + BACKLOG M5 partial): pick the
         # AMFC per thesis §6.4 Eq 6.42 as u*_{t-1} for the NEXT period

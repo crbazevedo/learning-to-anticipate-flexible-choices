@@ -128,7 +128,8 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
                       oos_returns: pd.DataFrame,
                       n_samples: int = 1000,
                       z_ref: tuple[float, float] = (0.2, 0.0),
-                      rng: np.random.Generator | None = None) -> dict:
+                      rng: np.random.Generator | None = None,
+                      use_closed_form: bool = False) -> dict:
     """Sample-average OOS Future Hypervolume per thesis Eqs 7.10+7.11.
 
     For each of n_samples MC scenarios e:
@@ -139,11 +140,25 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
          (u_i^T Σ̂_e u_i, μ̂_e^T u_i)
       4. Compute hypervolume of the N-point cloud against z_ref → S_e
 
+    W22 closed-form variant (use_closed_form=True): skips bootstrap MC;
+    instead uses single full-window MLE (μ̂, Σ̂) computed once. Returns
+    deterministic Ŝ given (oos_returns, pareto_weights, z_ref). This is
+    a POINT-ESTIMATE (S(E[μ,Σ])) NOT a true closed-form expectation
+    (E[S(μ,Σ)]) — by Jensen these differ for nonlinear HV. For Phase B
+    parallel validation: if closed-form Ŝ tracks the MC mean within
+    noise, the MC bootstrap was over-sampling for our use; otherwise
+    the uncertainty model is material and a true closed-form expected
+    Ŝ (Option B per W22 design doc, Black-Scholes-style truncated
+    means per portfolio + HV aggregation) is needed.
+
+    n_samples is IGNORED when use_closed_form=True (output is
+    deterministic; efhv_std=0.0; efhv_samples=[the single Ŝ value]).
+
     Returns:
         {
           'efhv_mean': float,   # Ŝ_{t+1} per Eq 7.11
-          'efhv_std':  float,   # MC standard deviation across scenarios
-          'efhv_samples': np.ndarray  # all E sample HVs (for downstream stats)
+          'efhv_std':  float,   # MC standard deviation across scenarios (0 if closed-form)
+          'efhv_samples': np.ndarray  # all E sample HVs (length 1 if closed-form)
         }
     """
     if rng is None:
@@ -165,6 +180,19 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
                 f"weights[{i}] shape {w.shape} mismatches oos_returns "
                 f"n_assets={n_assets}"
             )
+
+    if use_closed_form:
+        # W22 closed-form (point-estimate) variant: single full-window MLE
+        # → deterministic Ŝ. Skips bootstrap MC entirely.
+        mu = arr.mean(axis=0)
+        cov = np.cov(arr, rowvar=False, ddof=1)
+        points = [(float(w @ cov @ w), float(mu @ w)) for w in weights_arr]
+        hv = hypervolume_2d(points, z_ref)
+        return {
+            "efhv_mean": float(hv),
+            "efhv_std": 0.0,
+            "efhv_samples": np.array([hv], dtype=float),
+        }
 
     samples_hv = np.empty(n_samples, dtype=float)
     for e in range(n_samples):
