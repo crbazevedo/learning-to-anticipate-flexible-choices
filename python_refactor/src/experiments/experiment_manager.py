@@ -256,7 +256,15 @@ class ExperimentManager:
                     from ..algorithms.anticipatory_learning import AnticipatoryLearning
                     learning = AnticipatoryLearning(**learning_config.get('parameters', {}))
                 algorithm.set_learning(learning)
-            
+
+            # W16-2 (BACKLOG H1): thread previous-period implemented
+            # portfolio u*_{t-1} into the SMS-EMOA evaluator so the
+            # ROI objective is net of thesis Table 7.1 transaction
+            # costs. Walk-forward driver passes it via data dict.
+            prev_weights = data.get("previous_weights")
+            if prev_weights is not None and hasattr(algorithm, "set_previous_weights"):
+                algorithm.set_previous_weights(prev_weights)
+
             # Run algorithm
             population = algorithm.run(data)
             
