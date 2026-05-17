@@ -1,0 +1,21 @@
+proposal_id: wave-W13-20260517T071033Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T07:10:33Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W13
+  action: reorder
+trigger: operator-intervention
+rationale: "Operator caveat: out-of-sample EFHV. W13 (in-sample EFHV) measured the\
+  \ algorithm's PREDICTED HV against its own KF state \u2014 not a held-out test.\
+  \ Paper \xA7V-D's claim is about REALIZED future HV on held-out data: train on paper\
+  \ window (2003-2012), evaluate trained Pareto front against extended (2012-2024).\
+  \ Restructure: W13-1 unchanged (still need EFHV plumbing); W13-2 reshaped as OOS\
+  \ evaluator module; W13-3 NEW (re-run + report mean OOS EFHV)."
+evidence:
+- .dfg/retrospectives/W12/W12-2.md
+accepted_at: '2026-05-17T07:10:54Z'
+operator_note: 'OOS pivot: realized future HV on held-out extended window, not in-sample
+  EFHV'
