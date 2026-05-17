@@ -630,3 +630,91 @@ waves:
         - "Stats helpers + table generators + report orchestrator all importable + tested"
         - "Retros at .dfg/retrospectives/W8/W8-N.md with ADR-004 frontmatter"
       checkpoint_file: .dfg/checkpoints/W8-gate.md
+
+  - id: W9
+    name: src/ integration fixup + retro-hygiene gate
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W9-20260517T021518Z.
+    # W8-1 surfaced 3 src/ integration bugs blocking the real-run smoke-test.
+    # W9-1, W9-2, W9-3 are file-disjoint and run in parallel.
+    # W9-4 depends on W9-1 + W9-2 (re-run smoke-test to close W7-1-CARRY-1).
+    units:
+      - id: W9-1
+        slug: experiment-manager-bool-dataframe-fix
+        name: Fix bool(DataFrame) ambiguity at experiment_manager.py:190
+        purpose: "Closes W8-1-CARRY-2 partial. Replaces `if asset_data:` (DataFrame truthiness ValueError) with explicit emptiness check; unblocks the data-loading log step."
+        files:
+          - python_refactor/src/experiments/experiment_manager.py
+          - python_refactor/tests/test_experiments_experiment_manager.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "Line 190 no longer triggers `ValueError: The truth value of a DataFrame is ambiguous`"
+          - "num_assets log field is correct (column count for asset DataFrame; 0 when empty)"
+          - "At least 1 regression test that constructs a DataFrame + verifies the logging step doesn't raise"
+
+      - id: W9-2
+        slug: data-loader-pivot-and-glob
+        name: Fix pivot KeyError + add multi-CSV glob support
+        purpose: "Closes W8-1-CARRY-1 + W8-1-CARRY-2 partial. Glob-expand asset_files; tag rows with asset_id; pivot on asset_id."
+        files:
+          - python_refactor/src/experiments/data_loader.py
+          - python_refactor/tests/test_experiments_data_loader.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "data_loader.py: each asset_files entry is glob-expanded (via Path.glob or glob.glob); each loaded row tagged with asset_id; pivot uses columns='asset_id'"
+          - "No more KeyError(None) from pivot"
+          - "Paper-window data path (legacy-cpp/executable/data/ftse-original/table*.csv) loads successfully (≥ 90 assets)"
+          - "FTSE-updated single-CSV path continues to work (backward compat)"
+          - "At least 2 regression tests: (a) glob expansion, (b) pivot shape with multi-asset input"
+
+      - id: W9-3
+        slug: retro-hygiene-gate
+        name: Retro-hygiene — fix W7/W8 retro frontmatter + wire dfg reflect --validate into pre-pr
+        purpose: "Retires sub-papercut #23 (retro frontmatter wrong-keys silently skips ReflectionEmit; observed 7x). Re-keys 7 retros to ADR-004 canonical + wires dfg reflect --validate into pre-pr."
+        files:
+          - .dfg/retrospectives/W7/W7-1.md
+          - .dfg/retrospectives/W7/W7-2.md
+          - .dfg/retrospectives/W7/W7-3.md
+          - .dfg/retrospectives/W8/W8-1.md
+          - .dfg/retrospectives/W8/W8-2.md
+          - .dfg/retrospectives/W8/W8-3.md
+          - .dfg/retrospectives/W8/W8-4.md
+          - kit/scripts/pre-pr-reflect-validate.sh
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "All 7 retros re-keyed to ADR-004 canonical (what_worked, what_broke, what_youd_change, assumption_to_challenge); semantic content preserved"
+          - "`dfg reflect --backfill --waves W7,W8` emits ≥ 7 ReflectionEmit events (was 0)"
+          - "kit/scripts/pre-pr-reflect-validate.sh: for each W8-N retro present on disk, runs `dfg reflect --validate W8-N` and surfaces failures"
+          - "Script is documented in commit message; can be wired into make ci / pre-pr separately"
+
+      - id: W9-4
+        slug: smoke-test-end-to-end-rerun
+        name: Re-run W8-1 smoke-test end-to-end (closes W7-1-CARRY-1)
+        purpose: "After W9-1 + W9-2 land, re-runs the W8-1 smoke-test on master. Closes W7-1-CARRY-1 (real-run smoke-test PASSES end-to-end) and W8-1-CARRY-2 (src/ cascade resolved). Receipts logged in retro."
+        files:
+          - .dfg/retrospectives/W9/W9-4.md
+        depends_on: [W9-1, W9-2]
+        size: S
+        acceptance_criteria:
+          - "`python -m experiments.validation_matrix --scenario S0 --window paper --seed 1 --output /tmp/w9-smoke/` exits 0 (without --dry-run)"
+          - "/tmp/w9-smoke/manifest.json shows status=ok"
+          - "/tmp/w9-smoke/metrics.csv has at least 1 metric row"
+          - "Retro documents the closure of W7-1-CARRY-1 + W8-1-CARRY-2"
+
+    parallel_groups:
+      - [W9-1, W9-2, W9-3]
+      - [W9-4]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 4 units MERGED with green pre-pr battery"
+        - "W7-1-CARRY-1 closed: validation_matrix real-run smoke-test PASSES end-to-end (proven by W9-4)"
+        - "W8-1-CARRY-1 closed: paper-window per-asset CSV loader works"
+        - "W8-1-CARRY-2 closed: src/ bool(DataFrame) + pivot bugs both fixed"
+        - "sub-papercut #23 retired: dfg reflect --backfill emits ≥ 7 events; pre-pr wrapper exists"
+        - "Retros at .dfg/retrospectives/W9/W9-N.md with ADR-004 frontmatter (canonical keys)"
+      checkpoint_file: .dfg/checkpoints/W9-gate.md
