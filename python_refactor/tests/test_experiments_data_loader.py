@@ -98,6 +98,42 @@ class TestAssetsFilter(unittest.TestCase):
             self.assertEqual(df.columns.tolist(), ["MSFT", "AAPL"])
 
 
+class TestRealDataDuplicates(unittest.TestCase):
+    """W9-4 hotfix to W9-2: real CSVs have duplicate (Date, asset_id)
+    tuples (year-end summary rows). Synthetic fixtures missed this;
+    smoke-test surfaced it. Pin the dedup behavior."""
+
+    def test_duplicate_dates_in_single_csv_dont_break_pivot(self):
+        with TemporaryDirectory() as tmp:
+            tmpdir = Path(tmp)
+            # CSV has 2 rows for 2020-12-31 (year-end summary + EOD).
+            _write_csv(tmpdir / "INDEX.csv",
+                        ["2020-01-02", "2020-12-31", "2020-12-31"],
+                        [100.0, 110.0, 110.5])
+            loader = DataLoader()
+            df = loader.load_asset_data(
+                [str(tmpdir / "INDEX.csv")],
+                date_range={},
+                assets=[],
+            )
+            # Pivot succeeds; one row per unique date.
+            self.assertEqual(len(df), 2)
+            # 'keep=last' preserves the consolidated-summary value.
+            self.assertAlmostEqual(df["INDEX"].loc[pd.Timestamp("2020-12-31")],
+                                     (110.5 - 110.0) / 110.0, places=4)
+
+    def test_real_ftse_updated_csv_loads(self):
+        repo_root = Path(__file__).parents[2]
+        ftse_csv = repo_root / "python_refactor" / "data" / "ftse-updated" / "FTSE_100_20121121_20241231.csv"
+        if not ftse_csv.exists():
+            self.skipTest(f"FTSE-updated CSV not present at {ftse_csv}")
+        loader = DataLoader()
+        df = loader.load_asset_data([str(ftse_csv)], date_range={}, assets=[])
+        # Smoke: shape sane, no duplicates leaked past pivot.
+        self.assertGreater(len(df), 1000)
+        self.assertEqual(len(df.index), len(df.index.unique()))
+
+
 class TestPaperWindowLoad(unittest.TestCase):
     """W8-1-CARRY-1 closure check: paper-window per-asset CSVs load."""
 
