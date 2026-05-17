@@ -13,6 +13,16 @@ from typing import Tuple, Optional
 from scipy.stats import norm
 import logging
 
+# ---------------------------------------------------------------------------
+# W3-4 (closes W1-4-CARRY-2): heuristic placeholders for the
+# `_calculate_tip_simple` fallback path (used when KF covariance is
+# unavailable). These constants are NOT paper-grounded — they were chosen
+# during development to span the typical FTSE-100 ROI/risk range. Replace
+# with empirically-fitted values when a calibration unit lands.
+# ---------------------------------------------------------------------------
+_TIP_FALLBACK_MAX_ROI_DIFF: float = 0.5
+_TIP_FALLBACK_MAX_RISK_DIFF: float = 0.3
+
 logger = logging.getLogger(__name__)
 
 
@@ -200,12 +210,15 @@ class TemporalIncomparabilityCalculator:
             roi_distance = abs(current_roi - predicted_roi)
             risk_distance = abs(current_risk - predicted_risk)
             
-            # Normalize distances (assuming typical ranges)
-            max_roi_diff = 0.5  # Maximum expected ROI difference
-            max_risk_diff = 0.3  # Maximum expected risk difference
-            
-            normalized_roi_distance = min(roi_distance / max_roi_diff, 1.0)
-            normalized_risk_distance = min(risk_distance / max_risk_diff, 1.0)
+            # W3-4: named module constants (see top of file) replace the
+            # pre-W3-4 inline magic numbers. Flagged as heuristic
+            # placeholders; not paper-grounded.
+            normalized_roi_distance = min(
+                roi_distance / _TIP_FALLBACK_MAX_ROI_DIFF, 1.0,
+            )
+            normalized_risk_distance = min(
+                risk_distance / _TIP_FALLBACK_MAX_RISK_DIFF, 1.0,
+            )
             
             # TIP is higher when objectives are more similar (closer)
             tip = 0.5 * (1.0 - normalized_roi_distance + 1.0 - normalized_risk_distance)
