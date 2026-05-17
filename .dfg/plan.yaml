@@ -489,3 +489,67 @@ waves:
         - "docs/EXPERIMENT-VALIDATION-PLAN.md committed"
         - "Retros at .dfg/retrospectives/W6/W6-N.md with ADR-004 frontmatter"
       checkpoint_file: .dfg/checkpoints/W6-gate.md
+
+  - id: W7
+    name: Live experiment scaffold + analytics planning
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W7-20260517T012545Z.
+    # 3 units file-disjoint in 1 parallel group. Smoke-test + result
+    # population deferred to W8 (which depends on W7).
+    units:
+      - id: W7-1
+        slug: experiment-execution-scaffold
+        name: Build validation_matrix + aggregator + figures scaffold
+        purpose: "Scaffold for running the 5-scenario × 2-window × N-seed matrix from W6-3. Deterministic seed plumbing at driver level."
+        files:
+          - python_refactor/experiments/validation_matrix.py
+          - python_refactor/experiments/aggregate_validation.py
+          - python_refactor/experiments/figures.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "validation_matrix.py — CLI entrypoint runs `--scenario S2 --window paper --seed 42` end-to-end and writes results/<scenario>/<seed>/{metrics.csv,manifest.json}"
+          - "aggregate_validation.py — reads results/ tree, produces summary CSV (scenario × window × metric → mean ± std + N)"
+          - "figures.py — generates Pareto frontier evolution + wealth trajectory PNGs from per-run CSVs"
+          - "All seeded via np.random.seed(seed) + np.random.default_rng(seed) at driver entry; one seed source, deterministic"
+          - "No production-algorithm code modified (scaffold-only)"
+
+      - id: W7-2
+        slug: analytics-plan
+        name: Comprehensive analytics framework doc
+        purpose: "Covers reports / statistical tests / comparisons / multi-factor analyses / data segmentation / data viz / tables per operator directive 2026-05-17."
+        files:
+          - docs/ANALYTICS-PLAN.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "docs/ANALYTICS-PLAN.md exists with 8+ sections: descriptive stats, inferential tests, multi-factor design, data segmentation, visualization catalog, table specs, reproducibility receipts, honest scars"
+          - "Each statistical test cited to a methodology source (paper §V-D for Mann-Whitney; standard ANOVA for 2×2 factorial)"
+          - "Each visualization type linked to a specific paper figure when applicable"
+          - "Plan is execution-ready — W8 can implement directly without re-design"
+
+      - id: W7-3
+        slug: validation-results-template
+        name: VALIDATION-RESULTS.md skeleton template
+        purpose: "Empty results doc with the same section structure W8 will populate. Future readers see the empty template and know what's coming."
+        files:
+          - docs/VALIDATION-RESULTS.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "docs/VALIDATION-RESULTS.md exists with section headers per the analytics plan (W7-2)"
+          - "Each section has a '🚧 Populated by W8 (or later)' marker rather than fabricated numbers"
+          - "Document explains its own status (template; will be filled by W8 execution)"
+
+    parallel_groups:
+      - [W7-1, W7-2, W7-3]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 3 units MERGED with green pre-pr battery"
+        - "Execution scaffold passes a smoke-test invocation (e.g. `python -m experiments.validation_matrix --scenario S0 --window paper --seed 1 --dry-run` exits 0)"
+        - "Analytics plan covers all 7 operator-named categories (report, stats, comparisons, multi-factor, segmentation, viz, tables)"
+        - "VALIDATION-RESULTS.md template exists with structured empty sections (no fabricated results)"
+        - "Retros at .dfg/retrospectives/W7/W7-N.md with ADR-004 frontmatter"
+      checkpoint_file: .dfg/checkpoints/W7-gate.md
