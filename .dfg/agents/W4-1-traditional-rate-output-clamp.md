@@ -27,13 +27,15 @@ output_contract:
     PASSES under any random input because the clamp guarantees
     valid rates.
 
-## What this contract does NOT authorise
-
-- Touching any file outside output_contract.
-- Adding new tests (the W3-3 test was the regression case; reverting
-  its pinning is the verification).
-
 dispatch_instructions: |
+  ## What this contract does NOT authorise
+
+  - Touching any file outside output_contract.
+  - Adding new tests (the W3-3 test was the regression case; reverting
+    its pinning is the verification).
+
+  ## Implementation
+
   1. anticipatory_learning.py: in _compute_traditional_learning_rate,
      change `return anticipation_rate` to
      `return max(rate_lwb, min(rate_upb, anticipation_rate))`.
