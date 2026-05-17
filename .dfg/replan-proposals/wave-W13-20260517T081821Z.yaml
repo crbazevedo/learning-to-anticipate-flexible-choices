@@ -1,0 +1,18 @@
+proposal_id: wave-W13-20260517T081821Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T08:18:21Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W13
+  action: resize
+trigger: retro-driven
+rationale: "W13-2/W13-3 file path corrections vs plan.yaml. (a) test_oos_evaluator.py\
+  \ \u2192 test_experiments_oos_evaluator.py (naming convention follows test_experiments_*\
+  \ pattern). (b) W13-3 actually shipped oos_report.py + test_experiments_oos_report.py\
+  \ + OOS-EFHV-REPORT.md (3 files) beyond what plan listed. Path-only correction;\
+  \ no scope change."
+evidence: []
+accepted_at: '2026-05-17T08:19:14Z'
+operator_note: Path-only correction to match shipped files; no scope change

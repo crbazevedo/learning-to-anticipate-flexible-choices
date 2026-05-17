@@ -26,37 +26,63 @@ command:    python -m experiments.report --summary docs/VALIDATION-SUMMARY.csv -
 
 ## 1. Executive summary
 
-**The current Python implementation does NOT replicate the paper's
-headline claim.** At 30 seeds × 1000 MC scenarios × paper-window
-80/20 temporal split, the mean out-of-sample future hypervolume
-(thesis Eqs 7.10+7.11) is:
+**The W13-3 single-shot 80/20 evaluation reports S2 < S0 (−17.59%,
+p < 0.0001), inconsistent with the paper headline. BUT the evaluation
+methodology itself diverges from the thesis and may explain the result.**
+
+Receipt (30 seeds × 1000 MC × single 80/20 split of the paper window):
 
 | Scenario | Mean OOS EFHV | Std (n=30) | Direction vs S0 |
 |---|---|---|---|
-| **S0** (myopic baseline = SMS/RDM) | **5.12e-05** | 4.06e-06 | — |
+| **S0** (myopic baseline ≈ SMS/RDM) | **5.12e-05** | 4.06e-06 | — |
 | **S2** (anticipatory + max-Hypv DM ≈ ASMS/mHDM) | **4.22e-05** | 3.68e-06 | **−17.59%** |
 
-**Delta** = S2 − S0 = **−9.01e-06 (−17.59%)** — strongly statistically
-significant (Welch t ≈ 9, df ≈ 60, p < 0.0001) but in the **OPPOSITE**
-direction from the paper's Table 7.2 claim that ASMS/mHDM beats
-SMS/RDM in 70% of scenario × dataset combinations.
+Welch t ≈ 9, df ≈ 60. Direction reverses the paper's Table 7.2 claim
+that ASMS/mHDM beats SMS/RDM in 70% of scenario × dataset combinations.
 
-**Honest interpretation.** The W7→W13 chain delivered functioning
-infrastructure (60-run sweeps, 312-line populated doc, 16-test OOS
-evaluator), but the S2 "anticipatory" configuration in the current
-Python port does NOT produce the OOS-future-hypervolume gain the
-thesis reports. Candidate root causes (see W13-3 retro for the full
-list — filed as W13-CARRY-1 for W14 investigation): (a) the SCENARIOS
-dict maps `max_horizon` (paper Eq 14 H) but does NOT map the OAL
-window-size K∈{0,1,2,3} from thesis §7.2.3 that drives the
-anticipation effect; (b) cardinality constraints c_l=5, c_u=15
-unenforced; (c) OAL rate λ_{t+h} = ½(λ^H + λ^K) from Eq 7.16 likely
-only half-firing; (d) data-window divergence (98 assets vs thesis
-87; 2003–2012 partial range).
+### Methodology caveat (W13-CARRY-2 — the load-bearing one)
 
-**Headline number:** S2 paper-window mean OOS EFHV vs S0 = **−17.59%**
-(paper Table 7.2 claim direction: +; agreement: **divergent —
-investigate per W13-CARRY-1**). See [`OOS-EFHV-REPORT.md`](OOS-EFHV-REPORT.md).
+The thesis (§7.2.2) uses **online walk-forward evaluation**: at each
+rolling investment period t, the algorithm trains on data up to t,
+extracts the Estimated Maximal Flexible Choice (EMFC) `m̂_{u*_t}`,
+implements that portfolio, and observes the sample-average future
+hypervolume `Ŝ_{t+1}` at the NEXT period. Aggregation is over
+(T − 1) × 30 seeds = ~720 observations across the rolling sweep.
+
+**W13-3 instead used a single 80/20 train/test split** — 1 period
+× 30 seeds = 30 observations. This:
+
+- Defeats the anticipation property: the algorithm sees the whole
+  training window at once rather than stepping forward through it
+  with K∈{1,2,3} historical lookback. The paper's anticipation
+  effect is driven by THE WALK FORWARD ITSELF + the K-historical
+  window self-adjusting `λ_{t+h}` per Eq 7.16. Batch training
+  collapses this temporal structure.
+- Cuts statistical power by ~24×.
+- Doesn't match the C++ rolling-step structure (which IS in the
+  legacy code per the W13 sub-agent audit, even though that code
+  computes only in-sample HV).
+
+The S2 < S0 finding therefore says **the current pipeline + 80/20
+single-shot methodology does not reproduce the paper claim**. It
+does NOT say "the algorithm is broken." Disambiguating requires
+the walk-forward implementation in W14.
+
+### Candidate root causes (W13-CARRY-1 — secondary)
+
+If walk-forward STILL shows S2 ≤ S0, ranked by plausibility:
+
+(a) **K window-size mismatch** (highest). SCENARIOS maps
+   `max_horizon` (paper Eq 14 H) but NOT K ∈ {0,1,2,3} from
+   thesis §7.2.3 OAL historical-window. S2 may be running K=0
+   effectively — equivalent to SMS/RDM baseline.
+(b) Cardinality constraints (c_l=5, c_u=15) unenforced.
+(c) OAL rate `λ_{t+h} = ½(λ^H + λ^K)` only half-firing.
+(d) Data-window divergence (98 assets vs thesis 87; partial range).
+
+**Headline number:** −17.59% per current methodology;
+**agreement: methodologically incommensurable** until W14 lands
+walk-forward. See [`OOS-EFHV-REPORT.md`](OOS-EFHV-REPORT.md).
 
 ---
 

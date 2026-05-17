@@ -22,6 +22,7 @@ output_contract:
   files:
     - python_refactor/experiments/oos_report.py
     - python_refactor/tests/test_experiments_oos_report.py
+    - docs/OOS-EFHV-REPORT.md
     - docs/VALIDATION-RESULTS.populated.md
     - .dfg/retrospectives/W13/W13-3.md
   branch_name: feat/w13-3-oos-efhv-report
