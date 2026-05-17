@@ -471,17 +471,95 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
     def set_max_horizon(self, max_horizon: int):
         """
         Set maximum prediction horizon.
-        
+
         Args:
             max_horizon: New maximum prediction horizon
         """
         if max_horizon < 1:
             raise ValueError("Maximum horizon must be at least 1")
-        
+
         self.max_horizon = max_horizon
         self.n_step_predictor.max_horizon = max_horizon
-        
+
         logger.info(f"Set maximum prediction horizon to {max_horizon}")
+
+    def learn_population(self, population, current_time: int):
+        """Multi-horizon learn_population — paper Eq (14).
+
+        W4-2 (closes W1-3-CARRY-3): overrides
+        TIPIntegratedAnticipatoryLearning.learn_population so the
+        multi-horizon machinery (apply_anticipatory_learning_rule +
+        calculate_multi_horizon_lambda_rates) actually drives the
+        run loop for MultiHorizonAnticipatoryLearning instances —
+        instead of silently falling through to the parent's
+        single-horizon path.
+
+        Per solution:
+          1. Compute per-horizon λ rates (paper Eq 13) via
+             calculate_multi_horizon_lambda_rates.
+          2. For h=1..H-1, build a predicted [ROI, risk] state from
+             _generate_predicted_solution.
+          3. Apply paper Eq (14):
+                ẑ_t|ẑ_{t+1:t+H-1} = (1 − Σλ) · ẑ_t + Σ λ_{t+h} · ẑ_{t+h}
+             via apply_anticipatory_learning_rule.
+          4. Write the anticipated [ROI, risk] back to the solution
+             AND tag `solution.multi_horizon_applied = True` for
+             verifiability.
+
+        Honest scar: this override does NOT thread covariance updates
+        (paper Eq 15) — only mean vectors. A deeper integration unit
+        would close that gap.
+
+        Args:
+            population: list of Solution objects to update in-place
+            current_time: current time step
+        """
+        for solution in population:
+            # Build current state [ROI, risk] — paper Eq (11) canonical
+            # ordering (W1-1 settled this).
+            current_state = np.array([solution.P.ROI, solution.P.risk])
+
+            # Compute per-horizon λ rates (paper Eq 13).
+            lambda_rates = self.calculate_multi_horizon_lambda_rates(
+                solution, self.max_horizon,
+            )
+
+            # When max_horizon < 2 (no future horizons), the rule
+            # degenerates to identity — skip the update but still tag
+            # the solution as "multi-horizon path taken" for
+            # verifiability of which class drove the loop.
+            if not lambda_rates:
+                solution.multi_horizon_applied = True
+                continue
+
+            # For each future horizon h=1..H-1, build the predicted
+            # [ROI, risk] state from the existing predictor surface.
+            predicted_states = []
+            for h_idx, _ in enumerate(lambda_rates):
+                h = h_idx + 1  # horizons are 1-indexed in the API
+                predicted_solution = self._generate_predicted_solution(
+                    solution, h,
+                )
+                predicted_states.append(np.array([
+                    predicted_solution.P.ROI,
+                    predicted_solution.P.risk,
+                ]))
+
+            # Paper Eq (14): the multi-horizon convex combination.
+            anticipatory_state = self.apply_anticipatory_learning_rule(
+                current_state, predicted_states, lambda_rates,
+            )
+
+            # Write back the anticipated state. The solution's covariance
+            # update (paper Eq 15) is NOT threaded here — see honest scar
+            # in the docstring.
+            solution.P.ROI = float(anticipatory_state[0])
+            solution.P.risk = float(anticipatory_state[1])
+            solution.multi_horizon_applied = True
+
+        # Mirror the parent's bookkeeping so historical-population
+        # consumers (correspondence mapping, etc.) still see a snapshot.
+        self.store_historical_population(population)
 
 
 def create_multi_horizon_anticipatory_learning(max_horizon: int = 3, 
