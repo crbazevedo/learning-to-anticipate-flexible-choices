@@ -1065,3 +1065,100 @@ waves:
         - "VALIDATION-RESULTS.populated.md §1 updated with walk-forward result"
         - "Retros at .dfg/retrospectives/W14/W14-N.md with ADR-004 canonical keys"
       checkpoint_file: .dfg/checkpoints/W14-gate.md
+
+  - id: W15
+    name: Algorithm correctness — BACKLOG BLOCKERS B1-B4 + H3+H5+M15
+    state: PLANNED
+    # Added 2026-05-17 via replan wave-W15-20260517T143116Z.
+    # Per docs/BACKLOG.md grounded catalog. Each unit contract MUST
+    # follow §6 canonical template (BACKLOG item-ID pointer + thesis
+    # grounding with verbatim excerpts + reason field).
+    units:
+      - id: W15-1
+        slug: hv-reference-point
+        name: Thread z_ref=(0.2, 0.0) into SMSEMOA (BACKLOG B1)
+        purpose: "Closes BACKLOG B1. Replace sms_emoa.py defaults R1=0.0, R2=1.0 with thesis z_ref=(0.2, 0.0)^T per §7.2.3 p.147."
+        files:
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/tests/test_sms_emoa_reference_point.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "SMSEMOA constructor accepts z_ref tuple; defaults to thesis values (0.2, 0.0) per §7.2.3"
+          - "_compute_hypervolume_contributions_class and _compute_stochastic_hypervolume_contributions_class use z_ref consistently"
+          - "≥ 3 regression tests covering thesis-spec defaults + override + HV computation at new reference"
+
+      - id: W15-2
+        slug: cardinality-uniform-crossover-simplex
+        name: Cardinality enforcement + uniform crossover + simplex projection (BACKLOG B3+B4)
+        purpose: "Closes BACKLOG B3 (c_l=5, c_u=15) + B4 (replace SBX with uniform crossover; add dual-mode mutation; non-negative simplex projection)."
+        files:
+          - python_refactor/src/algorithms/operators.py
+          - python_refactor/src/portfolio/portfolio.py
+          - python_refactor/tests/test_operators_thesis_spec.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "uniform_crossover function implements thesis §7.2.3 spec (uniform over mean DD vectors)"
+          - "mutation function implements dual-mode (modify-nonzero / add-remove-asset) per thesis §7.2.3 p.147"
+          - "Cardinality enforced post-operator: c_l ≤ |non-zero weights| ≤ c_u with thesis defaults c_l=5, c_u=15"
+          - "Simplex projection: clip negative weights to 0, then renormalize to sum=1"
+          - "≥ 5 regression tests: uniform crossover spec, dual-mode mutation paths, cardinality projection (under/over), simplex non-negativity"
+
+      - id: W15-3
+        slug: scenarios-k-aware-date-range
+        name: SCENARIOS K-aware re-key + paper date range + H=2 fixed (BACKLOG B2+H3+H5)
+        purpose: "Closes BACKLOG B2 (thread K∈{0,1,2,3} per §7.1.1) + H3 (date range 2006-2012 per §7.2.3) + H5 (H=2 fixed per §7.2.3 Eq 7.16)."
+        files:
+          - python_refactor/experiments/validation_matrix.py
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/tests/test_scenarios_k_aware.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "SCENARIOS dict factorial: {ASMS,SMS} × {mHDM,RDM} × K∈{0,1,2,3} matching thesis Fig 7.15 framing"
+          - "K passed through to AnticipatoryLearning constructor; consumed in compute_anticipatory_learning_rate (λ^K arm)"
+          - "WINDOWS paper-window date_range sliced to 2006-11-20 → 2012-12-31 per thesis §7.2.3 p.145"
+          - "H=2 fixed across all anticipatory variants per thesis §7.2.3 Eq 7.16"
+          - "≥ 4 regression tests: K propagation, date range, H=2 invariant, SCENARIOS shape"
+
+      - id: W15-4
+        slug: nds-verification
+        name: Verify non-dominated sorting basis matches thesis §6.5.1 (BACKLOG M15)
+        purpose: "Closes BACKLOG M15. Code audit: NDS is over deterministic means of objective vectors (NOT over stochastic distributions) per thesis §6.5.1 p.134."
+        files:
+          - docs/NDS-VERIFICATION-W15-4.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "Audit doc cites sms_emoa.py:_evaluate_solution line 195 (solution.objectives = [P.ROI, P.risk]) — deterministic means"
+          - "Cross-ref thesis §6.5.1 + Theorem 6.5.1 + §6.6 contribution #4"
+          - "Verdict: matches thesis (no code change) OR documents deviation"
+
+      - id: W15-5
+        slug: integration-smoke-with-blockers-fixed
+        name: Integration smoke (S0 + S2/K=2 + S2/K=3) post-BLOCKERS
+        purpose: "Verify W15-1+W15-2+W15-3 combined fix: re-run 2-seed walk-forward smoke; report Δ(S0 vs S2/K=3); commit empirical receipt."
+        files:
+          - docs/OOS-EFHV-W15-INTEGRATION-SMOKE.md
+          - .dfg/retrospectives/W15/W15-5.md
+        depends_on: [W15-1, W15-2, W15-3]
+        size: S
+        acceptance_criteria:
+          - "Re-run W14-2 walk-forward smoke (2 seeds × {S0, S2/K=3 (≈ASMS/mHDM)}) with all 4 BLOCKERS fixed"
+          - "Empirical Δ direction reported honestly (consistent OR inconsistent with paper)"
+          - "Retro documents which BLOCKER fix had biggest effect (qualitative inspection of metrics)"
+
+    parallel_groups:
+      - [W15-1, W15-2, W15-3, W15-4]
+      - [W15-5]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 5 units MERGED with green pre-pr battery"
+        - "BACKLOG items B1, B2, B3, B4, H3, H5, M15 all marked ✅ closed in docs/BACKLOG.md"
+        - "All 4 unit contracts (W15-1 through W15-4) follow BACKLOG §6 canonical template (item-ID pointer + thesis grounding + verbatim excerpts)"
+        - "W15-5 integration smoke completes; Δ(S2 vs S0) reported honestly"
+        - "Retros at .dfg/retrospectives/W15/W15-N.md with ADR-004 canonical keys"
+      checkpoint_file: .dfg/checkpoints/W15-gate.md
