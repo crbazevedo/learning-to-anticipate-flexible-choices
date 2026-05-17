@@ -155,46 +155,85 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
         
         return anticipatory_state
     
-    def calculate_multi_horizon_lambda_rates(self, solution: Solution, 
-                                           prediction_horizon: int) -> List[float]:
+    def calculate_multi_horizon_lambda_rates(self, solution: Solution,
+                                           prediction_horizon: int,
+                                           generation: int = -1,
+                                           solution_rank: int = -1,
+                                           current_time: int = -1) -> List[float]:
         """
         Calculate λ_{t+h} rates for multiple horizons.
-        
-        Based on Equation 6.6: λ_{t+h} = (1/(H-1)) [1 - H(p_{t,t+h})]
-        
+
+        W17-5-CARRY-1: now combines Eq 6.6 (λ^H per horizon) with
+        Eq 6.9 (λ^K from K-period KF residual buffer) per thesis Eq 7.16:
+            λ_{t+h} = (1/2) * (λ^H_{t+h} + λ^K_{t+h})
+
+        Pre-W17-5-CARRY-1 the multi-horizon path used Eq 6.6 alone
+        (entropy of TIP) — silently dropping the λ^K arm. As a result
+        the W17-2 record_kf_residual wiring populated the buffer but
+        the buffer was never consumed by the headline ASMS_mHDM_K3
+        scenario. The W17-5 smoke saw 48x wall-clock slowdown
+        attributable to the multi-horizon prediction loop, NOT to
+        λ^K consumption (which was silently zero).
+
+        This fix:
+          1. Computes λ^H per horizon via Eq 6.6 (TIP-entropy, as before)
+          2. Computes λ^K via the inherited _compute_lambda_k_with_branch
+             (Eq 6.9 normalized residual sum over K periods)
+          3. Returns the (1/2) average per Eq 7.16 per horizon
+          4. Appends a trace row per horizon for W17-5 assertions
+
         Args:
             solution: Current solution
             prediction_horizon: Prediction horizon H
-            
+            generation: Generation index (for trace)
+            solution_rank: Rank index (for trace)
+            current_time: Period index (for trace)
+
         Returns:
-            List of lambda rates for each horizon
+            List of combined Eq 7.16 lambda rates for each horizon
         """
         if prediction_horizon < 2:
-            # W3-1: was `return [0.0]` which violates the invariant
-            # len(predicted_states) == len(lambda_rates) used by
-            # apply_anticipatory_learning_rule (H<2 has 0 future
-            # horizons, so 0 predicted_states, so 0 lambda_rates).
             return []
-        
+
+        # ── λ^K is solution-invariant per period (depends on residual
+        # buffer, not on the per-horizon TIP). Compute once.
+        # W17-5-CARRY-1: use _compute_lambda_k_with_branch from base.
+        lambda_k, lambda_k_branch = self._compute_lambda_k_with_branch(
+            solution,
+            min_error=0.0, max_error=1.0,
+            min_alpha=0.0, max_alpha=1.0,
+            current_time=current_time,
+        )
+
         lambda_rates = []
-        
         for h in range(1, prediction_horizon):
-            # Calculate TIP for horizon h
+            # λ^H per Eq 6.6: TIP-entropy across horizon h
             tip = self._calculate_tip_for_horizon(solution, h)
-            
-            # Calculate binary entropy
             entropy = self.tip_calculator.binary_entropy(tip)
-            
-            # Calculate lambda rate based on Equation 6.6
             lambda_h = (1.0 / (prediction_horizon - 1)) * (1.0 - entropy)
-            
-            # Apply bounds to ensure stability
             lambda_h = max(0.0, min(0.5, lambda_h))
-            
-            lambda_rates.append(lambda_h)
-        
-        logger.debug(f"Calculated lambda rates for horizon {prediction_horizon}: {lambda_rates}")
-        
+
+            # W17-5-CARRY-1: combine per Eq 7.16 verbatim
+            #   λ_{t+h} = (1/2) * (λ^H_{t+h} + λ^K_{t+h})
+            lambda_combined = 0.5 * (lambda_h + lambda_k)
+
+            # Trace row per horizon (consumed by W16-4 flush_lambda_trace_csv)
+            self._lambda_trace_rows.append({
+                "period": current_time,
+                "generation": generation,
+                "solution_rank": solution_rank if solution_rank >= 0 else h,
+                "lambda_h": lambda_h,
+                "lambda_k": lambda_k,
+                "lambda": lambda_combined,
+                "tip": tip,
+                "lambda_k_branch": lambda_k_branch,
+            })
+
+            lambda_rates.append(lambda_combined)
+
+        logger.debug(f"MultiHorizon λ rates (Eq 7.16) for H={prediction_horizon}: "
+                     f"{lambda_rates} (λ^K={lambda_k:.6f}, branch={lambda_k_branch})")
+
         return lambda_rates
     
     def _calculate_tip_for_horizon(self, solution: Solution, horizon: int) -> float:
@@ -544,14 +583,19 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
             population: list of Solution objects to update in-place
             current_time: current time step
         """
-        for solution in population:
+        for sol_rank, solution in enumerate(population):
             # Build current state [ROI, risk] — paper Eq (11) canonical
             # ordering (W1-1 settled this).
             current_state = np.array([solution.P.ROI, solution.P.risk])
 
-            # Compute per-horizon λ rates (paper Eq 13).
+            # Compute per-horizon λ rates — W17-5-CARRY-1: now combines
+            # Eq 6.6 (λ^H per horizon) + Eq 6.9 (λ^K) per Eq 7.16, with
+            # trace row emission per horizon.
             lambda_rates = self.calculate_multi_horizon_lambda_rates(
                 solution, self.max_horizon,
+                generation=-1,  # generation not tracked here; rank disambiguates
+                solution_rank=sol_rank,
+                current_time=current_time,
             )
 
             # When max_horizon < 2 (no future horizons), the rule
