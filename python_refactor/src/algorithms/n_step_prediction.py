@@ -5,8 +5,7 @@ Extends Kalman filter and Dirichlet filter for multi-step ahead predictions
 """
 
 import numpy as np
-from typing import List, Tuple, Dict, Optional
-from scipy.stats import multivariate_normal
+from typing import List, Dict
 import logging
 
 logger = logging.getLogger(__name__)

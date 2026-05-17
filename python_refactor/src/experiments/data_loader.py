@@ -5,8 +5,7 @@ Handles loading and preprocessing of financial data for portfolio optimization e
 """
 
 import pandas as pd
-import numpy as np
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any
 from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')

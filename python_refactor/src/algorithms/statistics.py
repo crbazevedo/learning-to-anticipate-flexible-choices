@@ -7,9 +7,8 @@ anticipatory learning and stochastic dominance calculations.
 """
 
 import numpy as np
-from typing import Optional, Tuple
+from typing import Tuple
 from scipy.stats import multivariate_normal
-from scipy.special import ndtr
 import warnings
 
 

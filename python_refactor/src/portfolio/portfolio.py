@@ -7,7 +7,7 @@ including ROI, risk, covariance estimation, and efficiency computations.
 
 import numpy as np
 import pandas as pd
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from dataclasses import dataclass
 from .asset import Asset
 

@@ -6,9 +6,9 @@ of portfolio selection problems.
 """
 
 import numpy as np
-from typing import List, Tuple, Optional
+from typing import List, Optional
 from .solution import Solution
-from .operators import crossover, mutation, binary_tournament_selection, create_offspring_population
+from .operators import create_offspring_population
 
 
 def fast_non_dominated_sort(population: List[Solution]) -> List[List[Solution]]:

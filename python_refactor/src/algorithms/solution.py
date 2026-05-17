@@ -5,8 +5,6 @@ This module defines the Solution class that represents a single solution
 in the multi-objective optimization algorithms (NSGA-II, SMS-EMOA).
 """
 
-import numpy as np
-from typing import Optional
 from ..portfolio.portfolio import Portfolio
 
 

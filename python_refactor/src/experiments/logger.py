@@ -8,12 +8,10 @@ with structured logging, multiple log levels, and performance tracking.
 import logging
 import json
 import time
-import os
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 import traceback
-import sys
 
 class ExperimentLogger:
     """Comprehensive logger for portfolio optimization experiments."""

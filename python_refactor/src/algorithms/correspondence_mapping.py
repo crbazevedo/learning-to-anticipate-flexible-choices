@@ -9,7 +9,7 @@ populations and tracking solution evolution over time.
 """
 
 import numpy as np
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
 
