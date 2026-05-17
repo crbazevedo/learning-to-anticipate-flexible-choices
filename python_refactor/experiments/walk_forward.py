@@ -77,6 +77,29 @@ def enumerate_periods(n_days: int, train_window_days: int = 378,
 # Per-period training + OOS eval
 # ---------------------------------------------------------------------------
 
+def _select_amfc_index(per_portfolio_efhv: np.ndarray) -> int:
+    """W17-4: AMFC selector per thesis §6.4 Eq 6.42.
+
+    Pick the argmax over per-portfolio expected future HV. Ties
+    broken deterministically (smallest index wins). Fallback to
+    index 0 + warning if all per-portfolio EFHV are 0 / NaN.
+    """
+    if per_portfolio_efhv.size == 0:
+        return 0
+    finite_mask = np.isfinite(per_portfolio_efhv)
+    if not finite_mask.any() or per_portfolio_efhv[finite_mask].max() <= 0.0:
+        import logging
+        logging.getLogger(__name__).warning(
+            "W17-4: all per-portfolio EFHV are 0/NaN — fallback to index 0 "
+            "as u*_{t-1}. Possible degenerate period (Pareto front dominated "
+            "by z_ref or all weights produced negative-return / high-variance "
+            "predictions)."
+        )
+        return 0
+    # np.argmax breaks ties by smallest index (deterministic).
+    return int(np.argmax(per_portfolio_efhv))
+
+
 def _train_and_extract_pareto(scenario: str, seed: int,
                                train_returns: pd.DataFrame,
                                previous_weights: np.ndarray | None = None,
@@ -190,14 +213,23 @@ def run_walk_forward(scenario: str,
             n_samples=n_mc,
             rng=rng,
         )
-        # W16-2: persist the period's implemented portfolio as
-        # u*_{t-1} for the NEXT period's optimization. Convention:
-        # the first portfolio in the Pareto front (or argmax-EFHV
-        # if richer DM logic is available — W17 territory).
-        previous_weights = weights[0]
+        # W17-4 (closes W16-2-CARRY-1 + BACKLOG M5 partial): pick the
+        # AMFC per thesis §6.4 Eq 6.42 as u*_{t-1} for the NEXT period
+        # — argmax over per-portfolio expected single-point HV against
+        # z_ref. Replaces W16-2's "first Pareto-front portfolio" proxy.
+        from .oos_evaluator import compute_per_portfolio_efhv
+        per_portfolio_efhv = compute_per_portfolio_efhv(
+            pareto_weights=weights,
+            oos_returns=oos,
+            n_samples=n_mc,
+            rng=rng,
+        )
+        u_star_idx = _select_amfc_index(per_portfolio_efhv)
+        previous_weights = weights[u_star_idx]
         results.append({
             **p,
             "n_pareto": len(weights),
+            "u_star_idx": int(u_star_idx),
             "efhv_mean": efhv["efhv_mean"],
             "efhv_std": efhv["efhv_std"],
         })
