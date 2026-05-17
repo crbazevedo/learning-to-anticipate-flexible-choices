@@ -302,7 +302,8 @@ class AnticipatoryLearning:
         # If K = 0 OR the residual window is empty: λ^K = 0 (thesis
         # §7.1.1 K=0 myopic SMS-EMOA collapse). Otherwise λ^K =
         # normalized sum of KF squared residuals over the last K periods.
-        lambda_k = self._compute_lambda_k(
+        # W17-2: also return the branch indicator for trace assertion.
+        lambda_k, lambda_k_branch = self._compute_lambda_k_with_branch(
             solution, min_error, max_error, min_alpha, max_alpha, current_time
         )
 
@@ -330,6 +331,8 @@ class AnticipatoryLearning:
         lambda_combined = 0.5 * (lambda_h + lambda_k)
 
         # ── W16-1 trace plumbing (W16-4 builds CSV emit on top) ────
+        # W17-2: added lambda_k_branch column (backward-compat: CSV writer
+        # tolerates extra column gracefully via DictWriter).
         self._lambda_trace_rows.append({
             "period": current_time,
             "generation": generation,
@@ -338,9 +341,35 @@ class AnticipatoryLearning:
             "lambda_k": lambda_k,
             "lambda": lambda_combined,
             "tip": tip_value,
+            "lambda_k_branch": lambda_k_branch,
         })
 
         return lambda_combined
+
+    def _compute_lambda_k_with_branch(self, solution: Solution, min_error: float,
+                                       max_error: float, min_alpha: float, max_alpha: float,
+                                       current_time: int) -> tuple[float, str]:
+        """
+        W17-2: same as _compute_lambda_k but also returns the branch
+        indicator string in {'k0_zero', 'warmup_traditional', 'kperiod_sum'}.
+
+        Used by compute_anticipatory_learning_rate to populate the
+        lambda_k_branch trace column so W17-5 can directly assert
+        which branch fired in production.
+        """
+        if self.window_size == 0:
+            return 0.0, "k0_zero"
+        if not self._kf_residual_window:
+            val = self._compute_traditional_learning_rate(
+                solution, min_error, max_error,
+                min_alpha, max_alpha, current_time,
+            )
+            return val, "warmup_traditional"
+        # Non-empty buffer — proper K-period residual sum branch.
+        residual_sum = float(np.sum(self._kf_residual_window))
+        scale = max(1.0, float(np.mean(self._kf_residual_window)))
+        normalized = 1.0 - float(np.exp(-residual_sum / (len(self._kf_residual_window) * scale)))
+        return 0.5 * normalized, "kperiod_sum"
 
     def _compute_lambda_k(self, solution: Solution, min_error: float,
                           max_error: float, min_alpha: float, max_alpha: float,
@@ -430,6 +459,8 @@ class AnticipatoryLearning:
     LAMBDA_TRACE_CSV_HEADER = [
         "period", "generation", "solution_rank",
         "lambda_h", "lambda_k", "lambda", "tip",
+        # W17-2: added; backward-compat — CSV readers tolerate extra cols.
+        "lambda_k_branch",
     ]
 
     def flush_lambda_trace_csv(self, path,
@@ -474,6 +505,7 @@ class AnticipatoryLearning:
                     "lambda_k": r.get("lambda_k", float("nan")),
                     "lambda": r.get("lambda", float("nan")),
                     "tip": r.get("tip", float("nan")),
+                    "lambda_k_branch": r.get("lambda_k_branch", ""),
                 })
         n_written = len(rows)
         self._lambda_trace_rows = []

@@ -307,11 +307,20 @@ class SMSEMOA:
         """
         portfolio = solution.P
 
-        # Update Kalman filter with current observation if available
+        # Update Kalman filter with current observation if available.
+        # W17-2 (closes W16-1-CARRY-1): kalman_update now returns the
+        # squared-residual scalar; forward to the anticipatory_learning
+        # instance via record_kf_residual so λ^K (Eq 6.9) actually fires
+        # in production (vs warm-up traditional-rate fallback).
         if hasattr(solution.P, 'kalman_state') and solution.P.kalman_state is not None:
             from .kalman_filter import kalman_update
             measurement = np.array([portfolio.ROI, portfolio.risk])
-            kalman_update(solution.P.kalman_state, measurement)
+            residual_sq = kalman_update(solution.P.kalman_state, measurement)
+            # Accumulate to the learner's K-period window (no-op if K=0
+            # OR if no learner attached).
+            if (self.anticipatory_learning is not None
+                    and hasattr(self.anticipatory_learning, "record_kf_residual")):
+                self.anticipatory_learning.record_kf_residual(residual_sq)
 
         # W16-2: compute net-of-cost ROI for the NDS/HV objective.
         # Gross ROI stays on portfolio.ROI for reporting; only the

@@ -59,10 +59,12 @@ class TestLambdaTraceCSVHeader:
     """The trace CSV header matches the documented schema."""
 
     def test_header_schema_matches_spec(self):
-        """LAMBDA_TRACE_CSV_HEADER is exactly the documented 7 fields."""
+        """LAMBDA_TRACE_CSV_HEADER includes the W16-4 + W17-2 fields."""
+        # W16-4 baseline: 7 fields. W17-2 added 'lambda_k_branch'.
         expected = [
             "period", "generation", "solution_rank",
             "lambda_h", "lambda_k", "lambda", "tip",
+            "lambda_k_branch",  # W17-2 addition
         ]
         assert AnticipatoryLearning.LAMBDA_TRACE_CSV_HEADER == expected
 
