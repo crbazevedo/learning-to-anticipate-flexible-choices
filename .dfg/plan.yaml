@@ -935,3 +935,57 @@ waves:
         - "W11-CARRY-1 (portfolio_value identical) resolved: either differentiates at multi-seed (closes) or doesn't (escalates to W13 portfolio-evaluator investigation)"
         - "Retros at .dfg/retrospectives/W12/W12-N.md with ADR-004 canonical keys"
       checkpoint_file: .dfg/checkpoints/W12-gate.md
+
+  - id: W13
+    name: Mean future hypervolume — paper headline metric
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W13-20260517T065453Z.
+    # Operator pivot: report mean future hypervolume (paper §V-D headline).
+    # W12 receipts: algorithm.hypervolume=0; expected_future_hypervolume=null.
+    # Root causes located in audit: experiment_manager.py:269 doesn't pass
+    # EFHV kwarg; hypervolume=0 from degenerate ROI values.
+    units:
+      - id: W13-1
+        slug: hypervolume-and-efhv-threading
+        name: Thread expected_future_hypervolume + audit hypervolume=0
+        purpose: "Closes W12-CARRY-1 partial. Thread EFHV kwarg + audit hypervolume=0 (degenerate ROI)."
+        files:
+          - python_refactor/src/experiments/experiment_manager.py
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/tests/test_hypervolume_threading.py
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "experiment_manager.py:269 passes expected_future_hypervolume=algorithm.get_expected_future_hypervolume()"
+          - "Smoke-test on S2/paper/seed=1: algorithm.expected_future_hypervolume is NOT null"
+          - "Smoke-test on S2/paper/seed=1: algorithm.hypervolume > 0 (or, if structurally 0, document precisely why in retro + minimum-viable fix)"
+          - "≥ 3 regression tests covering EFHV threading + hypervolume non-zero on real data"
+
+      - id: W13-2
+        slug: mean-future-hypervolume-report
+        name: Re-run S0+S2 × 30 seeds + report mean future hypervolume
+        purpose: "Re-runs W12 sweep with W13-1 fixes; reports mean future hypervolume S0 vs S2 (paper §V-D headline)."
+        files:
+          - docs/VALIDATION-RESULTS.populated.md
+          - .dfg/retrospectives/W13/W13-2.md
+        depends_on: [W13-1]
+        size: S
+        acceptance_criteria:
+          - "Re-run sweep S0+S2 × paper × 30 seeds (60 runs) status=ok"
+          - "VALIDATION-SUMMARY.csv has algorithm.expected_future_hypervolume non-null rows for both S0 and S2"
+          - "docs/VALIDATION-RESULTS.populated.md §1 headline reports mean future hypervolume per scenario"
+          - "Retro documents whether S2 mean EFHV > S0 mean EFHV (the paper's claim) — empirically, not asserted"
+
+    parallel_groups:
+      - [W13-1]
+      - [W13-2]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 2 units MERGED with green pre-pr battery"
+        - "algorithm.expected_future_hypervolume non-null in real-run smoke-test"
+        - "algorithm.hypervolume > 0 in real-run smoke-test (or precise documented reason)"
+        - "VALIDATION-RESULTS.populated.md reports mean future hypervolume per scenario"
+        - "Retros at .dfg/retrospectives/W13/W13-N.md with ADR-004 canonical keys"
+      checkpoint_file: .dfg/checkpoints/W13-gate.md
