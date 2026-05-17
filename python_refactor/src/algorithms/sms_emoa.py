@@ -54,6 +54,7 @@ class SMSEMOA:
                  crossover_rate: float = 0.9, mutation_rate: float = 0.1,
                  tournament_size: int = 3,
                  z_ref: tuple[float, float] = (0.0, 0.2),
+                 use_v2_stability_weighting: bool = False,
                  # Deprecated kwargs kept for callers that still pass them:
                  reference_point_1: float | None = None,
                  reference_point_2: float | None = None):
@@ -97,6 +98,16 @@ class SMSEMOA:
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.tournament_size = tournament_size
+        # W21-1 (Reading-F experimental test, INVERTED per W20-5 correction):
+        # When True, force solution.stability = 1.0 at the per-solution Δ_S
+        # computation sites. This matches v2's effective behavior, where
+        # `stability` is declared (asms_emoa.h:18), initialized to 1.0 in
+        # all three constructors (asms_emoa.h:{45,56,69}), and NEVER
+        # reassigned anywhere in legacy-cpp-v2/source/*.cpp — making the
+        # `delta_Si *= Pareto_front[i]->stability` lines effective no-ops.
+        # Python's default stability (1/(1+pred_error) or 1/(1+std(weights)))
+        # is < 1.0 and depresses Δ_S below the bare Gaussian expectation.
+        self.use_v2_stability_weighting = use_v2_stability_weighting
         # Resolve z_ref with deprecated-kwarg overrides.
         r1 = reference_point_1 if reference_point_1 is not None else z_ref[0]
         r2 = reference_point_2 if reference_point_2 is not None else z_ref[1]
@@ -534,9 +545,13 @@ class SMSEMOA:
                 next_solution = solutions[i + 1]
                 solution.hypervolume_contribution = (solution.P.ROI - next_solution.P.ROI) * (prev_solution.P.risk - solution.P.risk)
             
-            # Apply stability factor
-            solution.hypervolume_contribution *= solution.stability
-    
+            # Apply stability factor (W21-1 INVERTED Reading-F: when
+            # use_v2_stability_weighting=True, treat stability as the v2
+            # effective no-op 1.0 instead of Python's depressing < 1.0
+            # multiplier).
+            stability_factor = 1.0 if self.use_v2_stability_weighting else solution.stability
+            solution.hypervolume_contribution *= stability_factor
+
     def _compute_stochastic_hypervolume_contributions_class(self, solutions: List[Solution]):
         """Compute stochastic hypervolume contributions considering uncertainty."""
         if len(solutions) == 1:
@@ -551,7 +566,8 @@ class SMSEMOA:
             
             # Expected hypervolume contribution
             solution.hypervolume_contribution = (mean_delta_ROI * var_delta_risk + mean_delta_risk * var_delta_ROI) / (var_delta_ROI + var_delta_risk)
-            solution.hypervolume_contribution *= solution.stability
+            stability_factor = 1.0 if self.use_v2_stability_weighting else solution.stability
+            solution.hypervolume_contribution *= stability_factor
             return
         
         # Sort by ROI
@@ -596,8 +612,9 @@ class SMSEMOA:
             
             # Expected hypervolume contribution
             solution.hypervolume_contribution = (mean_delta_ROI * var_delta_risk + mean_delta_risk * var_delta_ROI) / (var_delta_ROI + var_delta_risk)
-            solution.hypervolume_contribution *= solution.stability
-    
+            stability_factor = 1.0 if self.use_v2_stability_weighting else solution.stability
+            solution.hypervolume_contribution *= stability_factor
+
     def _tournament_selection(self) -> int:
         """Perform tournament selection based on hypervolume contribution."""
         # Select random individuals (handle case where tournament_size > population_size)

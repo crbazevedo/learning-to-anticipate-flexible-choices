@@ -151,6 +151,32 @@ SCENARIOS: dict[str, dict[str, Any]] = {
         "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True),
         "dm": "mHDM",
     },
+    # W21-1 / Reading-F experimental variant (INVERTED per W20-5 correction):
+    # identical to ASMS_mHDM_K3_v2rate but ALSO forces SMS-EMOA's stability
+    # multiplier to be the v2 effective no-op (1.0) instead of Python's
+    # depressing < 1.0 default. v2's stability is declared at asms_emoa.h:18
+    # and initialized to 1.0 in 3 constructors but NEVER reassigned anywhere
+    # in legacy-cpp-v2/source/*.cpp; the `delta_Si *= stability` lines in
+    # asms_emoa.cpp are effective no-ops. Python's
+    # `1/(1+pred_error)` and `1/(1+std(weights))` actively depress Δ_S
+    # below the bare Gaussian expectation, making ASMS-favorable solutions
+    # look less attractive than v2's effective behavior. If combined gap
+    # closes ≤ 0, Reading F is confirmed.
+    "ASMS_mHDM_K3_v2both": {
+        "name": "ASMS/mHDM K=3 + v2 rate AND v2 stability (Reading-F combined experiment)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True),
+        "algorithm_overrides": {"use_v2_stability_weighting": True},
+        "dm": "mHDM",
+    },
+    # W21-1 / Reading-F isolated variant: v2 stability ONLY (no v2 rate).
+    # Isolates the contribution of disabling Python's stability multiplier
+    # vs the dominant Reading-E v2-rate effect. For the W21-5 ablation matrix.
+    "ASMS_mHDM_K3_v2stab": {
+        "name": "ASMS/mHDM K=3 + v2 stability (Reading-F isolated experiment)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=False),
+        "algorithm_overrides": {"use_v2_stability_weighting": True},
+        "dm": "mHDM",
+    },
     # ─── Legacy aliases for backward compat with W12-W14 reports ─────────
     "S0": {
         "name": "[legacy alias for SMS_RDM_K0] Markowitz baseline",
@@ -271,6 +297,18 @@ def build_experiment_config(scenario_id: str, window_id: str, seed: int) -> dict
     scenario = SCENARIOS[scenario_id]
     window = WINDOWS[window_id]
 
+    # W21-1: scenarios may opt-in to extra SMS-EMOA algorithm parameters via
+    # the "algorithm_overrides" key (e.g. use_v2_stability_weighting=True
+    # for Reading-F experimental test). Default-empty dict merges harmlessly.
+    algorithm_overrides = scenario.get("algorithm_overrides", {})
+    algorithm_params = {
+        "population_size": 20,
+        "generations": 30,
+        "crossover_rate": 0.2,
+        "mutation_rate": 0.3,
+        **algorithm_overrides,
+    }
+
     return {
         "name": f"{scenario_id}_{window_id}_seed{seed}",
         "description": scenario["name"],
@@ -280,12 +318,7 @@ def build_experiment_config(scenario_id: str, window_id: str, seed: int) -> dict
         },
         "algorithm": {
             "name": "sms_emoa",
-            "parameters": {
-                "population_size": 20,
-                "generations": 30,
-                "crossover_rate": 0.2,
-                "mutation_rate": 0.3,
-            },
+            "parameters": algorithm_params,
         },
         "learning": scenario["learning"],
         "portfolio_selection": "hypervolume",
