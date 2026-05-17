@@ -212,3 +212,127 @@ waves:
         - "W1 wave-close ceremony fires CLEAN after W2 merges (no open carries from W1-3/W1-4/W1-5 listed in W1-gate verdict)"
         - "Retro for each unit at .dfg/retrospectives/W2/W2-N.md with ADR-004 YAML frontmatter"
       checkpoint_file: .dfg/checkpoints/W2-gate.md
+
+  - id: W3
+    name: W2 carry closure + packaging finish
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W3-20260517T000745Z (action=add).
+    # 6 units: 4 in parallel group 1 (file-disjoint), then ruff sweep, then uv.lock.
+    units:
+      - id: W3-1
+        slug: multi-horizon-lambda-rates-bug
+        name: Triage W2-2-CARRY-1 — fix multi-horizon lambda-rates AssertionError
+        purpose: "Triage `test_calculate_multi_horizon_lambda_rates` failure (1 != 0). Likely off-by-one in horizon iteration."
+        files:
+          - python_refactor/src/algorithms/multi_horizon_anticipatory.py
+          - python_refactor/tests/test_multi_horizon_anticipatory.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "test_calculate_multi_horizon_lambda_rates PASSES in .venv-w1"
+          - "Root cause documented (off-by-one, semantic mismatch, etc.) in the impl commit message"
+
+      - id: W3-2
+        slug: enhanced-n-step-bounds-bug
+        name: Triage W2-2-CARRY-2 — fix enhanced_n_step prediction bounds setup
+        purpose: "Triage `test_enhanced_prediction_bounds_validation` failure (ValueError: No prediction available for horizon 2)."
+        files:
+          - python_refactor/src/algorithms/enhanced_n_step_prediction.py
+          - python_refactor/tests/test_enhanced_n_step_prediction.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "test_enhanced_prediction_bounds_validation PASSES in .venv-w1"
+          - "Root cause documented in the impl commit message"
+
+      - id: W3-3
+        slug: correspondence-integration-bug
+        name: Triage W2-2-CARRY-3 — fix correspondence-mapping negative-value bug
+        purpose: "Triage `test_correspondence_with_anticipatory_learning` failure (negative value where positive expected)."
+        files:
+          - python_refactor/src/algorithms/correspondence_mapping.py
+          - python_refactor/tests/test_correspondence_integration.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "test_correspondence_with_anticipatory_learning PASSES in .venv-w1"
+          - "Root cause documented in the impl commit message"
+
+      - id: W3-4
+        slug: tip-magic-numbers
+        name: Replace TIP _calculate_tip_simple magic numbers with named constants
+        purpose: "Replace `max_roi_diff=0.5` + `max_risk_diff=0.3` magic numbers in TIP fallback with named module constants. Closes W1-4-CARRY-2."
+        files:
+          - python_refactor/src/algorithms/temporal_incomparability_probability.py
+          - python_refactor/tests/test_temporal_incomparability_probability.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "_calculate_tip_simple uses named module-level constants (e.g. TIP_FALLBACK_MAX_ROI_DIFF) instead of inline magic numbers"
+          - "Constants are documented with a brief comment on provenance (or flagged as heuristic placeholder)"
+          - "All 19 existing TIP tests continue to PASS in .venv-w1"
+
+      - id: W3-5
+        slug: ruff-f401-wider-sweep
+        name: Wider ruff F401 sweep across src/
+        purpose: "Run `ruff check --select F401 --fix` across all src/ files. Closes W2-4-CARRY-1 (~144 F401 errors)."
+        files:
+          - python_refactor/src/algorithms/__init__.py
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/src/algorithms/belief_coefficient.py
+          - python_refactor/src/algorithms/correspondence_mapping.py
+          - python_refactor/src/algorithms/enhanced_n_step_prediction.py
+          - python_refactor/src/algorithms/kalman_filter.py
+          - python_refactor/src/algorithms/multi_horizon_anticipatory.py
+          - python_refactor/src/algorithms/n_step_prediction.py
+          - python_refactor/src/algorithms/nsga2.py
+          - python_refactor/src/algorithms/operators.py
+          - python_refactor/src/algorithms/sliding_window_dirichlet.py
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/src/algorithms/solution.py
+          - python_refactor/src/algorithms/statistics.py
+          - python_refactor/src/algorithms/temporal_incomparability_probability.py
+          - python_refactor/src/config/experiment_config.py
+          - python_refactor/src/config/thesis_parameters.py
+          - python_refactor/src/experiments/data_loader.py
+          - python_refactor/src/experiments/experiment_manager.py
+          - python_refactor/src/experiments/logger.py
+          - python_refactor/src/experiments/metrics_collector.py
+          - python_refactor/src/experiments/portfolio_evaluator.py
+          - python_refactor/src/experiments/thesis_aligned_experiment.py
+        depends_on: [W3-1, W3-2, W3-3, W3-4]
+        size: S
+        acceptance_criteria:
+          - "`ruff check --select F401 python_refactor/src/` returns 0 errors"
+          - "No semantic changes; only unused-import removals"
+          - "All previously-passing tests continue to pass in .venv-w1"
+
+      - id: W3-6
+        slug: uv-lock-add
+        name: Add uv.lock for reproducible installs
+        purpose: "Run `uv lock` against pyproject.toml + commit uv.lock. Closes W2-4-CARRY-2. Removes the uv.lock gitignore exclusion."
+        files:
+          - uv.lock
+          - .gitignore
+        depends_on: [W3-5]
+        size: S
+        acceptance_criteria:
+          - "uv.lock at repo root, committed, generated from pyproject.toml"
+          - ".gitignore no longer lists uv.lock (it's a real file now, not auto-generated waste)"
+          - "uv sync --frozen reproduces the venv from the lock"
+
+    parallel_groups:
+      - [W3-1, W3-2, W3-3, W3-4]
+      - [W3-5]
+      - [W3-6]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 6 units MERGED to master (squash-merge) with green pre-pr battery"
+        - "W2-2-CARRY-1/2/3 closed: 3 previously-failing tests now PASS in .venv-w1"
+        - "W1-4-CARRY-2 closed: TIP magic numbers replaced with named constants"
+        - "W2-4-CARRY-1 closed: 0 ruff F401 errors across src/"
+        - "W2-4-CARRY-2 closed: uv.lock committed; uv sync --frozen reproducible"
+        - "Retro for each unit at .dfg/retrospectives/W3/W3-N.md with ADR-004 YAML frontmatter"
+      checkpoint_file: .dfg/checkpoints/W3-gate.md
