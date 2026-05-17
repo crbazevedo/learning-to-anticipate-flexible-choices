@@ -882,3 +882,56 @@ waves:
         - "Scenario-differentiation regression gate in place (class-retiring per directive #5)"
         - "Retros at .dfg/retrospectives/W11/W11-N.md with ADR-004 canonical keys"
       checkpoint_file: .dfg/checkpoints/W11-gate.md
+
+  - id: W12
+    name: First multi-seed run + first populated VALIDATION-RESULTS.md
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W12-20260517T033157Z.
+    # W11 unblocked experiments; W12 produces the first real summary CSV.
+    # Strategy: S0 + S2 × paper × 30 seeds (most-different scenarios per W11-3;
+    # also stress-tests W11-CARRY-1 soft scar of identical portfolio_value).
+    units:
+      - id: W12-1
+        slug: multi-seed-sweep-driver
+        name: Multi-seed sweep driver
+        purpose: "Adds a sweep CLI that runs scenarios × windows × seeds in parallel and writes a results tree compatible with aggregate_validation.py."
+        files:
+          - python_refactor/experiments/sweep.py
+          - python_refactor/tests/test_experiments_sweep.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "sweep.py CLI: --scenarios S0,S2 --windows paper --seeds 1-30 --output results/W12 --jobs N"
+          - "Each (scenario, window, seed) tuple writes results/W12/<scenario>_<window>_seed<N>/{metrics.csv, manifest.json}"
+          - "Uses python subprocess + concurrent.futures for parallel dispatch"
+          - "≥ 3 regression tests: (a) seed range parsing 1-30, (b) sweep enumerates correctly, (c) at least one real-dispatch end-to-end test (S0 × paper × 2 seeds; smoke)"
+
+      - id: W12-2
+        slug: first-populated-results-doc
+        name: S0+S2 × paper × 30 seeds → first populated VALIDATION-RESULTS.md
+        purpose: "Runs S0+S2 × paper × 30 seeds = 60 runs; aggregates + populates VALIDATION-RESULTS.md. First real W7→W11 receipt."
+        files:
+          - docs/VALIDATION-RESULTS.populated.md
+          - .dfg/retrospectives/W12/W12-2.md
+        depends_on: [W12-1]
+        size: M
+        acceptance_criteria:
+          - "results/W12-paper/ has 60 run directories, each with status=ok manifest + populated metrics.csv"
+          - "VALIDATION-SUMMARY.csv has rows for both S0 and S2 across paper window"
+          - "docs/VALIDATION-RESULTS.populated.md exists with Table A populated for S0 and S2; receipt block (§0) filled with git SHA + uv.lock fingerprint"
+          - "Retro documents: (a) whether S0 vs S2 wealth distributions differ at multi-seed (resolves W11-CARRY-1), (b) any new src/ bugs surfaced under multi-seed stress"
+
+    parallel_groups:
+      - [W12-1]
+      - [W12-2]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 2 units MERGED with green pre-pr battery"
+        - "First populated VALIDATION-RESULTS.md (S0+S2 paper-window) exists at docs/VALIDATION-RESULTS.populated.md"
+        - "60-run sweep completes with ≥ 55 status=ok runs (allow ≤ 5 seed-specific bugs as honest scars)"
+        - "Aggregate + report pipeline works end-to-end on real multi-seed data"
+        - "W11-CARRY-1 (portfolio_value identical) resolved: either differentiates at multi-seed (closes) or doesn't (escalates to W13 portfolio-evaluator investigation)"
+        - "Retros at .dfg/retrospectives/W12/W12-N.md with ADR-004 canonical keys"
+      checkpoint_file: .dfg/checkpoints/W12-gate.md
