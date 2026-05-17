@@ -169,7 +169,19 @@ class AnticipatoryLearning:
         
         # Anticipative distributions storage
         self.anticipative_distributions = []
-        
+
+        # W16-1: per-period KF squared-residual buffer for λ^K (Eq 6.9).
+        # Length-K rolling window; each entry is the sum of per-asset
+        # squared residuals (innovation^T @ innovation) for the most
+        # recent K periods. Used to compute λ^K = normalized(sum(...)).
+        # K=0 disables; in that case λ^K is identically 0 per §7.1.1 K=0.
+        self._kf_residual_window: List[float] = []
+
+        # W16-1: per-call trace of the (λ^H, λ^K, λ, TIP) tuple per
+        # invocation of compute_anticipatory_learning_rate. W16-4
+        # ships CSV emit on top of this list.
+        self._lambda_trace_rows: List[Dict[str, Any]] = []
+
         # Stochastic Pareto frontiers storage for visualization
         self.stochastic_pareto_frontiers = []
         self.anticipative_pareto_frontiers = []
@@ -247,55 +259,167 @@ class AnticipatoryLearning:
         return SimpleNamespace(P=shadow_portfolio)
 
     def compute_anticipatory_learning_rate(self, solution: Solution, min_error: float,
-                                         max_error: float, min_alpha: float, max_alpha: float, 
+                                         max_error: float, min_alpha: float, max_alpha: float,
                                          current_time: int, tip_calculator: Optional[TemporalIncomparabilityCalculator] = None,
-                                         predicted_solution: Optional[Solution] = None, horizon: int = 2) -> float:
+                                         predicted_solution: Optional[Solution] = None, horizon: int = 2,
+                                         generation: int = -1, solution_rank: int = -1) -> float:
         """
-        Compute anticipatory learning rate using TIP integration (Equation 7.16).
-        
-        This implements the enhanced formula that combines TIP and Kalman Filter residuals:
+        Compute anticipatory learning rate per thesis Eq 7.16 (W16-1).
+
         λ_{t+h} = (1/2) * (λ^{(H)}_{t+h} + λ^{(K)}_{t+h})
-        
+
+        where:
+          λ^H_{t+h} = TIP-based future-looking rate (Eq 6.6, §6.1.3 p.117)
+          λ^K_{t+h} = normalized sum of KF squared residuals over the
+                      last K periods (Eq 6.9, §6.1.4 p.119)
+
+        Per §7.1.1 (p. 140), K ∈ {0,1,2,3}. For K = 0 (myopic SMS-EMOA),
+        λ^K is identically 0 by construction (no historical window).
+        For K > 0, λ^K accumulates squared residuals from
+        self._kf_residual_window (managed by the caller via
+        record_kf_residual / _maybe_record_kf_residual).
+
+        The (1/2) factor is the verbatim Eq 7.16 "balanced tension"
+        average between past-trust (λ^K) and future-trust (λ^H).
+
         Args:
             solution: Solution to compute learning rate for
-            min_error: Minimum prediction error in population
-            max_error: Maximum prediction error in population
-            min_alpha: Minimum alpha in population
-            max_alpha: Maximum alpha in population
+            min_error: Minimum prediction error in population (for fallback λ^K)
+            max_error: Maximum prediction error in population (for fallback λ^K)
+            min_alpha: Minimum alpha in population (for fallback λ^K)
+            max_alpha: Maximum alpha in population (for fallback λ^K)
             current_time: Current time step
-            tip_calculator: TIP calculator instance
+            tip_calculator: TIP calculator instance (drives λ^H)
             predicted_solution: Predicted solution for TIP calculation
-            horizon: Prediction horizon
-            
+            horizon: Prediction horizon (default 2 per Eq 7.16)
+            generation: Generation index for trace (W16-4 plumbing)
+            solution_rank: Rank index for trace (W16-4 plumbing)
+
         Returns:
-            Anticipatory learning rate
+            Anticipatory learning rate λ_{t+h} ∈ [0, 0.5]
         """
-        # Traditional learning rate (Kalman Filter based)
-        traditional_rate = self._compute_traditional_learning_rate(
+        # ── λ^K: past-looking (Eq 6.9) ──────────────────────────────
+        # If K = 0 OR the residual window is empty: λ^K = 0 (thesis
+        # §7.1.1 K=0 myopic SMS-EMOA collapse). Otherwise λ^K =
+        # normalized sum of KF squared residuals over the last K periods.
+        lambda_k = self._compute_lambda_k(
             solution, min_error, max_error, min_alpha, max_alpha, current_time
         )
-        
-        # TIP-based learning rate (Equation 6.6)
-        tip_rate = 0.0
+
+        # ── λ^H: future-looking (Eq 6.6) ────────────────────────────
+        lambda_h = 0.0
+        tip_value = float("nan")
         if tip_calculator is not None and predicted_solution is not None:
             try:
-                # Calculate TIP
-                tip = tip_calculator.calculate_tip(solution, predicted_solution)
-                
-                # Calculate TIP-based learning rate (Equation 6.6)
-                tip_rate = tip_calculator.calculate_anticipatory_learning_rate_tip(tip, horizon)
-                
+                tip_value = tip_calculator.calculate_tip(solution, predicted_solution)
+                lambda_h = tip_calculator.calculate_anticipatory_learning_rate_tip(
+                    tip_value, horizon
+                )
             except Exception as e:
-                logger.warning(f"TIP calculation failed: {e}, using traditional rate only")
-                tip_rate = 0.0
-        
-        # Combined learning rate (Equation 7.16)
-        if tip_rate > 0.0:
-            combined_rate = 0.5 * (traditional_rate + tip_rate)
-        else:
-            combined_rate = traditional_rate
-        
-        return combined_rate
+                logger.warning(f"TIP calculation failed: {e}; λ^H set to 0")
+                lambda_h = 0.0
+                tip_value = float("nan")
+
+        # ── Combined λ per Eq 7.16 verbatim ─────────────────────────
+        # ALWAYS the (1/2) average, even when one arm is 0. Per the
+        # thesis motivation: "balanced tension" between past-trust
+        # and future-trust requires the average, not a fall-back.
+        # Pre-W16-1 code short-circuited to traditional_rate when
+        # tip_rate==0, which violated Eq 7.16 (the formula is the
+        # average even if one term is zero).
+        lambda_combined = 0.5 * (lambda_h + lambda_k)
+
+        # ── W16-1 trace plumbing (W16-4 builds CSV emit on top) ────
+        self._lambda_trace_rows.append({
+            "period": current_time,
+            "generation": generation,
+            "solution_rank": solution_rank,
+            "lambda_h": lambda_h,
+            "lambda_k": lambda_k,
+            "lambda": lambda_combined,
+            "tip": tip_value,
+        })
+
+        return lambda_combined
+
+    def _compute_lambda_k(self, solution: Solution, min_error: float,
+                          max_error: float, min_alpha: float, max_alpha: float,
+                          current_time: int) -> float:
+        """
+        Compute λ^K per thesis Eq 6.9 (§6.1.4 p.119, W16-1).
+
+        λ^K_{t+h} is the normalized sum of KF squared residuals over
+        the historical window of size K (= self.window_size).
+
+        Per §7.1.1 (p. 140), K = 0 disables anticipation entirely.
+        In that case λ^K ≡ 0 by construction (no historical window
+        exists to sum residuals over).
+
+        For K > 0 with an empty / under-filled residual buffer
+        (warm-up periods before K real residuals have been recorded),
+        we fall back to the per-solution traditional rate
+        (uncertainty + accuracy / 2 in [0, 0.5]), which is the
+        original C++ implementation's notion of "KF-based rate".
+        This preserves backward-compat behavior for the warm-up
+        regime where the K-period sum is not yet meaningful.
+
+        Once the residual buffer holds ≥ 1 entry, λ^K is computed
+        as a sigmoid-normalized sum-over-window, mapped to [0, 0.5]
+        to match λ^H's range (so λ = 0.5*(λ^H + λ^K) ∈ [0, 0.5]).
+        """
+        if self.window_size == 0:
+            # K=0: myopic SMS-EMOA. λ^K ≡ 0 per §7.1.1.
+            return 0.0
+
+        if not self._kf_residual_window:
+            # Warm-up: no residuals recorded yet. Fall back to the
+            # pre-W16-1 per-solution traditional rate as a
+            # well-defined non-zero value (it lives in [0, 0.5]).
+            return self._compute_traditional_learning_rate(
+                solution, min_error, max_error,
+                min_alpha, max_alpha, current_time,
+            )
+
+        # K > 0 and residual buffer non-empty:
+        # λ^K = sigmoid-normalized squared-residual sum mapped to [0, 0.5].
+        # Per Eq 6.9 the residuals are accumulated as innovation^T innovation
+        # over the K-period window; the normalization choice (sigmoid here)
+        # is unconstrained by the thesis text but must map ℝ_+ → [0, 0.5]
+        # to match λ^H's range. We use a sigmoid centered at the running
+        # mean so the rate is meaningful at any scale of residuals.
+        residual_sum = float(np.sum(self._kf_residual_window))
+        # Normalize to [0, 1] via 1 - exp(-residual_sum / scale)
+        # where scale = max(1, mean(window)) keeps the rate sensitive
+        # at any magnitude. Map to [0, 0.5] to match λ^H's range.
+        scale = max(1.0, float(np.mean(self._kf_residual_window)))
+        normalized = 1.0 - float(np.exp(-residual_sum / (len(self._kf_residual_window) * scale)))
+        return 0.5 * normalized
+
+    def record_kf_residual(self, residual_squared_sum: float) -> None:
+        """
+        Append a per-period KF squared-residual scalar to the rolling
+        window of size K = self.window_size (W16-1 + Eq 6.9).
+
+        The caller (typically the walk-forward driver after each period's
+        Kalman update) passes the sum-of-squared-innovations across all
+        portfolios / both objectives for the period. The buffer is
+        truncated to length K so older periods are forgotten.
+
+        Per §7.1.1: if K = 0 we never record (no historical window).
+        """
+        if self.window_size == 0:
+            return
+        self._kf_residual_window.append(float(residual_squared_sum))
+        if len(self._kf_residual_window) > self.window_size:
+            self._kf_residual_window = self._kf_residual_window[-self.window_size:]
+
+    def reset_lambda_trace(self) -> None:
+        """Clear the per-call λ trace (W16-1, used by W16-4 between flushes)."""
+        self._lambda_trace_rows = []
+
+    def get_lambda_trace(self) -> List[Dict[str, Any]]:
+        """Return a copy of the per-call λ trace rows (W16-1 / W16-4)."""
+        return list(self._lambda_trace_rows)
     
     def _compute_traditional_learning_rate(self, solution: Solution, min_error: float, 
                                          max_error: float, min_alpha: float, max_alpha: float, 
