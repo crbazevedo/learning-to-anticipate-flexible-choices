@@ -95,27 +95,51 @@ SCENARIOS: dict[str, dict[str, Any]] = {
     },
 }
 
-# W8-1 (closes W7-1-CARRY-1 partial): the paper-window's original FTSE
-# data is 98 per-asset CSVs at legacy-cpp/executable/data/ftse-original/
-# table\\ (*).csv — the underlying data_loader doesn't accept glob patterns
-# in its asset_files list (treats each entry as a literal filename).
-# Filed as W8-1-CARRY-1; for now both windows use the FTSE-updated
-# single-CSV path so the scaffold's smoke-test gets past data loading.
-# A future paper-window-loader unit (W9 candidate) will close the gap.
+# W10-1 (closes W8-1-CARRY-1 fully): paper-window now points at the
+# real 98 per-asset CSVs at legacy-cpp/executable/data/ftse-original/
+# table*.csv. W9-2 added glob-expansion to data_loader.load_asset_data,
+# so the loader handles this pattern correctly (verified by W9-2's
+# test_real_paper_window_glob_loads_many_assets → ≥ 90 assets).
+# Date range matches the IEEE 2015 paper §V-A: 2003-01 → 2012-11.
+# `extended` keeps the FTSE-updated single-CSV path for out-of-sample.
 WINDOWS: dict[str, dict[str, str]] = {
     "paper": {
-        "asset_files_glob": "data/ftse-updated/FTSE_100_20121121_20241231.csv",
-        "date_start": "2012-11-21",  # W8-1-CARRY-1: paper-window data needs loader extension
-        "date_end": "2024-12-31",
-        "notes": "Paper-window data loader is a W8-1-CARRY-1; smoke-test temporarily uses the FTSE-updated CSV here.",
+        "asset_files_glob": "../legacy-cpp/executable/data/ftse-original/table*.csv",
+        "date_start": "2003-01-01",
+        "date_end": "2012-11-20",
+        "notes": "Paper window (IEEE TCYB 2015 §V-A): 98 per-asset FTSE CSVs, ~2003-2012.",
     },
     "extended": {
         "asset_files_glob": "data/ftse-updated/FTSE_100_20121121_20241231.csv",
         "date_start": "2012-11-21",
         "date_end": "2024-12-31",
-        "notes": "Out-of-sample window.",
+        "notes": "Out-of-sample window: FTSE-updated single-CSV, 2012-2024.",
     },
 }
+
+
+def _flatten_metrics(d: dict, prefix: str = "") -> "list[tuple[str, float]]":
+    """Recursively flatten a nested metrics dict into [(dotted-key, value), ...].
+
+    W10-1 helper: ExperimentManager returns final_metrics shaped like
+    {'algorithm': {...nums...}, 'portfolio': {...nums...}, 'summary': {...}}.
+    The pre-W10-1 metrics-writer filtered on top-level scalars and got 0
+    rows. This recursion emits 'portfolio.final_value', 'summary.total_return',
+    etc., so the analytics layer can consume them.
+
+    Booleans are skipped: in Python `True/False` are int subclasses but
+    don't belong in a numeric metric column. None values are skipped.
+    """
+    out: list[tuple[str, float]] = []
+    for k, v in d.items():
+        key = f"{prefix}.{k}" if prefix else str(k)
+        if isinstance(v, dict):
+            out.extend(_flatten_metrics(v, key))
+        elif isinstance(v, bool) or v is None:
+            continue
+        elif isinstance(v, (int, float)):
+            out.append((key, float(v)))
+    return out
 
 
 def _git_sha() -> str:
@@ -257,17 +281,21 @@ def run_one(scenario_id: str, window_id: str, seed: int,
                        status="error", error=f"{type(e).__name__}: {e}")
         raise
 
-    # Write a flat metrics.csv that aggregate_validation.py can consume.
-    # Shape: one row per metric (long format), so adding new metrics
-    # doesn't change the column schema.
+    # W10-1 (closes W9-CARRY-3): final_metrics is a NESTED dict
+    # ({'algorithm': {...}, 'portfolio': {...}, 'summary': {...}, ...}).
+    # The pre-W10-1 writer filtered isinstance(value, (int, float)) on
+    # the top level → every value was a sub-dict → 0 rows emitted.
+    # Recurse into '<category>.<metric>' rows so the analytics layer
+    # has something to chew on. Booleans are explicitly excluded (in
+    # Python `True/False` are int subclasses but shouldn't land in a
+    # numeric metric column).
     final_metrics = results.get("final_metrics", {})
     import csv
     with (output_dir / "metrics.csv").open("w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["scenario", "window", "seed", "metric", "value"])
-        for key, value in final_metrics.items():
-            if isinstance(value, (int, float)):
-                writer.writerow([scenario_id, window_id, seed, key, value])
+        for key, value in _flatten_metrics(final_metrics):
+            writer.writerow([scenario_id, window_id, seed, key, value])
 
     write_manifest(output_dir, config, seed, scenario_id, window_id, status="ok")
     print(f"[ok] {config['name']} → {output_dir}")
