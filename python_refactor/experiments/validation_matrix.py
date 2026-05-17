@@ -76,9 +76,16 @@ import numpy as np
 _BASELINE_MYOPIC = {"enabled": False}
 
 
-def _asms_learning_config(K: int, use_multi_horizon: bool = True) -> dict:
+def _asms_learning_config(K: int, use_multi_horizon: bool = True,
+                            use_v2_anticipative_rate: bool = False) -> dict:
     """Construct the AnticipatoryLearning constructor kwargs for K > 0.
-    H = 2 fixed per thesis Eq 7.16."""
+    H = 2 fixed per thesis Eq 7.16.
+
+    W20-1 / Reading-E: when use_v2_anticipative_rate=True, the learner
+    instance uses v2's monotonic α = 1 - TIP formula (legacy-cpp-v2/
+    asms_emoa.cpp:44) instead of Python's default thesis Eq 7.16
+    (1/2)(λ^H + λ^K).
+    """
     return {
         "enabled": True,
         "use_multi_horizon": use_multi_horizon,
@@ -86,6 +93,7 @@ def _asms_learning_config(K: int, use_multi_horizon: bool = True) -> dict:
             "window_size": K,        # K = OAL historical window
             "max_horizon": 2,         # H = 2 (one-step-ahead) per thesis
             "monte_carlo_samples": 500,
+            "use_v2_anticipative_rate": use_v2_anticipative_rate,  # W20-1 / Reading-E
         },
     }
 
@@ -130,6 +138,17 @@ SCENARIOS: dict[str, dict[str, Any]] = {
     "ASMS_mHDM_K3": {
         "name": "ASMS/mHDM K=3 — PAPER HEADLINE configuration (Fig 7.15)",
         "learning": _asms_learning_config(K=3),
+        "dm": "mHDM",
+    },
+    # W20-1 / Reading-E experimental variant: identical to ASMS_mHDM_K3
+    # but with v2 monotonic anticipative-rate formula (α = 1 - TIP) instead
+    # of Python's thesis-Eq-7.16 (1/2)(λ^H + λ^K). Per W19-4 finding, v2's
+    # formula maintains anticipation at 0.5 in the W17-5 saturation regime
+    # (TIP≈0.5) where Python's collapses to 0. If S2_v2rate > S0, Reading E
+    # is confirmed and the paper headline replicates with formula adjustment.
+    "ASMS_mHDM_K3_v2rate": {
+        "name": "ASMS/mHDM K=3 + v2 anticipative-rate formula (Reading-E experiment)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True),
         "dm": "mHDM",
     },
     # ─── Legacy aliases for backward compat with W12-W14 reports ─────────

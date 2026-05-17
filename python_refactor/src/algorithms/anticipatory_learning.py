@@ -123,10 +123,11 @@ class AnticipatoryLearning:
     def __init__(self, learning_rate: float = 0.01, prediction_horizon: int = 1,
                  monte_carlo_simulations: int = 1000, state_observation_frequency: int = 10,
                  error_threshold: float = 0.05, learning_type: str = "single_solution",
-                 adaptive_learning: bool = True, window_size: int = 20):
+                 adaptive_learning: bool = True, window_size: int = 20,
+                 use_v2_anticipative_rate: bool = False):
         """
         Initialize enhanced anticipatory learning system.
-        
+
         Args:
             learning_rate: Base learning rate for state updates
             prediction_horizon: Number of time steps to predict ahead (default: 1)
@@ -136,6 +137,13 @@ class AnticipatoryLearning:
             learning_type: Type of learning ("single_solution" or "population")
             adaptive_learning: Whether to use adaptive learning rate
             window_size: Kalman filter window size
+            use_v2_anticipative_rate: W20-1 / Reading-E experimental test.
+                When True, compute_anticipatory_learning_rate replaces the
+                thesis-Eq-7.16 form `λ = 0.5 * (λ^H + λ^K)` with v2's
+                monotonic form `α = 1 - TIP` (legacy-cpp-v2/asms_emoa.cpp:44).
+                Default False = thesis-faithful Python behavior (W16-1).
+                See docs/CROSS-VALIDATION-G-ANTICIPATIVE-RATE.md for the
+                three-formula divergence + Reading E discussion.
         """
         self.base_learning_rate = learning_rate
         self.prediction_horizon = prediction_horizon
@@ -145,6 +153,8 @@ class AnticipatoryLearning:
         self.learning_type = learning_type
         self.adaptive_learning = adaptive_learning
         self.window_size = window_size
+        # W20-1 / Reading-E: experimental flag
+        self.use_v2_anticipative_rate = use_v2_anticipative_rate
         
         # Kalman filter functions for state tracking
         self.kalman_filter_functions = {
@@ -328,7 +338,17 @@ class AnticipatoryLearning:
         # Pre-W16-1 code short-circuited to traditional_rate when
         # tip_rate==0, which violated Eq 7.16 (the formula is the
         # average even if one term is zero).
-        lambda_combined = 0.5 * (lambda_h + lambda_k)
+        #
+        # W20-1 / Reading-E experimental override: when
+        # use_v2_anticipative_rate=True, replace Eq 7.16 with v2's
+        # monotonic form `α = 1 - TIP` (legacy-cpp-v2/asms_emoa.cpp:44).
+        # This MAINTAINS anticipation at α=0.5 in the W17-5 saturation
+        # regime (TIP≈0.5) where Eq 7.16 collapses to 0. See
+        # docs/CROSS-VALIDATION-G-ANTICIPATIVE-RATE.md.
+        if getattr(self, "use_v2_anticipative_rate", False) and not np.isnan(tip_value):
+            lambda_combined = 1.0 - tip_value
+        else:
+            lambda_combined = 0.5 * (lambda_h + lambda_k)
 
         # ── W16-1 trace plumbing (W16-4 builds CSV emit on top) ────
         # W17-2: added lambda_k_branch column (backward-compat: CSV writer
@@ -556,20 +576,24 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
     according to the thesis theoretical framework.
     """
     
-    def __init__(self, window_size: int = 10, monte_carlo_samples: int = 1000):
+    def __init__(self, window_size: int = 10, monte_carlo_samples: int = 1000,
+                  use_v2_anticipative_rate: bool = False):
         """
         Initialize TIP-integrated anticipatory learning.
 
         Args:
             window_size: Window size for historical tracking
             monte_carlo_samples: Number of Monte Carlo samples for TIP calculation
+            use_v2_anticipative_rate: W20-1 / Reading-E experimental flag;
+                forwarded to base AnticipatoryLearning.__init__.
         """
         # Pre-W1-2 bug: `super().__init__(window_size)` passed window_size
         # POSITIONALLY, which silently became `learning_rate` in the parent
         # signature `(learning_rate, prediction_horizon, monte_carlo_simulations,
         # state_observation_frequency, error_threshold, learning_type,
         # adaptive_learning, window_size)`. Fixed to keyword form.
-        super().__init__(window_size=window_size)
+        super().__init__(window_size=window_size,
+                          use_v2_anticipative_rate=use_v2_anticipative_rate)
         self.tip_calculator = TemporalIncomparabilityCalculator(monte_carlo_samples)
         self.prediction_horizon = 2  # Default prediction horizon
         
