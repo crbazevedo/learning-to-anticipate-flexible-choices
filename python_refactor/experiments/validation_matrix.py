@@ -95,12 +95,19 @@ SCENARIOS: dict[str, dict[str, Any]] = {
     },
 }
 
+# W8-1 (closes W7-1-CARRY-1 partial): the paper-window's original FTSE
+# data is 98 per-asset CSVs at legacy-cpp/executable/data/ftse-original/
+# table\\ (*).csv — the underlying data_loader doesn't accept glob patterns
+# in its asset_files list (treats each entry as a literal filename).
+# Filed as W8-1-CARRY-1; for now both windows use the FTSE-updated
+# single-CSV path so the scaffold's smoke-test gets past data loading.
+# A future paper-window-loader unit (W9 candidate) will close the gap.
 WINDOWS: dict[str, dict[str, str]] = {
     "paper": {
-        "asset_files_glob": "../legacy-cpp/executable/data/ftse-original/table (*).csv",
-        "date_start": "2006-11-20",
-        "date_end": "2012-12-31",
-        "notes": "Direct paper-comparison window (paper §V-A).",
+        "asset_files_glob": "data/ftse-updated/FTSE_100_20121121_20241231.csv",
+        "date_start": "2012-11-21",  # W8-1-CARRY-1: paper-window data needs loader extension
+        "date_end": "2024-12-31",
+        "notes": "Paper-window data loader is a W8-1-CARRY-1; smoke-test temporarily uses the FTSE-updated CSV here.",
     },
     "extended": {
         "asset_files_glob": "data/ftse-updated/FTSE_100_20121121_20241231.csv",
@@ -231,7 +238,17 @@ def run_one(scenario_id: str, window_id: str, seed: int,
         return 2
 
     logging.basicConfig(level=logging.INFO)
-    manager = ExperimentManager(experiment_dir=str(output_dir))
+    # ExperimentManager takes a top-level "suite" config (name, description,
+    # version, timestamp) at init time, NOT a per-experiment config. The
+    # per-experiment config is passed to run_experiment() below. W8-1 fix:
+    # initial scaffold used `experiment_dir=...` kwarg which doesn't exist.
+    suite_config = {
+        "experiment_name": f"validation_matrix_{scenario_id}",
+        "description": f"W8 validation run: {SCENARIOS[scenario_id]['name']}",
+        "version": "W8-1",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+    manager = ExperimentManager(suite_config)
 
     try:
         results = manager.run_experiment(config)
