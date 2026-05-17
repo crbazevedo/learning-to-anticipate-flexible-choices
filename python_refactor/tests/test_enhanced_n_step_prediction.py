@@ -456,22 +456,46 @@ class TestEnhancedNStepPredictionIntegration(unittest.TestCase):
             self._create_mock_solution(0.08, 0.04)
         ]
         
+        # W3-2: extended setUp from single-step to 3-step kalman+dirichlet
+        # predictions so test_enhanced_prediction_bounds_validation can
+        # iterate horizons 1..3 without ValueError. Mirrors the shape
+        # used by TestEnhancedNStepPredictor.setUp.
         self.kalman_predictions = {
             'step_1': {
                 'state': np.array([0.11, 0.055, 0.001, 0.001]),
                 'covariance': np.eye(4) * 0.01,
                 'horizon': 1
+            },
+            'step_2': {
+                'state': np.array([0.12, 0.06, 0.002, 0.002]),
+                'covariance': np.eye(4) * 0.02,
+                'horizon': 2
+            },
+            'step_3': {
+                'state': np.array([0.13, 0.065, 0.003, 0.003]),
+                'covariance': np.eye(4) * 0.03,
+                'horizon': 3
             }
         }
-        
+
         self.dirichlet_predictions = {
             'step_1': {
                 'dirichlet_params': np.array([0.4, 0.3, 0.2, 0.1]),
                 'mean_prediction': np.array([0.4, 0.3, 0.2, 0.1]),
                 'horizon': 1
+            },
+            'step_2': {
+                'dirichlet_params': np.array([0.35, 0.35, 0.2, 0.1]),
+                'mean_prediction': np.array([0.35, 0.35, 0.2, 0.1]),
+                'horizon': 2
+            },
+            'step_3': {
+                'dirichlet_params': np.array([0.3, 0.4, 0.2, 0.1]),
+                'mean_prediction': np.array([0.3, 0.4, 0.2, 0.1]),
+                'horizon': 3
             }
         }
-        
+
     def _create_mock_solution(self, roi: float, risk: float):
         """Create a mock solution for testing."""
         class MockPortfolio:
@@ -481,7 +505,7 @@ class TestEnhancedNStepPredictionIntegration(unittest.TestCase):
                 self.num_assets = 4
                 self.investment = np.array([0.4, 0.3, 0.2, 0.1])
                 self.kalman_state = None
-        
+
         class MockSolution:
             def __init__(self, roi, risk):
                 self.P = MockPortfolio(roi, risk)
@@ -489,9 +513,9 @@ class TestEnhancedNStepPredictionIntegration(unittest.TestCase):
                 self.prediction_error = 0.01
                 self.anticipation = False
                 self.hypervolume_contribution = 0.1
-        
+
         return MockSolution(roi, risk)
-    
+
     def test_full_enhanced_prediction_workflow(self):
         """Test complete enhanced prediction workflow."""
         # Step 1: Compute conditional expected hypervolume
