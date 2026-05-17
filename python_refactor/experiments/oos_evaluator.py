@@ -185,3 +185,69 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
         "efhv_std": float(samples_hv.std(ddof=1)) if n_samples >= 2 else 0.0,
         "efhv_samples": samples_hv,
     }
+
+
+def compute_per_portfolio_efhv(pareto_weights: list[np.ndarray],
+                                oos_returns: pd.DataFrame,
+                                n_samples: int = 1000,
+                                z_ref: tuple[float, float] = (0.2, 0.0),
+                                rng: np.random.Generator | None = None) -> np.ndarray:
+    """W17-4: per-portfolio expected single-point HV against z_ref.
+
+    Implements thesis §6.4 Eq 6.42 (AMFC selection) on the OOS side:
+    for each portfolio i in pareto_weights, return E[Hypv((u_i^T Σ̂ u_i,
+    μ̂^T u_i))] averaged over n_samples MC bootstrap scenarios.
+
+    The "single-point HV" against z_ref = (risk_max, return_min) is:
+        HV_i_e = max(0, μ̂_e^T u_i - z_ref[1]) * max(0, z_ref[0] - u_i^T Σ̂_e u_i)
+    i.e. the rectangular area dominated by the single point (var, return)
+    against the reference corner (risk_max, return_min). Per-portfolio
+    EFHV = mean over e.
+
+    The argmax-index of the returned array is the AMFC per Eq 6.42.
+    walk_forward.run_walk_forward uses this argmax as u*_{t-1} for the
+    next rolling period (W16-2-CARRY-1 closure: replaces "first
+    Pareto-front portfolio" proxy).
+
+    Returns:
+        np.ndarray of length len(pareto_weights), each entry is the
+        portfolio's expected single-point HV (≥ 0). All-zero indicates
+        a degenerate period (all portfolios dominate-or-are-dominated
+        by z_ref); caller should fall back to weights[0].
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+    arr = (oos_returns.values if isinstance(oos_returns, pd.DataFrame)
+            else np.asarray(oos_returns, dtype=float))
+    if arr.ndim != 2 or arr.shape[0] < 2:
+        raise ValueError(f"oos_returns must be 2D with ≥ 2 rows; got shape {arr.shape}")
+    n_days, n_assets = arr.shape
+
+    weights_arr = [np.asarray(w, dtype=float) for w in pareto_weights]
+    n_portfolios = len(weights_arr)
+    if n_portfolios == 0:
+        return np.zeros(0, dtype=float)
+    for i, w in enumerate(weights_arr):
+        if w.shape != (n_assets,):
+            raise ValueError(
+                f"weights[{i}] shape {w.shape} mismatches oos_returns "
+                f"n_assets={n_assets}"
+            )
+
+    risk_ref, return_ref = z_ref[0], z_ref[1]
+    # Accumulate per-portfolio HV samples across MC bootstrap.
+    per_portfolio_hv = np.zeros(n_portfolios, dtype=float)
+    for e in range(n_samples):
+        idx = rng.integers(0, n_days, n_days)
+        sample = arr[idx]
+        mu = sample.mean(axis=0)
+        cov = np.cov(sample, rowvar=False, ddof=1)
+        for i, w in enumerate(weights_arr):
+            var = float(w @ cov @ w)
+            ret = float(mu @ w)
+            # Single-point HV against z_ref = (risk_max, return_min).
+            # Dominance corner: portfolio dominates the reference iff
+            # ret > return_ref AND var < risk_ref.
+            hv = max(0.0, ret - return_ref) * max(0.0, risk_ref - var)
+            per_portfolio_hv[i] += hv
+    return per_portfolio_hv / float(n_samples)
