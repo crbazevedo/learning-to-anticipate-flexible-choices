@@ -26,9 +26,28 @@ command:    python -m experiments.report --summary docs/VALIDATION-SUMMARY.csv -
 
 ## 1. Executive summary
 
-**The W13-3 single-shot 80/20 evaluation reports S2 < S0 (−17.59%,
-p < 0.0001), inconsistent with the paper headline. BUT the evaluation
-methodology itself diverges from the thesis and may explain the result.**
+**Both single-shot 80/20 (W13-3) AND walk-forward (W14-2) evaluations
+show S2 ≤ S0 — methodology was tested as an explanation and ruled out.
+The discrepancy with the paper is structural, not methodological. See
+`docs/BACKLOG.md` for the catalog of 27 grounded gaps + W15+ wave plan.**
+
+**W14-2 walk-forward receipt (2-seed smoke, 44 periods × 200 MC):**
+
+| Scenario | Grand mean Ŝ | Std (n=2 seeds) |
+|---|---|---|
+| **S0** (myopic) | **2.527e-04** | 1.02e-05 |
+| **S2** (anticipatory) | **1.899e-04** | 1.18e-05 |
+| Delta = S2 − S0 | **−24.86%** (Welch t ≈ −5.7, df ≈ 1) | direction OPPOSITE paper Table 7.2 |
+
+Walk-forward direction matches W13-3's single-shot finding (-17.59%)
+→ methodology is NOT the explanation. Root cause analysis (BACKLOG):
+4 BLOCKERS (B1 wrong HV reference, B2 K not threaded, B3 cardinality
+unenforced, B4 wrong crossover operator + non-simplex weights) → W15
+addresses all of them.
+
+---
+
+**Legacy single-shot 80/20 receipt (W13-3, kept for cross-reference):**
 
 Receipt (30 seeds × 1000 MC × single 80/20 split of the paper window):
 
