@@ -79,12 +79,33 @@ objs_dir:
 	@mkdir -p objs
 
 # Per-check driver builds. Each cross-check ships a single
-# drivers/NAME_driver.cpp; the rule links it against the legacy .o set.
+# drivers/NAME_driver.cpp; the rule links it against a CURATED subset
+# of legacy objects required for that check. Avoids pulling in mvtnorm.o
+# (which depends on Fortran `_mvtdst_` symbol we don't have on Apple
+# silicon for now) when the driver doesn't need it.
+#
+# By default driver-X links against portfolio + utils + statistics +
+# kalman_filter (the foundational stack). Drivers needing additional
+# modules can override OBJS_FOR_<name>.
+DRIVER_BASE_OBJS = $(OBJS) objs/mvtdst_stub.o
+
+# mvtdst_stub: provide a stub for the Fortran `mvtdst_` symbol so we
+# can link drivers that don't actually invoke multivariate normal CDF
+# (most cross-checks). If a driver DOES call it (e.g. TIP), it will
+# get zeros + INFORM=99; the driver must check INFORM and fall back
+# to its own MC implementation or skip.
+objs/mvtdst_stub.o: drivers/mvtdst_stub.cpp
+	@echo "[W18-1] CXX $<"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# TIP driver (W18-4) needs the multivariate normal stack too — that's the
+# mvtnorm-dependent path. We'll handle that with a separate rule when it lands.
+
 drivers: $(DRIVER_BINS)
 
-drivers/%: drivers/%.cpp objs
+drivers/%: drivers/%.cpp $(DRIVER_BASE_OBJS)
 	@echo "[W18-1] LD $@"
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) $< $(OBJS) -o $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) $< $(DRIVER_BASE_OBJS) -o $@
 
 clean:
 	@echo "[W18-1] cleaning build artifacts (keeping eigen download)..."
