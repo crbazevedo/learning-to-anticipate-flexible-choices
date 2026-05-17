@@ -267,7 +267,24 @@ class ExperimentManager:
 
             # Run algorithm
             population = algorithm.run(data)
-            
+
+            # W16-4: flush per-period λ + TIP trace CSV. Caller passes
+            # data["lambda_trace_csv_path"] (typically the walk-forward
+            # driver, once per period). Trace is APPENDED across periods.
+            trace_csv_path = data.get("lambda_trace_csv_path")
+            if (trace_csv_path is not None
+                    and hasattr(algorithm, "anticipatory_learning")
+                    and algorithm.anticipatory_learning is not None
+                    and hasattr(algorithm.anticipatory_learning, "flush_lambda_trace_csv")):
+                try:
+                    algorithm.anticipatory_learning.flush_lambda_trace_csv(
+                        trace_csv_path, append=True,
+                    )
+                except Exception as exc:
+                    self.logger.warning(
+                        f"W16-4 λ trace flush failed (non-fatal): {exc}"
+                    )
+
             execution_time = time.time() - start_time
             
             # Collect algorithm metrics.
