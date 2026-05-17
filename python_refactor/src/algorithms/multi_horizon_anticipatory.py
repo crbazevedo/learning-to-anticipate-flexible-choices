@@ -162,7 +162,11 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
             List of lambda rates for each horizon
         """
         if prediction_horizon < 2:
-            return [0.0]  # No multi-horizon for H < 2
+            # W3-1: was `return [0.0]` which violates the invariant
+            # len(predicted_states) == len(lambda_rates) used by
+            # apply_anticipatory_learning_rule (H<2 has 0 future
+            # horizons, so 0 predicted_states, so 0 lambda_rates).
+            return []
         
         lambda_rates = []
         
