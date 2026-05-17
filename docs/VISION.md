@@ -21,6 +21,16 @@ a Kalman Filter (objective space) and a Dirichlet Dynamical model (search
 space), self-adjusts anticipation rates from a Time Incomparability
 Probability (TIP), and integrates both via the ASMS-EMOA algorithm.
 
+**Canonical long-form source.** The IEEE paper is a condensed version of
+chapters 5–7 of the originating PhD thesis: *Anticipation in Multiple
+Criteria Decision-Making Under Uncertainty* (Azevedo, UNICAMP 2014, advisor
+Prof. Fernando José Von Zuben, DOI [10.47749/T/UNICAMP.2012.938003](https://doi.org/10.47749/T/UNICAMP.2012.938003)).
+The thesis is available locally at `docs/Azevedo_CarlosRenatoBelo_D.pdf` and
+indexed (chapter map, OOS protocol Eqs 7.10–7.11, parameters, future research
+directions, key references) at [`docs/THESIS-INDEX.md`](THESIS-INDEX.md). When
+the thesis and the IEEE paper disagree, the thesis wins — it has the
+unabridged derivations and the explicit OOS evaluation protocol.
+
 **Identity sentence.** *The reference open-source implementation of the
 AS-MOO methodology, faithful to the paper PDF, reproducible from a pinned
 environment, and usable by the broader MOO / MCDM research community.*
@@ -62,7 +72,12 @@ Two distinct problems:
 learning-to-anticipate-flexible-choices/
 ├── docs/                                         (new)
 │   ├── VISION.md                                 (this file)
-│   └── paper.pdf                                 (canon — IEEE paper, 1.9 MB)
+│   ├── paper.pdf                                 (canon — IEEE paper, 1.9 MB)
+│   ├── Azevedo_CarlosRenatoBelo_D.pdf            (canon long-form — PhD thesis, 17.8 MB, UNICAMP 2014)
+│   ├── THESIS-INDEX.md                           (chapter map + OOS protocol + parameters + future works)
+│   ├── ANALYTICS-PLAN.md                         (analytics-layer spec, W7-2)
+│   ├── EXPERIMENT-VALIDATION-PLAN.md             (validation matrix spec, W6-3)
+│   └── VALIDATION-RESULTS.md                     (template, W7-3)
 ├── legacy-cpp/                                   (renamed from ASMOO/, frozen)
 │   ├── source/             — 11 .cpp
 │   ├── headers/            — 10 .h
