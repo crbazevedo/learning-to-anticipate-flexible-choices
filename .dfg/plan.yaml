@@ -1577,3 +1577,111 @@ waves:
         - "Reading A/B/C verdict updated with W19 evidence"
         - "Retros at .dfg/retrospectives/W19/W19-N.md with ADR-004 keys"
       checkpoint_file: .dfg/checkpoints/W19-gate.md
+
+  - id: W20
+    name: Reading-E experimental test + remaining cross-checks H/I/J/K
+    state: PLANNED
+    units:
+      - id: W20-1
+        slug: reading-e-experimental-test
+        name: Reading-E experimental test (use_v2_anticipative_rate flag + W17-5 smoke)
+        purpose: "Closes W19-4-CARRY-1. Experimental test whether v2 monotonic formula reverses S2 ≤ S0."
+        files:
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/tests/test_use_v2_anticipative_rate.py
+          - docs/READING-E-EXPERIMENTAL-TEST.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "use_v2_anticipative_rate kwarg implemented in AnticipatoryLearning + Multi-Horizon subclasses"
+          - "W17-5 smoke re-run with flag enabled; Δ(S2 − S0) reported honestly"
+          - "Verdict: PAPER-REPLICATES / READING-E-PARTIAL / READING-E-REFUTED"
+          - "≥ 2 unit tests for the flag behavior"
+
+      - id: W20-2
+        slug: cross-check-h-dirichlet-variant
+        name: Cross-check H — Dirichlet variant (dedupe with E?)
+        purpose: "Closes operator check H. Investigate dedupe vs check E."
+        files:
+          - docs/CROSS-VALIDATION-H-DIRICHLET-VARIANT.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "Determine if H is distinct from E or duplicate"
+          - "If duplicate: documented dedupe + cite W19-3 receipt"
+          - "If distinct: full cross-check"
+
+      - id: W20-3
+        slug: cross-check-i-anticipative-distributions
+        name: Cross-check I — anticipative distributions from OAL
+        purpose: "Closes operator check I. Cross-validate OAL output distributions (ROI, risk, covariance)."
+        files:
+          - legacy-cpp-v2/build/drivers/anticipative_distribution_driver.cpp
+          - python_refactor/scripts/cross_validation/run_anticipative_distribution.py
+          - python_refactor/tests/test_cross_check_anticipative_distribution.py
+          - docs/CROSS-VALIDATION-I-ANTICIPATIVE-DISTRIBUTIONS.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "C++ + Python drivers on identical (KF state, predicted, alpha) fixture"
+          - "Markdown diff with abs+rel tolerance"
+          - "Verdict per W18 matrix"
+
+      - id: W20-4
+        slug: cross-check-j-crowding-distance
+        name: Cross-check J — crowding distance for NDS
+        purpose: "Closes operator check J. Cross-validate CD computation."
+        files:
+          - legacy-cpp-v2/build/drivers/crowding_distance_driver.cpp
+          - python_refactor/scripts/cross_validation/run_crowding_distance.py
+          - python_refactor/tests/test_cross_check_crowding_distance.py
+          - docs/CROSS-VALIDATION-J-CROWDING-DISTANCE.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "C++ + Python drivers on identical Pareto-front fixture"
+          - "Markdown diff"
+          - "Verdict per W18 matrix"
+
+      - id: W20-5
+        slug: cross-check-k-expected-hv
+        name: Cross-check K — expected HV contribution (stochastic Δ_S)
+        purpose: "Closes operator check K. Cross-validate v2's closed-form Δ_S vs Python's MC expected_future_hypervolume."
+        files:
+          - legacy-cpp-v2/build/drivers/expected_hv_driver.cpp
+          - python_refactor/scripts/cross_validation/run_expected_hv.py
+          - python_refactor/tests/test_cross_check_expected_hv.py
+          - docs/CROSS-VALIDATION-K-EXPECTED-HV.md
+        depends_on: []
+        size: M
+        acceptance_criteria:
+          - "C++ closed-form vs Python MC on identical fixture"
+          - "Compare to expectation"
+          - "Verdict per W18 matrix"
+
+      - id: W20-6
+        slug: synthesis
+        name: W20 synthesis + W21 roadmap (L/M/N)
+        purpose: "Aggregate W20-1..W20-5; consolidate Reading-E verdict; pre-stub W21 for L/M/N."
+        files:
+          - docs/W20-CROSS-VALIDATION-SYNTHESIS.md
+          - .dfg/retrospectives/W20/W20-6.md
+        depends_on: [W20-1, W20-2, W20-3, W20-4, W20-5]
+        size: S
+        acceptance_criteria:
+          - "Verdict table for Reading-E + H + I + J + K"
+          - "W21 roadmap for L/M/N"
+          - "ADR-004 retro"
+
+    parallel_groups:
+      - [W20-1, W20-2, W20-3, W20-4, W20-5]
+      - [W20-6]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 6 units MERGED with green pre-pr battery"
+        - "W20-1 Reading-E test reports verdict with honest data"
+        - "4 cross-checks (H, I, J, K) shipped with receipts"
+        - "Retros at .dfg/retrospectives/W20/W20-N.md with ADR-004 keys"
+      checkpoint_file: .dfg/checkpoints/W20-gate.md
