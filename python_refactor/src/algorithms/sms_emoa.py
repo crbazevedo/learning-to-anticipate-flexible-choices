@@ -198,14 +198,50 @@ class SMSEMOA:
         portfolio.stability = 1.0 / (1.0 + np.std(solution.P.investment))
     
     def _apply_anticipatory_learning(self, generation: int):
-        """Apply anticipatory learning to population."""
+        """Apply anticipatory learning to population.
+
+        W11-1 (closes W10-CARRY-2): the pre-W11-1 loop always called
+        learn_single_solution, which is defined only on the base
+        AnticipatoryLearning class. TIPIntegratedAnticipatoryLearning
+        and MultiHorizonAnticipatoryLearning override learn_population
+        (paper Eq 13 / Eq 14 / Eq 15) but NOT learn_single_solution,
+        so all "learning-enabled" scenarios collapsed to base behavior
+        (S1=S2=S3=S4 produced identical metrics).
+
+        Fix: detect whether the learner overrides learn_population
+        (not inherited from base) and call it once for the unlearned
+        subset; fall back to the per-solution loop only when no
+        override exists.
+        """
         if self.anticipatory_learning is None:
             return
-        
-        # Apply to each solution that hasn't been learned yet
-        for solution in self.population:
-            if not hasattr(solution, 'anticipation') or not solution.anticipation:
-                self.anticipatory_learning.learn_single_solution(solution, generation)
+
+        unlearned = [s for s in self.population
+                     if not getattr(s, 'anticipation', False)]
+        if not unlearned:
+            return
+
+        # The base AnticipatoryLearning class does NOT define
+        # learn_population — only subclasses (TIPIntegrated, MultiHorizon)
+        # do. So `hasattr(learner, 'learn_population')` is a sufficient
+        # detector: True → subclass-defined → route through population
+        # entry point (paper Eq 13 TIP arm + Eq 14/15 multi-horizon
+        # convex combination). False → base → per-solution fallback.
+        #
+        # Note: we re-check whether learn_population was defined on a
+        # non-base class via __mro__ walk, BUT skipping that check
+        # when the base lacks it entirely (the actual project shape)
+        # is equivalent: any class with learn_population is a subclass
+        # override of nothing.
+        learner = self.anticipatory_learning
+        if hasattr(learner, 'learn_population'):
+            # Subclass-defined entry point (paper Eq 13/14/15).
+            learner.learn_population(unlearned, generation)
+            return
+
+        # Fallback: per-solution loop (the base / legacy path).
+        for solution in unlearned:
+            learner.learn_single_solution(solution, generation)
     
     def _run_generation(self):
         """Run one generation of SMS-EMOA."""
