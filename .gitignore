@@ -233,15 +233,22 @@ python_refactor/experiments/results/*
 # W17-1: result-of-truth artifacts (committed for test dependencies)
 !python_refactor/experiments/results/h4-eda/
 
-# W18-1 cross-validation: legacy-cpp/build/ is the harness scaffold dir.
-# Override the broad `build/` rule from VS boilerplate above so we can
-# commit the Makefile + README-BUILD-ADAPTER.md + drivers/*.cpp sources,
-# then ignore per-platform artifacts within it.
+# W18-1 + substrate-v2: legacy-cpp{,-v2}/build/ harness scaffold dirs.
+# Override the broad `build/` rule above so the Makefiles + driver
+# sources commit; ignore per-platform artifacts within.
 !legacy-cpp/build/
 !legacy-cpp/build/**
+!legacy-cpp-v2/build/
+!legacy-cpp-v2/build/**
 legacy-cpp/build/objs/
 legacy-cpp/build/src_patched/
 legacy-cpp/build/headers_patched/
 legacy-cpp/build/eigen-*/
 legacy-cpp/build/eigen-*.tar.gz
 legacy-cpp/build/drivers/*_driver
+legacy-cpp/build/drivers/*_driver_v2
+legacy-cpp-v2/build/objs/
+legacy-cpp-v2/build/src_patched/
+legacy-cpp-v2/build/headers_patched/
+legacy-cpp-v2/build/drivers/*_driver
+legacy-cpp-v2/build/drivers/*_driver_v2
