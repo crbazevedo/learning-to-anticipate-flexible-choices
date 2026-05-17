@@ -49,9 +49,16 @@ def _load_paper_window_returns() -> pd.DataFrame:
 def _run_one(scenario: str, seed: int,
               full_returns_pickle: bytes,
               train_window_days: int, step_days: int,
-              n_mc: int) -> dict[str, Any]:
+              n_mc: int,
+              lambda_trace_csv_path: str | None = None) -> dict[str, Any]:
     """ProcessPoolExecutor entry: unpickle returns + run one
-    (scenario, seed) walk-forward, return aggregate."""
+    (scenario, seed) walk-forward, return aggregate.
+
+    W17-3 (closes W16-5-CARRY-1 + W16-4-CARRY-1): optional
+    lambda_trace_csv_path forwarded to run_walk_forward (kwarg from
+    W16-4). When set, the K-period λ trace is appended to the CSV
+    per period via ExperimentManager.
+    """
     import pickle
     from experiments.walk_forward import (aggregate_per_seed,
                                             run_walk_forward)
@@ -65,6 +72,7 @@ def _run_one(scenario: str, seed: int,
         step_days=step_days,
         n_mc=n_mc,
         rng=rng,
+        lambda_trace_csv_path=lambda_trace_csv_path,
     )
     agg = aggregate_per_seed(per_period)
     return {
@@ -194,6 +202,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--per-seed-json", type=Path, default=None)
     parser.add_argument("--jobs", type=int, default=4)
+    # W17-3 (closes W16-5-CARRY-1 + W16-4-CARRY-1): optional λ trace
+    # CSV path. When set, ExperimentManager flushes per-period λ + TIP
+    # rows to this CSV via the W16-4 plumbing. Smokes that pass this
+    # arg can then directly assert "both λ arms fire" rather than
+    # infer from aggregate HV.
+    parser.add_argument("--lambda-trace-csv-path", type=Path, default=None,
+                          help="If set, ExperimentManager appends per-period "
+                               "(period, generation, solution_rank, λ^H, λ^K, "
+                               "λ, TIP, lambda_k_branch) rows to this CSV.")
     args = parser.parse_args(argv)
 
     scenarios = [s.strip() for s in args.scenarios.split(",") if s.strip()]
@@ -212,10 +229,20 @@ def main(argv: list[str] | None = None) -> int:
 
     per_seed_results: list[dict[str, Any]] = []
     t0 = time.time()
+    # W17-3: convert Path → str for ProcessPoolExecutor pickling (Paths
+    # are picklable but stringifying upfront avoids any worker-side
+    # cwd surprises).
+    lambda_trace_csv_path_str = (
+        str(args.lambda_trace_csv_path) if args.lambda_trace_csv_path else None
+    )
+    if lambda_trace_csv_path_str:
+        print(f"[wf-report] λ trace CSV → {lambda_trace_csv_path_str}", file=sys.stderr)
+
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
         futures = {
             pool.submit(_run_one, s, sd, full_returns_pickle,
-                          args.train_window_days, args.step_days, args.n_mc): (s, sd)
+                          args.train_window_days, args.step_days, args.n_mc,
+                          lambda_trace_csv_path_str): (s, sd)
             for (s, sd) in pairs
         }
         done = 0
