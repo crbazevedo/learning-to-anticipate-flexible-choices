@@ -7,8 +7,8 @@ portfolio optimization experiments.
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
+from typing import Dict, List, Any
+from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 

@@ -8,7 +8,7 @@ Based on C++ implementation in anticipatory-learning-asmoo/source/dirichlet.cpp
 """
 
 import numpy as np
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from scipy.stats import dirichlet
 import logging
 

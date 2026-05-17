@@ -7,7 +7,6 @@ ensuring full alignment with the theoretical framework and experimental setup.
 
 from typing import Dict, Any, Tuple
 from dataclasses import dataclass
-import numpy as np
 
 
 @dataclass

@@ -12,11 +12,8 @@ This script demonstrates the integration of all components:
 import sys
 import argparse
 import numpy as np
-import pandas as pd
-from datetime import datetime
-from typing import List, Optional
+from typing import List
 
-from .portfolio.asset import load_asset_data, calculate_returns
 from .portfolio.portfolio import Portfolio
 from .algorithms.nsga2 import run_nsga2, get_pareto_front, evaluate_population_statistics
 from .algorithms.sms_emoa import run_sms_emoa, get_sms_emoa_pareto_front, evaluate_sms_emoa_statistics

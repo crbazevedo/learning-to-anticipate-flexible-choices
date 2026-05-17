@@ -11,7 +11,6 @@ Fully aligned with C++ ASMS-EMOA implementation including:
 """
 
 import numpy as np
-import pandas as pd
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 import warnings
@@ -20,7 +19,7 @@ warnings.filterwarnings('ignore')
 
 logger = logging.getLogger(__name__)
 
-from .kalman_filter import KalmanParams, kalman_filter, kalman_prediction, kalman_update
+from .kalman_filter import kalman_filter, kalman_prediction, kalman_update
 from .statistics import multi_norm, normal_cdf, linear_entropy
 from .solution import Solution
 from .temporal_incomparability_probability import TemporalIncomparabilityCalculator

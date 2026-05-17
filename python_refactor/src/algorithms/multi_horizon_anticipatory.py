@@ -7,7 +7,7 @@ multi-horizon prediction capabilities.
 """
 
 import numpy as np
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any
 import logging
 from dataclasses import dataclass
 
@@ -15,10 +15,9 @@ from dataclasses import dataclass
 # worked under a `sys.path.insert(..., src)` hack and was one of the
 # 16 pre-W1-3 pytest collection errors).
 from .solution import Solution
-from .temporal_incomparability_probability import TemporalIncomparabilityCalculator
 from .n_step_prediction import NStepPredictor
 from .sliding_window_dirichlet import SlidingWindowDirichlet
-from .kalman_filter import KalmanParams, kalman_prediction, kalman_update
+from .kalman_filter import KalmanParams
 from .anticipatory_learning import TIPIntegratedAnticipatoryLearning
 
 logger = logging.getLogger(__name__)

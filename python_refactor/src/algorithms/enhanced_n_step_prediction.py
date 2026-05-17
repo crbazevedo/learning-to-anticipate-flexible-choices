@@ -7,7 +7,7 @@ conditional expected hypervolume calculation.
 """
 
 import numpy as np
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 import logging
 from dataclasses import dataclass
 

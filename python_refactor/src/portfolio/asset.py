@@ -6,9 +6,8 @@ for loading historical price data from CSV files.
 """
 
 import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-from typing import List, Optional
+from datetime import datetime
+from typing import List
 import os
 
 

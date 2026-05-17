@@ -6,7 +6,7 @@ used in the NSGA-II and SMS-EMOA algorithms.
 """
 
 import numpy as np
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from .solution import Solution
 from ..portfolio.portfolio import Portfolio
 

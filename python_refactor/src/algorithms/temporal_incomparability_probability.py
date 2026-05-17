@@ -10,7 +10,6 @@ with the main anticipatory learning algorithm.
 
 import numpy as np
 from typing import Tuple, Optional
-from scipy.stats import norm
 import logging
 
 # ---------------------------------------------------------------------------
