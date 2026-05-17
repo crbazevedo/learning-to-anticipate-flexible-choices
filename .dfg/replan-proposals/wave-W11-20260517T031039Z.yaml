@@ -1,0 +1,21 @@
+proposal_id: wave-W11-20260517T031039Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T03:10:39Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W11
+  action: add
+trigger: retro-driven
+rationale: 'W10-CARRY-2 root cause located: SMS-EMOA._apply_anticipatory_learning
+  always calls learn_single_solution; TIPIntegrated/MultiHorizon override only learn_population
+  so they degenerate to base. W10-CARRY-1 root cause: portfolio_evaluator._get_asset_returns
+  returns price-level data; (1+prices).cumprod() overflows. W11 fixes both in parallel
+  (file-disjoint) + W11-3 verifies + ships scenario-differentiation regression gate
+  (class-retiring per directive #5).'
+evidence:
+- .dfg/checkpoints/W10-gate.md
+- .dfg/retrospectives/W10/W10-3.md
+accepted_at: '2026-05-17T03:11:38Z'
+operator_note: W11 plan validated; 3 units, root causes located, fixes file-disjoint
