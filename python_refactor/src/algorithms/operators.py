@@ -338,3 +338,186 @@ def create_offspring_population(parent_population: List[Solution],
     
     # Trim to exact population size
     return offspring_population[:population_size] 
+
+# ===========================================================================
+# W15-2: Thesis-faithful operators per Azevedo PhD §7.2.3 (BACKLOG B3+B4)
+# ===========================================================================
+#
+# The pre-W15-2 `crossover` (line 14) uses SBX. The thesis §7.2.3
+# (p. 147) verbatim prescribes:
+#   "We utilized uniform crossover over the mean DD vectors. For mutation,
+#    we randomly choose between (1) modifying the non-zero weights; or
+#    (2) adding/removing assets. If operator (1) is selected, then, with
+#    probability 1/2, we either increase or decrease the investment on a
+#    randomly chosen asset by a uniformly drawn factor from 10 to 50%.
+#    If (2) is selected, then, with probability 1/2, we either add or
+#    remove a randomly chosen asset. If it is removed, we simply set its
+#    weight to zero. If it is added, we randomly set its weight within
+#    a ±10% range from an equally-balanced allocation. All modified DD
+#    vectors are renormalized."
+#
+# Plus thesis §7.2.3 (p. 146) cardinality: c_l = 5, c_u = 15.
+# Plus thesis §7.2 (p. 141) simplex: u ∈ S^{N-1} (u_i ≥ 0, sum=1).
+#
+# Both the legacy `crossover` and `mutation` above are kept available
+# for backward compatibility but should NOT be used for thesis-faithful
+# experiments — use the thesis_uniform_crossover + thesis_dual_mode_mutation
+# below.
+
+
+# Thesis defaults from §7.2.3 p. 146
+THESIS_CARDINALITY_MIN = 5
+THESIS_CARDINALITY_MAX = 15
+
+
+def project_to_simplex(weights: np.ndarray,
+                        c_l: int = THESIS_CARDINALITY_MIN,
+                        c_u: int = THESIS_CARDINALITY_MAX,
+                        rng: np.random.Generator | None = None) -> np.ndarray:
+    """Project a weight vector onto the cardinality-constrained simplex.
+
+    Steps (in order, per thesis §7.2 Eq 7.3 + §7.2.3 Constraint Handling):
+      1. Clip negatives to 0 (simplex non-negativity per p. 141)
+      2. Enforce cardinality upper bound: if `cardinality > c_u`, zero
+         out the smallest non-zero weights until cardinality == c_u
+      3. Enforce cardinality lower bound: if `cardinality < c_l`,
+         randomly activate `c_l - cardinality` zero-weight assets at
+         ±10% of equally-balanced allocation (per thesis "Search
+         Operators" §7.2.3 p. 147 wording for the add-asset mutation)
+      4. Renormalize to sum = 1
+
+    Grounding:
+      - Thesis §7.2 p. 141: "u ∈ S^{N-1} denote the proportions of
+        wealth to be invested" → u_i ≥ 0, sum=1
+      - Thesis §7.2 Eq (7.3) p. 142: "s.t. c_l ≤ c(u_t) ≤ c_u, where
+        c(u_t) computes the number of assets in u_t with non-zero weight"
+      - Thesis §7.2.3 p. 146: "We considered minimum and maximum
+        cardinality of c_l = 5 and c_u = 15 assets."
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+    w = np.maximum(np.asarray(weights, dtype=float), 0.0)
+    # Active asset count
+    active_mask = w > 1e-12
+    n_active = int(active_mask.sum())
+    n_assets = len(w)
+    # Cap to c_u (zero out smallest non-zero weights)
+    if n_active > c_u:
+        # Sort non-zero indices by weight ascending; zero out the smallest
+        # (n_active - c_u) of them.
+        nonzero_idx = np.flatnonzero(active_mask)
+        sorted_idx = nonzero_idx[np.argsort(w[nonzero_idx])]
+        to_zero = sorted_idx[: n_active - c_u]
+        w[to_zero] = 0.0
+        active_mask = w > 1e-12
+        n_active = int(active_mask.sum())
+    # Fill to c_l (add small weights to inactive assets)
+    if n_active < c_l and n_assets >= c_l:
+        inactive_idx = np.flatnonzero(~active_mask)
+        n_to_add = c_l - n_active
+        # Sample without replacement
+        n_to_add = min(n_to_add, len(inactive_idx))
+        chosen = rng.choice(inactive_idx, size=n_to_add, replace=False)
+        # ±10% of equal allocation per thesis add-asset mutation rule
+        equal_alloc = 1.0 / c_l
+        for idx in chosen:
+            jitter = rng.uniform(-0.10, 0.10) * equal_alloc
+            w[idx] = max(equal_alloc + jitter, 1e-9)
+    # Renormalize to sum=1
+    total = w.sum()
+    if total <= 0:
+        # Degenerate fallback: equal allocation over c_l first assets
+        w = np.zeros(n_assets)
+        idx = rng.choice(n_assets, size=min(c_l, n_assets), replace=False)
+        w[idx] = 1.0 / len(idx)
+    else:
+        w = w / total
+    return w
+
+
+def thesis_uniform_crossover(parent1: Solution, parent2: Solution,
+                              p: float = 0.5,
+                              c_l: int = THESIS_CARDINALITY_MIN,
+                              c_u: int = THESIS_CARDINALITY_MAX,
+                              rng: np.random.Generator | None = None
+                              ) -> Tuple[Solution, Solution]:
+    """Uniform crossover over mean DD (decision) vectors per thesis §7.2.3 p.147.
+
+    For each asset i: with probability `p`, child1 takes parent2's
+    weight at i (and child2 takes parent1's); otherwise no swap.
+    Renormalize + project to cardinality-constrained simplex.
+
+    Grounding (thesis §7.2.3 p. 147):
+      "We utilized uniform crossover over the mean DD vectors."
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+    n = len(parent1.P.investment)
+    swap_mask = rng.random(n) < p
+    w1 = parent1.P.investment.copy()
+    w2 = parent2.P.investment.copy()
+    w1[swap_mask], w2[swap_mask] = w2[swap_mask], w1[swap_mask]
+    child1 = Solution(num_assets=n)
+    child2 = Solution(num_assets=n)
+    child1.P.investment = project_to_simplex(w1, c_l, c_u, rng)
+    child2.P.investment = project_to_simplex(w2, c_l, c_u, rng)
+    return child1, child2
+
+
+def thesis_dual_mode_mutation(solution: Solution,
+                                p_factor_lo: float = 0.10,
+                                p_factor_hi: float = 0.50,
+                                add_jitter: float = 0.10,
+                                c_l: int = THESIS_CARDINALITY_MIN,
+                                c_u: int = THESIS_CARDINALITY_MAX,
+                                rng: np.random.Generator | None = None
+                                ) -> Solution:
+    """Dual-mode mutation per thesis §7.2.3 p.147 (verbatim spec):
+
+    Mode (1): modify non-zero weights — with prob 1/2 increase OR
+              decrease investment on a randomly chosen asset by a
+              uniformly drawn factor in [p_factor_lo, p_factor_hi]
+              = [0.10, 0.50] per thesis.
+
+    Mode (2): add or remove an asset — with prob 1/2 add OR remove
+              a randomly chosen asset. Removed: set weight to zero.
+              Added: random weight within ±`add_jitter` = ±0.10 of
+              equally-balanced allocation per thesis.
+
+    All modified weight vectors are renormalized + projected to
+    cardinality-constrained simplex per thesis §7.2 Eq 7.3.
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+    n = len(solution.P.investment)
+    w = solution.P.investment.copy()
+    mutated = Solution(num_assets=n)
+    # Coin flip between mode 1 and mode 2 (per thesis: "we randomly choose between")
+    if rng.random() < 0.5:
+        # Mode 1: modify a non-zero weight
+        active_idx = np.flatnonzero(w > 1e-12)
+        if len(active_idx) > 0:
+            asset = int(rng.choice(active_idx))
+            factor = rng.uniform(p_factor_lo, p_factor_hi)
+            if rng.random() < 0.5:
+                w[asset] *= (1.0 + factor)  # increase
+            else:
+                w[asset] *= (1.0 - factor)  # decrease
+                w[asset] = max(w[asset], 0.0)
+    else:
+        # Mode 2: add or remove an asset
+        active_idx = np.flatnonzero(w > 1e-12)
+        if rng.random() < 0.5 and len(active_idx) > c_l:
+            # Remove: only if removing keeps cardinality >= c_l
+            asset = int(rng.choice(active_idx))
+            w[asset] = 0.0
+        else:
+            # Add: pick an inactive asset (if any)
+            inactive_idx = np.flatnonzero(w <= 1e-12)
+            if len(inactive_idx) > 0:
+                asset = int(rng.choice(inactive_idx))
+                equal_alloc = 1.0 / max(c_l, len(active_idx) + 1)
+                jitter = rng.uniform(-add_jitter, add_jitter) * equal_alloc
+                w[asset] = max(equal_alloc + jitter, 1e-9)
+    mutated.P.investment = project_to_simplex(w, c_l, c_u, rng)
+    return mutated

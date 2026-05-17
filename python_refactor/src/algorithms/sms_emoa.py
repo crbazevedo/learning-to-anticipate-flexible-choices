@@ -192,6 +192,20 @@ class SMSEMOA:
         for _ in range(self.population_size):
             solution = Solution(num_assets=num_assets)
 
+            # W15-2: project initial weights to thesis cardinality
+            # [c_l=5, c_u=15] + non-negative simplex BEFORE evaluating.
+            # Solution.__init__ produces random fully-dense weights;
+            # without projection, initial population starts with
+            # cardinality ≈ n_assets (98 for paper window), violating
+            # thesis §7.2 Eq (7.3) cardinality constraint.
+            from .operators import project_to_simplex
+            solution.P.investment = project_to_simplex(
+                solution.P.investment, rng=np.random.default_rng(self.function_evaluations))
+            # Re-compute portfolio efficiency on the projected weights.
+            from ..portfolio.portfolio import Portfolio
+            if Portfolio.mean_ROI is not None and Portfolio.covariance is not None:
+                Portfolio.compute_efficiency(solution.P)
+
             # Initialize Kalman filter state
             self._initialize_kalman_state(solution, data)
 
@@ -315,17 +329,22 @@ class SMSEMOA:
         parent1_idx = self._tournament_selection()
         parent2_idx = self._tournament_selection()
         
-        # Create offspring
-        from .operators import crossover, mutation
-        offspring1, offspring2 = crossover(
+        # W15-2: switch to thesis-faithful operators per §7.2.3 p. 147
+        # ("We utilized uniform crossover over the mean DD vectors. For
+        # mutation, we randomly choose between (1) modifying the
+        # non-zero weights; or (2) adding/removing assets..."). Legacy
+        # SBX `crossover` and `mutation` retained in operators.py for
+        # backward compat but no longer used here.
+        from .operators import (
+            thesis_dual_mode_mutation, thesis_uniform_crossover,
+        )
+        offspring1, offspring2 = thesis_uniform_crossover(
             self.population[parent1_idx],
             self.population[parent2_idx],
-            self.crossover_rate
+            p=self.crossover_rate,
         )
-        
-        # Apply mutation
-        mutation(offspring1, self.mutation_rate)
-        mutation(offspring2, self.mutation_rate)
+        offspring1 = thesis_dual_mode_mutation(offspring1)
+        offspring2 = thesis_dual_mode_mutation(offspring2)
         
         # Add offspring to population
         self.population.append(offspring1)
