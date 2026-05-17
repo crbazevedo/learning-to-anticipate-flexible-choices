@@ -681,7 +681,7 @@ waves:
           - .dfg/retrospectives/W8/W8-2.md
           - .dfg/retrospectives/W8/W8-3.md
           - .dfg/retrospectives/W8/W8-4.md
-          - kit/scripts/pre-pr-reflect-validate.sh
+          - scripts/pre-pr-reflect-validate.sh  # corrected from kit/scripts/ (W9-3-CARRY-2 close, replan unit-W9-3-20260517T024044Z)
         depends_on: []
         size: S
         acceptance_criteria:

@@ -1,0 +1,16 @@
+proposal_id: unit-W9-3-20260517T024044Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T02:40:44Z'
+scope:
+  level: unit
+  cli_level: unit
+  target: W9-3
+  action: resize
+trigger: retro-driven
+rationale: 'W9-3-CARRY-2 closure: plan.yaml listed file as kit/scripts/pre-pr-reflect-validate.sh
+  but kit/ is a symlink into dfg-harness (directive #5). Corrected to scripts/pre-pr-reflect-validate.sh
+  (repo-owned). Same file scope, path-only correction.'
+evidence: []
+accepted_at: '2026-05-17T02:41:04Z'
+operator_note: 'W9-3-CARRY-2 close: path-only correction, same scope'
