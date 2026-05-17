@@ -718,3 +718,97 @@ waves:
         - "sub-papercut #23 retired: dfg reflect --backfill emits ≥ 7 events; pre-pr wrapper exists"
         - "Retros at .dfg/retrospectives/W9/W9-N.md with ADR-004 frontmatter (canonical keys)"
       checkpoint_file: .dfg/checkpoints/W9-gate.md
+
+  - id: W10
+    name: Pipeline activation — metric flatten + S1-S4 smoke-tests
+    state: PLANNED
+    # Added 2026-05-17 via replan proposal wave-W10-20260517T025230Z.
+    # W9 left orchestration green but metrics.csv empty (W9-CARRY-3).
+    # W10-1 closes that + switches paper-window to real 98-CSV glob.
+    # W10-2..W10-5 smoke-test S1/S2/S3/S4 in parallel.
+    # Dead-code-coming-alive pattern instance #8+ expected per scenario.
+    units:
+      - id: W10-1
+        slug: validation-matrix-tightening
+        name: Metric flatten + paper-window real-glob switch
+        purpose: "Closes W9-CARRY-3 + W8-1-CARRY-1 fully. Recurses final_metrics into <category>.<metric> rows; WINDOWS paper-window switches to legacy-cpp/.../table*.csv."
+        files:
+          - python_refactor/experiments/validation_matrix.py
+          - python_refactor/tests/test_experiments_validation_matrix.py
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "validation_matrix.py: final_metrics recursed; emits flattened key '<category>.<metric>' rows in metrics.csv"
+          - "Smoke-test on S0/paper/seed=1 produces metrics.csv with ≥ 5 metric rows"
+          - "WINDOWS['paper']['asset_files_glob'] = 'legacy-cpp/executable/data/ftse-original/table*.csv'"
+          - "≥ 2 regression tests: (a) flatten produces dotted-key rows, (b) WINDOWS paper-window loads ≥ 90 assets"
+
+      - id: W10-2
+        slug: s1-smoke-test
+        name: S1 (TIP integrated, H=2) end-to-end smoke-test
+        purpose: "Verifies S1 scenario runs end-to-end with metrics populated. Surfaces any TIP-wiring src/ bugs."
+        files:
+          - .dfg/retrospectives/W10/W10-2.md
+        depends_on: [W10-1]
+        size: S
+        acceptance_criteria:
+          - "`python -m experiments.validation_matrix --scenario S1 --window paper --seed 1 --output /tmp/w10-s1` exits 0"
+          - "manifest.json status=ok"
+          - "metrics.csv has ≥ 5 metric rows"
+          - "Retro documents either green-path receipt OR honest scar with new bugs filed as carries"
+
+      - id: W10-3
+        slug: s2-smoke-test
+        name: S2 (TIP + Multi-Horizon H=3) end-to-end smoke-test
+        purpose: "Verifies S2 — the paper's headline configuration. Surfaces Multi-Horizon-wiring src/ bugs."
+        files:
+          - .dfg/retrospectives/W10/W10-3.md
+        depends_on: [W10-1]
+        size: S
+        acceptance_criteria:
+          - "`python -m experiments.validation_matrix --scenario S2 --window paper --seed 1 --output /tmp/w10-s2` exits 0"
+          - "manifest.json status=ok"
+          - "metrics.csv has ≥ 5 metric rows"
+          - "Retro documents either green-path receipt OR honest scar with new bugs filed as carries"
+
+      - id: W10-4
+        slug: s3-smoke-test
+        name: S3 (TIP + Multi-Horizon H=2 control) end-to-end smoke-test
+        purpose: "Verifies S3 — horizon-ablation control. Should reuse most of S2's code paths."
+        files:
+          - .dfg/retrospectives/W10/W10-4.md
+        depends_on: [W10-1]
+        size: S
+        acceptance_criteria:
+          - "`python -m experiments.validation_matrix --scenario S3 --window paper --seed 1 --output /tmp/w10-s3` exits 0"
+          - "manifest.json status=ok"
+          - "metrics.csv has ≥ 5 metric rows"
+          - "Retro documents either green-path receipt OR honest scar with new bugs filed as carries"
+
+      - id: W10-5
+        slug: s4-smoke-test
+        name: S4 (TIP + Multi-Horizon H=3 explicit covariance) end-to-end smoke-test
+        purpose: "Verifies S4 — the explicit-covariance variant. Surfaces covariance-threading src/ bugs."
+        files:
+          - .dfg/retrospectives/W10/W10-5.md
+        depends_on: [W10-1]
+        size: S
+        acceptance_criteria:
+          - "`python -m experiments.validation_matrix --scenario S4 --window paper --seed 1 --output /tmp/w10-s4` exits 0"
+          - "manifest.json status=ok"
+          - "metrics.csv has ≥ 5 metric rows"
+          - "Retro documents either green-path receipt OR honest scar with new bugs filed as carries"
+
+    parallel_groups:
+      - [W10-1]
+      - [W10-2, W10-3, W10-4, W10-5]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "All 5 units MERGED with green pre-pr battery"
+        - "W9-CARRY-3 closed: metrics.csv populated with ≥ 5 rows for at least S0 (proven by W10-1 test) and any green smoke-tests"
+        - "W8-1-CARRY-1 fully closed: WINDOWS paper-window glob loads ≥ 90 assets in real run"
+        - "All 4 S1/S2/S3/S4 smoke-tests either GREEN (status=ok + metrics.csv populated) OR honestly scarred (new carries filed, no laundering)"
+        - "Retros at .dfg/retrospectives/W10/W10-N.md with ADR-004 canonical keys; `bash scripts/pre-pr-reflect-validate.sh --wave W10` green"
+      checkpoint_file: .dfg/checkpoints/W10-gate.md

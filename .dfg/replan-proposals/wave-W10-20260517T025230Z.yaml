@@ -1,0 +1,23 @@
+proposal_id: wave-W10-20260517T025230Z
+schema_version: 1.0.0
+status: accepted
+created_at: '2026-05-17T02:52:30Z'
+scope:
+  level: wave
+  cli_level: wave
+  target: W10
+  action: add
+trigger: retro-driven
+rationale: "W9 closed with W7-1-CARRY-1 PARTIAL (orchestration green but metrics.csv\
+  \ empty due to nested final_metrics) and W9-CARRY-3 filed. W10 activates the pipeline:\
+  \ W10-1 flattens validation_matrix.py metric serialization + switches WINDOWS paper\
+  \ to real 98-CSV glob (closes W8-1-CARRY-1 fully); W10-2..W10-5 smoke-test S1/S2/S3/S4\
+  \ (TIP, Multi-Horizon variants) in parallel. Each scenario likely surfaces dead-code-coming-alive\
+  \ instance #8+ \u2014 discipline #5 says file as honest scar, not chase. Output:\
+  \ 5 scenarios proven end-to-end with real metric rows."
+evidence:
+- .dfg/checkpoints/W9-gate.md
+- .dfg/retrospectives/W9/W9-4.md
+accepted_at: '2026-05-17T02:53:35Z'
+operator_note: W10 plan validated; 5 units with W10-1 keystone + 4 file-disjoint smoke-test
+  verifiers in group 2; closes W9-CARRY-3 + W8-1-CARRY-1 fully
