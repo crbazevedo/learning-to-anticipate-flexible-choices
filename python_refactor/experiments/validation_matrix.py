@@ -56,58 +56,133 @@ import numpy as np
 # Scenario → learning config (per docs/EXPERIMENT-VALIDATION-PLAN.md §3)
 # --------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------
+# W15-3 (BACKLOG B2 + H5): SCENARIOS re-keyed to thesis factorial
+# {ASMS, SMS} × {mHDM, RDM} × K ∈ {0, 1, 2, 3} per §7.1.1 (p. 140) and
+# Fig 7.15 (p. 157). Anticipation horizon H = 2 FIXED per §7.2.3 Eq 7.16
+# (p. 146): "λ_{t+h} = (1/2)(λ_{t+h}^(H) + λ_{t+h}^(K)), for which the
+# anticipation horizon is H = 2 (one-step-ahead prediction)."
+#
+# K is the OAL historical-window size (drives λ^K — the squared-KF-
+# residual arm of Eq 7.16). For K = 0, the algorithm has no historical
+# window, all anticipation rates collapse to λ = 1, and the result is
+# equivalent to the myopic SMS baseline (thesis §7.1.1 verbatim).
+#
+# Legacy S0..S4 aliases preserved so W12/W13/W14 reports + the
+# differentiation regression gate at tests/test_scenario_differentiation.py
+# remain runnable. S0 ≡ SMS_RDM_K0 (myopic baseline); S2 ≡ ASMS_mHDM_K3
+# (paper headline configuration).
+
+_BASELINE_MYOPIC = {"enabled": False}
+
+
+def _asms_learning_config(K: int, use_multi_horizon: bool = True) -> dict:
+    """Construct the AnticipatoryLearning constructor kwargs for K > 0.
+    H = 2 fixed per thesis Eq 7.16."""
+    return {
+        "enabled": True,
+        "use_multi_horizon": use_multi_horizon,
+        "parameters": {
+            "window_size": K,        # K = OAL historical window
+            "max_horizon": 2,         # H = 2 (one-step-ahead) per thesis
+            "monte_carlo_samples": 500,
+        },
+    }
+
+
 SCENARIOS: dict[str, dict[str, Any]] = {
+    # ─── Thesis-faithful factorial (Fig 7.15 framing) ────────────────────
+    "SMS_RDM_K0": {
+        "name": "SMS/RDM K=0 — myopic baseline + random DM",
+        "learning": _BASELINE_MYOPIC,
+        "dm": "RDM",
+    },
+    "SMS_mHDM_K0": {
+        "name": "SMS/mHDM K=0 — myopic baseline + max-Hypv DM",
+        "learning": _BASELINE_MYOPIC,
+        "dm": "mHDM",
+    },
+    "ASMS_RDM_K1": {
+        "name": "ASMS/RDM K=1 — anticipatory + random DM, 1-period window",
+        "learning": _asms_learning_config(K=1),
+        "dm": "RDM",
+    },
+    "ASMS_RDM_K2": {
+        "name": "ASMS/RDM K=2",
+        "learning": _asms_learning_config(K=2),
+        "dm": "RDM",
+    },
+    "ASMS_RDM_K3": {
+        "name": "ASMS/RDM K=3",
+        "learning": _asms_learning_config(K=3),
+        "dm": "RDM",
+    },
+    "ASMS_mHDM_K1": {
+        "name": "ASMS/mHDM K=1 — anticipatory + max-Hypv DM, 1-period window",
+        "learning": _asms_learning_config(K=1),
+        "dm": "mHDM",
+    },
+    "ASMS_mHDM_K2": {
+        "name": "ASMS/mHDM K=2",
+        "learning": _asms_learning_config(K=2),
+        "dm": "mHDM",
+    },
+    "ASMS_mHDM_K3": {
+        "name": "ASMS/mHDM K=3 — PAPER HEADLINE configuration (Fig 7.15)",
+        "learning": _asms_learning_config(K=3),
+        "dm": "mHDM",
+    },
+    # ─── Legacy aliases for backward compat with W12-W14 reports ─────────
     "S0": {
-        "name": "Markowitz baseline",
-        "learning": {"enabled": False},
+        "name": "[legacy alias for SMS_RDM_K0] Markowitz baseline",
+        "learning": _BASELINE_MYOPIC,
+        "dm": "RDM",
     },
     "S1": {
-        "name": "TIP integrated (H=2)",
-        "learning": {
-            "enabled": True,
-            "use_tip": True,
-            "parameters": {"window_size": 20, "monte_carlo_samples": 500},
-        },
+        "name": "[legacy alias] TIP integrated (H=2 was misnomer; now K=1 ASMS/RDM)",
+        "learning": _asms_learning_config(K=1, use_multi_horizon=False),
+        "dm": "RDM",
     },
     "S2": {
-        "name": "TIP + Multi-horizon (H=3)",
-        "learning": {
-            "enabled": True,
-            "use_multi_horizon": True,
-            "parameters": {"max_horizon": 3, "monte_carlo_samples": 500},
-        },
+        "name": "[legacy alias for ASMS_mHDM_K3] PAPER HEADLINE",
+        "learning": _asms_learning_config(K=3),
+        "dm": "mHDM",
     },
     "S3": {
-        "name": "TIP + Multi-horizon (H=2 control)",
-        "learning": {
-            "enabled": True,
-            "use_multi_horizon": True,
-            "parameters": {"max_horizon": 2, "monte_carlo_samples": 500},
-        },
+        "name": "[legacy alias] horizon-ablation control (now ASMS_mHDM_K2)",
+        "learning": _asms_learning_config(K=2),
+        "dm": "mHDM",
     },
     "S4": {
-        "name": "TIP + Multi-horizon (H=3, explicit covariance)",
-        "learning": {
-            "enabled": True,
-            "use_multi_horizon": True,
-            "parameters": {"max_horizon": 3, "monte_carlo_samples": 1000},
-        },
+        "name": "[legacy alias] explicit-cov ablation (now ASMS_mHDM_K3 + 1000 MC)",
+        "learning": {**_asms_learning_config(K=3),
+                      "parameters": {**_asms_learning_config(K=3)["parameters"],
+                                       "monte_carlo_samples": 1000}},
+        "dm": "mHDM",
     },
 }
 
-# W10-1 (closes W8-1-CARRY-1 fully): paper-window now points at the
-# real 98 per-asset CSVs at legacy-cpp/executable/data/ftse-original/
-# table*.csv. W9-2 added glob-expansion to data_loader.load_asset_data,
-# so the loader handles this pattern correctly (verified by W9-2's
-# test_real_paper_window_glob_loads_many_assets → ≥ 90 assets).
-# Date range matches the IEEE 2015 paper §V-A: 2003-01 → 2012-11.
-# `extended` keeps the FTSE-updated single-CSV path for out-of-sample.
+# W15-3 (BACKLOG H3): paper-window date_range narrowed to thesis
+# §7.2.3 p. 145: "The real-world scenarios are composed of daily
+# adjusted close prices collected between 20/11/2006 – 31/12/2012".
+# Pre-W15-3 the range was 2003-01-01 → 2012-11-20 (a SUPERSET of the
+# thesis range; produced ~44 rolling periods instead of the thesis's
+# T=24 for FTSE).
+#
+# `legacy_paper_2003_2012` is kept as an alias for the pre-W15-3 range
+# to preserve backward compat with the W12/W13/W14 reports that used it.
 WINDOWS: dict[str, dict[str, str]] = {
     "paper": {
         "asset_files_glob": "../legacy-cpp/executable/data/ftse-original/table*.csv",
+        "date_start": "2006-11-20",
+        "date_end": "2012-12-31",
+        "notes": "Paper window (thesis §7.2.3 p. 145): FTSE daily 20/11/2006 – 31/12/2012, T=24 rolling 50-day-shift periods, d=87 (thesis) vs 98 (our archive — BACKLOG H4).",
+    },
+    "legacy_paper_2003_2012": {
+        "asset_files_glob": "../legacy-cpp/executable/data/ftse-original/table*.csv",
         "date_start": "2003-01-01",
         "date_end": "2012-11-20",
-        "notes": "Paper window (IEEE TCYB 2015 §V-A): 98 per-asset FTSE CSVs, ~2003-2012.",
+        "notes": "[legacy alias] pre-W15-3 paper range (superset of thesis; ~44 rolling periods). Kept for W12-W14 report reproducibility.",
     },
     "extended": {
         "asset_files_glob": "data/ftse-updated/FTSE_100_20121121_20241231.csv",
