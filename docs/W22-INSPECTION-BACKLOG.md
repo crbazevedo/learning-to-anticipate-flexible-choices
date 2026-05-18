@@ -1,0 +1,421 @@
+# W22 Inspection Backlog — controlled probes for ASMS module diagnosis
+
+*Generated 2026-05-18 after the NC1-NC6+EQ1 bundle empirically REGRESSED
+(PR #140 finding). Pivoting from smoke-variant chasing to controlled,
+first-principles module probes.*
+
+## First-principles framework
+
+For ASMS to beat SMS on **any** dataset, ALL of the following must hold:
+
+| Condition | What it means | Why required |
+|---|---|---|
+| C1 | KF predicts t+1 (ROI, risk) BETTER than naive persistence | Otherwise anticipation arm has no signal to leverage |
+| C2 | TIP varies meaningfully across periods (not stuck at 0.5) | TIP-saturated state mathematically kills λ^H |
+| C3 | λ (anticipation rate) varies per-portfolio per-period | Constant λ across population erases differentiation |
+| C4 | Anticipative distribution parameters are non-degenerate | Zero-eigenvalue cov → numerical pathology |
+| C5 | AMFC picks Pareto-front portfolios whose realized OOS Ŝ correlates with predicted E[HV] | Otherwise DM is uninformative |
+| C6 | Pareto front has enough portfolios for the DM to meaningfully choose | pop=20 may produce front of 1-3 → trivial choice |
+| C7 | Dirichlet predictor for portfolio composition is informative | Decision-space anticipation analog of C1 |
+
+**Currently we have ZERO evidence on any of C1-C7.** All prior W17-W22 work tested OUTPUTS (OOS Ŝ); none tested whether the INPUTS to those outputs are functioning as designed.
+
+This backlog rectifies that.
+
+---
+
+## Probe spec template
+
+Each probe follows this template:
+
+```
+### Probe X: <Name>
+
+**Motivation** (first-principles): why this matters
+**Code paths inspected**: file:line refs
+**Methodology**: inspection approach
+**Tools**: specific analytical / statistical / mathematical instruments
+**Hypothesis (H0/H1)**: falsifiable null + alternative
+**Tests**: statistical tests with significance levels
+**Metrics / KPIs**: what we measure
+**Visualizations**: specific plots
+**Decision criteria**: if confirmed/refuted, what we do
+**Wall-clock budget**: estimated time
+**Output artifact**: where the analysis lands
+```
+
+---
+
+## Probe A: KF predictive accuracy vs naive persistence
+
+**Motivation** (C1): the entire anticipation arm is predicated on KF being a better predictor than simply assuming `(ROI_{t+1}, risk_{t+1}) = (ROI_t, risk_t)`. If our constant-velocity KF model is wrong for FTSE 2006-2012 (which includes 2008 crash), KF predictions may be NOISIER than persistence — making anticipation a negative-information signal.
+
+**Code paths inspected**:
+- `python_refactor/src/algorithms/kalman_filter.py:73-141` (predict + update)
+- `python_refactor/src/algorithms/kalman_filter.py:144-178` (paper Eq 11 F matrix, constant-velocity)
+- `python_refactor/src/algorithms/sms_emoa.py:_evaluate_solution:345-360` (per-solution KF update site)
+
+**Methodology**:
+1. Add per-period logging to `_evaluate_solution`: capture `(period_t, portfolio_id, predicted_t+1_state, observed_t+1_state, persistence_state)` tuples.
+2. Run a single ASMS_mHDM_K3 scenario at n=3 seeds, dump JSON log of all tuples.
+3. Post-hoc: compute prediction-error MAE/RMSE for KF vs persistence on each (ROI, risk) component.
+4. Per-portfolio time-series: KF prediction trajectory vs actual observation trajectory.
+
+**Tools**:
+- pandas for tuple aggregation
+- scipy.stats.wilcoxon for paired non-parametric test
+- scipy.stats.ttest_rel for paired t-test (parametric counterpart)
+- numpy.corrcoef for prediction-actual correlation
+- matplotlib for trajectory + residual plots
+
+**Hypothesis**:
+- **H0**: `|KF_pred − actual|` ≥ `|persistence − actual|` (KF is NO BETTER than persistence)
+- **H1**: `|KF_pred − actual|` < `|persistence − actual|` (KF is BETTER)
+
+**Tests**:
+- Paired Wilcoxon signed-rank test (one-sided), separately for ROI and risk
+- Significance level: α = 0.05 (Bonferroni: α/2 = 0.025 per objective)
+- Effect size: relative reduction in MAE (KF MAE / persistence MAE)
+
+**Metrics / KPIs**:
+- MAE_ROI(KF), MAE_ROI(persistence), MAE_risk(KF), MAE_risk(persistence)
+- Bias_ROI(KF) = mean(KF_pred_ROI − actual_ROI); similar for risk (should be ≈ 0)
+- corr(KF_pred, actual) per component; should be > 0.5 for useful prediction
+- Wilcoxon p-values; effect-size ratios
+
+**Visualizations**:
+- 2×2 residual histogram: rows = ROI/risk, cols = KF/persistence
+- Time-series of KF prediction trajectory vs actual (per portfolio, sampled)
+- Scatter: KF_pred vs actual with 45° line (perfect prediction)
+
+**Decision criteria**:
+- If H0 rejected for both ROI AND risk → KF is functional → anticipation has signal → focus on downstream conditions C2-C7
+- If H0 NOT rejected for either → **KF model is wrong** → either replace constant-velocity F matrix or remove KF entirely → ASMS cannot beat SMS until KF is fixed
+- If H0 rejected for ROI only → KF helps for return prediction but not risk → consider asymmetric anticipation (only use ROI anticipation)
+- If KF has significant bias → systematic prediction error → likely from R matrix issue (NC2 already addressed but may need re-verification)
+
+**Wall-clock budget**: ~2h (45min logging instrumentation + 30min smoke run + 45min analysis)
+
+**Output artifact**: `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY.md` + raw JSON at `python_refactor/experiments/results/w22-probe-a-kf-accuracy/per_period_predictions.json`
+
+---
+
+## Probe B: TIP + λ + anticipation_rate signal distributions
+
+**Motivation** (C2 + C3): TIP saturation (Reading C from W18) was the original W17-5 saturation chain. If TIP is stuck at 0.5 most periods, λ^H collapses to 0. If λ_combined is uniform across portfolios, no differentiation.
+
+**Code paths inspected**:
+- `python_refactor/src/algorithms/temporal_incomparability_probability.py` (TIP MC + binary entropy)
+- `python_refactor/src/algorithms/anticipatory_learning.py:1090` (anticipation_rate = 1 − nd_probability)
+- `python_refactor/src/algorithms/multi_horizon_anticipatory.py:165-244` (λ_combined per Eq 7.16)
+
+**Methodology**:
+1. Instrument logging in `compute_anticipatory_learning_rate` to dump `(period, portfolio_id, TIP, λ_h, λ_k, λ_combined, anticipation_rate)`.
+2. Run ASMS_mHDM_K3 at n=3 seeds.
+3. Post-hoc histograms per period, per-population.
+
+**Tools**:
+- scipy.stats.entropy (Shannon) for distribution entropy
+- scipy.stats.kstest for distribution comparison (uniform / Beta hypothesis)
+- numpy.histogram + matplotlib for KDE plots
+- Cluster-analysis: scipy.cluster.hierarchy for bimodality detection
+
+**Hypothesis**:
+- **H0 (TIP saturation)**: TIP distribution across periods × portfolios has > 50% of mass within (0.45, 0.55) → TIP is functionally constant
+- **H1 (TIP varies)**: TIP distribution has Shannon entropy > 1.5 nats (substantial spread)
+
+For λ:
+- **H0**: λ_combined coefficient of variation < 0.2 across portfolios within a period → no per-portfolio differentiation
+- **H1**: CoV > 0.2 → meaningful per-portfolio signal
+
+**Tests**:
+- Kolmogorov-Smirnov test of TIP histogram vs Uniform[0,1]
+- Coefficient of variation of λ within each period
+- Shannon entropy of TIP marginal
+
+**Metrics / KPIs**:
+- Fraction of TIP samples in (0.45, 0.55) — target: < 30% for non-saturated
+- Shannon entropy of TIP marginal (bits) — target: ≥ 1.5
+- λ_combined CoV per period — target: ≥ 0.2 (meaningful spread)
+- λ_combined min, median, max per period
+
+**Visualizations**:
+- KDE of TIP per period (small multiples)
+- Stacked violin: λ_h vs λ_k vs λ_combined across periods
+- Heatmap of anticipation_rate (period × portfolio_id)
+
+**Decision criteria**:
+- If TIP is saturated (H1 rejected) → Reading C confirmed at code level → need different uncertainty measure (e.g., raw variance ratio, not symmetric TIP)
+- If λ has low CoV → anticipation is uniform → selection sees no signal → fix the per-portfolio differentiation (probably λ^K min-max per Eq 6.9, the EQ2 finding)
+- If both signals are healthy → bottleneck is downstream (probes D/E/C)
+
+**Wall-clock budget**: ~1.5h
+
+**Output artifact**: `docs/W22-PROBE-B-SIGNAL-DISTRIBUTIONS.md`
+
+---
+
+## Probe C: AMFC vs alternative DM sensitivity analysis
+
+**Motivation** (C5): the DM (decision maker) picks ONE portfolio from the Pareto front. AMFC = argmax E[single-point HV]. If this formula picks portfolios that don't actually maximize realized OOS Ŝ, the algorithm is producing good fronts but the DM is throwing them away.
+
+**Code paths inspected**:
+- `python_refactor/experiments/walk_forward.py:226-228` (AMFC selection)
+- `python_refactor/experiments/oos_evaluator.py:_select_amfc_index`
+- `python_refactor/experiments/oos_evaluator.py:compute_per_portfolio_efhv`
+
+**Methodology**:
+1. Modify `walk_forward.run_walk_forward` to log the FULL Pareto front + AMFC index per period.
+2. Re-evaluate (offline) each period's Pareto front under multiple DMs:
+   - AMFC (current): argmax E[single-point HV via MC]
+   - AMFC-CF (closed-form): argmax E[single-point HV via Option A closed-form]
+   - HighROI: argmax mean predicted ROI
+   - LowRisk: argmin mean predicted risk
+   - Sharpe: argmax (ROI − R1) / sqrt(risk − R2 + ε)
+   - Median: 50th percentile by single-point HV
+   - First: weights[0] (the W17-4 fallback)
+   - Random: 100 random picks averaged
+   - **Oracle**: argmax of *actual realized* HV (uses post-hoc OOS observations; cheating, upper bound)
+
+**Tools**:
+- pandas for per-period DataFrame of front + DM choices + realized Ŝ
+- numpy for vectorized DM scoring
+- scipy.stats.kendalltau / spearmanr for DM-vs-realized rank correlation
+- matplotlib for OOS Ŝ comparison across DMs
+
+**Hypothesis**:
+- **H0**: AMFC OOS Ŝ ≤ Random OOS Ŝ (AMFC is no better than random) ← worst case
+- **H1**: AMFC > Random; comparable to Oracle within 20%
+- **H2**: AMFC ≥ all alternative single-criterion DMs (current is justified)
+
+**Tests**:
+- Paired Wilcoxon: AMFC OOS Ŝ vs each alternative
+- Rank correlation: AMFC's `per_portfolio_efhv` ranking vs realized OOS Ŝ ranking per period (Spearman)
+- Effect size: (AMFC mean Ŝ − Oracle mean Ŝ) / Oracle mean Ŝ (gap-to-perfect)
+
+**Metrics / KPIs**:
+- Per-period: AMFC's Ŝ, alternative DMs' Ŝ, Oracle's Ŝ
+- Aggregate: mean OOS Ŝ per DM
+- Rank correlation: AMFC's E[HV] ordering vs actual Ŝ ordering (Spearman ρ)
+- Gap-to-Oracle: (Oracle − AMFC) / Oracle
+
+**Visualizations**:
+- Bar chart: mean OOS Ŝ per DM (with confidence intervals)
+- Heatmap per period × DM showing rank within front
+- Scatter: AMFC's E[HV] vs realized OOS Ŝ (per portfolio); should be along diagonal if AMFC is informative
+
+**Decision criteria**:
+- If AMFC ≈ Random → DM is uninformative; **replace DM** (probably HighROI or Sharpe)
+- If Oracle >> AMFC + alternatives → DM is hard problem; consider ensemble (median of DMs)
+- If AMFC > alternatives → DM is justified; problem is upstream
+
+**Wall-clock budget**: ~2h (more analysis-heavy)
+
+**Output artifact**: `docs/W22-PROBE-C-AMFC-VS-ALTERNATIVES.md`
+
+---
+
+## Probe D: Pareto front diversity per period
+
+**Motivation** (C6): SMS-EMOA with pop=20, gens=30, cardinality 5-15 may produce a Pareto front of only 1-3 portfolios. If the DM has 1 portfolio to "choose" from, all DMs reduce to the same trivial pick → DM analysis (Probe C) becomes meaningless.
+
+**Code paths inspected**:
+- `python_refactor/src/algorithms/sms_emoa.py:_update_pareto_front`
+- `python_refactor/src/algorithms/sms_emoa.py:_fast_non_dominated_sort`
+
+**Methodology**:
+1. Log per-period: front size, Pareto-rank histogram, distinct-portfolio count, ROI/risk extrema.
+2. Run ASMS_mHDM_K3 at n=3 seeds.
+
+**Tools**:
+- pandas for per-period DataFrame
+- numpy.unique for distinct counting
+- matplotlib for distribution plots
+
+**Hypothesis**:
+- **H0**: typical front size ≥ 5 (enough choices for DM)
+- **H1**: typical front size < 5 (front is sparse)
+
+**Metrics / KPIs**:
+- Median front size across periods
+- Pareto-rank distribution (1st rank only? multiple ranks?)
+- ROI range of front (max − min) per period
+- Risk range of front per period
+
+**Visualizations**:
+- Time-series of front size per period (per seed)
+- Histogram of front sizes pooled across periods
+- ROI vs risk scatter of all portfolios per period (color = rank)
+
+**Decision criteria**:
+- If front size < 5 typically → **increase pop/gens** (the H2 hypothesis from the algo-param agent: thesis pop=200, gens=500)
+- If front size > 10 → DM has enough choices; problem isn't this
+- If front has all rank-1 (no dominated portfolios visible) → NDS may be too aggressive
+
+**Wall-clock budget**: ~1h
+
+**Output artifact**: `docs/W22-PROBE-D-PARETO-FRONT-DIVERSITY.md`
+
+---
+
+## Probe E: Anticipative distribution parameter sanity
+
+**Motivation** (C4): the anticipative distribution combines current state + KF prediction. If parameters degenerate (zero eigenvalues in cov, runaway mean drift), the anticipation arm is numerically broken regardless of inputs.
+
+**Code paths inspected**:
+- `python_refactor/src/algorithms/anticipatory_learning.py:_create_anticipative_distribution`
+- `python_refactor/src/algorithms/anticipatory_learning.py:_update_solution_state_anticipative:1374-1405`
+
+**Methodology**:
+1. Log per-period × per-portfolio: `(anticipative_mean, anticipative_covariance, observed_state_mean, observed_state_cov, KF predicted mean/cov)`.
+2. Compute eigenvalue spectra of anticipative_covariance.
+3. Detect degeneracy: near-zero eigenvalues, condition number blow-up.
+
+**Tools**:
+- numpy.linalg.eigvalsh for symmetric eigenvalue computation
+- numpy.linalg.cond for condition numbers
+- scipy.stats.shapiro / normaltest for Gaussianity assumption check
+
+**Hypothesis**:
+- **H0**: anticipative_covariance is positive-definite with condition number < 1e6 across all periods × portfolios
+- **H1**: at least 5% of (period, portfolio) instances have degenerate covariance
+
+**Metrics / KPIs**:
+- Min eigenvalue distribution
+- Condition number distribution
+- Fraction of degenerate instances
+- Trace of anticipative_covariance over time (should not blow up)
+
+**Visualizations**:
+- Heatmap of min(eigenvalue) per (period, portfolio)
+- Time-series of condition number per portfolio
+- Histogram of anticipative_mean drift (delta from observed_state_mean)
+
+**Decision criteria**:
+- If degeneracy > 5% → fix the source (likely related to KF R-clobbering NC2, or numerical pathology in StochasticParams)
+- If condition numbers stable < 1e3 → distribution is healthy
+- If mean drift large → KF state-evolution unstable → revisit constant-velocity F matrix
+
+**Wall-clock budget**: ~1.5h
+
+**Output artifact**: `docs/W22-PROBE-E-ANTICIPATIVE-DISTRIBUTION-SANITY.md`
+
+---
+
+## Probe F: Dirichlet filtering + prediction informativeness
+
+**Motivation** (C7): the Dirichlet predictor tracks portfolio composition (weights as Dirichlet-distributed parameters) as a decision-space analog to the KF objective-space anticipation. If the Dirichlet predictions are uninformative — i.e., the predicted weights don't correlate with the t+1 actually-realized weights — then anticipation in decision space has no signal.
+
+**Code paths inspected**:
+- `python_refactor/src/algorithms/anticipatory_learning.py:886` (Dirichlet predictor call site)
+- `python_refactor/src/data/dirichlet_predictor.py` or equivalent (Dirichlet update/predict module)
+- `legacy-cpp-v2/source/dirichlet.cpp` (paper-companion reference)
+
+**Methodology**:
+1. Log per-period × per-portfolio: `(dirichlet_params_t, predicted_weights_t+1, actual_weights_t+1, persistence_weights = current_weights)`.
+2. Compute weight-prediction error metrics:
+   - L1 distance: sum |predicted − actual|
+   - KL divergence: D_KL(actual || predicted) if both are valid Dirichlet
+   - Effective sample size ratio: ESS(predicted) / ESS(actual)
+3. Compare to persistence baseline.
+
+**Tools**:
+- scipy.special.gammaln + Dirichlet PDF for KL computation
+- scipy.stats.dirichlet for distribution sampling/fitting
+- numpy.linalg.norm for L1/L2 distances
+- matplotlib for trajectory + error plots
+
+**Hypothesis**:
+- **H0**: Dirichlet predicted weights ≈ persistence weights (no information added)
+- **H1**: Dirichlet predicted weights are closer to actual t+1 weights than persistence
+
+**Tests**:
+- Paired Wilcoxon: L1(Dirichlet, actual) vs L1(persistence, actual)
+- KL divergence comparison
+- Per-asset bias: mean(predicted_i − actual_i) per asset
+
+**Metrics / KPIs**:
+- Mean L1 distance Dirichlet vs persistence
+- KL divergence per period
+- Per-asset prediction bias
+- Cardinality preservation: does Dirichlet predict 5-15 active weights?
+
+**Visualizations**:
+- Per-asset prediction error histograms
+- Time-series of L1 distance per portfolio
+- Stacked area: predicted weight composition vs actual over time
+- KL divergence per period
+
+**Decision criteria**:
+- If Dirichlet ≈ persistence → Dirichlet adds no info → simplify (drop Dirichlet, use persistence)
+- If Dirichlet significantly better → decision-space anticipation has signal → focus on integrating it with objective-space anticipation
+- If Dirichlet has high bias (e.g., always predicts equal weights) → predictor's prior is too strong → tune alpha-scaling
+
+**Wall-clock budget**: ~2h
+
+**Output artifact**: `docs/W22-PROBE-F-DIRICHLET-INFORMATIVENESS.md`
+
+---
+
+## Sequencing + budget summary
+
+| Probe | Module | Budget | Decision impact |
+|---|---|---|---|
+| **A** | KF predictive accuracy | ~2h | **First**: if KF is broken, everything else is moot |
+| **B** | TIP + λ distributions | ~1.5h | Second: if signals are dead, anticipation is mathematically inactive |
+| **D** | Pareto front diversity | ~1h | Cheap; rules out trivial DM situation |
+| **C** | AMFC vs alt DMs | ~2h | Higher value once D rules out trivial-front |
+| **E** | Anticipative distribution sanity | ~1.5h | After C: if AMFC is OK, dist may be the issue |
+| **F** | Dirichlet informativeness | ~2h | Decision-space sibling of A |
+
+**Total: ~10h sequenced**, but A+B+D can run in parallel (different logging surfaces) → ~4-5h wall-clock for the first triage.
+
+## Mitigation decision tree (after all probes)
+
+```
+                ┌─ if KF broken → fix F matrix or remove KF
+Probe A ─┬──────┤
+         │      └─ if KF OK → continue
+         │
+Probe B ─┼─ if TIP saturated → replace uncertainty measure
+         │      └─ if λ uniform → fix per-portfolio differentiation (EQ2)
+         │
+Probe D ─┼─ if front sparse → increase pop/gens (H2)
+         │      └─ if front diverse → continue
+         │
+Probe C ─┼─ if AMFC ≈ random → replace DM (HighROI? Sharpe?)
+         │      └─ if AMFC > alt → continue
+         │
+Probe E ─┼─ if dist degenerate → fix numerical pathology
+         │      └─ if dist healthy → continue
+         │
+Probe F ─┴─ if Dirichlet uninformative → simplify or fix predictor
+                └─ if informative → confirmed signal in decision space
+```
+
+## Discipline (per W22 lessons)
+
+- All probes are READ-ONLY logging additions; no algorithm changes
+- All hypotheses are FALSIFIABLE with pre-specified thresholds
+- All tests are STANDARD (Wilcoxon, KS, Shapiro, scipy) — no custom statistical claims
+- All probes have a CLEAR mitigation criterion (if X then Y)
+- No bundled changes; one probe → one diagnosis → one targeted fix
+- If a probe is INCONCLUSIVE at n=3, escalate to n=10 before drawing conclusions
+
+## Update protocol
+
+This document is updated whenever:
+- A probe completes (move 🔴 → 🟢 confirmed / ⚫ refuted)
+- A new module-level hypothesis is raised
+- A mitigation lands and changes the empirical picture
+
+## Current state
+
+| Probe | Status | Output |
+|---|---|---|
+| A | 🟡 IN PROGRESS (implementing logging) | TBD |
+| B | 🔴 PENDING | TBD |
+| C | 🔴 PENDING | TBD |
+| D | 🔴 PENDING | TBD |
+| E | 🔴 PENDING | TBD |
+| F | 🔴 PENDING | TBD |
