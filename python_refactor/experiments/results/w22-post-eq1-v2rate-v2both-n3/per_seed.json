@@ -1,0 +1,110 @@
+[
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 3,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00037612097055236403,
+    "grand_std": 0.000419521269904127,
+    "wall_clock_s": 4.618977069854736
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003767763079982587,
+    "grand_std": 0.0004483210878335512,
+    "wall_clock_s": 4.944024085998535
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003840545806536777,
+    "grand_std": 0.0005104694825331942,
+    "wall_clock_s": 5.173119068145752
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2rate",
+    "seed": 3,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.000360300796426291,
+    "grand_std": 0.00035531948225641817,
+    "wall_clock_s": 1348.9670102596283
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2rate",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00035257553159820376,
+    "grand_std": 0.00038209305601257724,
+    "wall_clock_s": 1360.6363859176636
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2rate",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003364056048606909,
+    "grand_std": 0.0003789101827055428,
+    "wall_clock_s": 1378.3929572105408
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003404153096915931,
+    "grand_std": 0.00036346036087601453,
+    "wall_clock_s": 1280.3422968387604
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003340657994667375,
+    "grand_std": 0.0003784427195085358,
+    "wall_clock_s": 1272.1488647460938
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 3,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.000345243075094579,
+    "grand_std": 0.0003502663801456437,
+    "wall_clock_s": 1261.250188112259
+  },
+  {
+    "scenario": "ASMS_mHDM_K2_v2both",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00033174036579242485,
+    "grand_std": 0.0003705790237964061,
+    "wall_clock_s": 3568.1710720062256
+  },
+  {
+    "scenario": "ASMS_mHDM_K2_v2both",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00035388115437490637,
+    "grand_std": 0.000384316160363038,
+    "wall_clock_s": 3573.1733870506287
+  },
+  {
+    "scenario": "ASMS_mHDM_K2_v2both",
+    "seed": 3,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003548286056244961,
+    "grand_std": 0.0003610443521159993,
+    "wall_clock_s": 3565.665160894394
+  }
+]
