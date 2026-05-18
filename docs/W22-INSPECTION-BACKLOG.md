@@ -440,10 +440,51 @@ Offspring (generated via `Solution.__init__` → `Portfolio.initialize_kalman_fi
 
 **NC8 candidates (deeper structural diagnosis)**:
 - **NC8a** — KF measurement = KF init state by construction (innovation always 0 at first update). Init `x = [portfolio.ROI, portfolio.risk, 0, 0]`; first measurement `Z = [portfolio.ROI, portfolio.risk]`; `Z == x_init` → `y = 0` → no learning.
-- **NC8b** — Offspring never receive `kalman_update` during evolution (`_evaluate_solution` only called from `_initialize_population`); also `compute_efficiency` is called on RANDOM weights at Solution.__init__ before crossover overwrites the weights → ROI/risk perpetually stale on offspring.
+- **NC8b** — Offspring never receive `kalman_update` during evolution (`_evaluate_solution` only called from `_initialize_population`); also `compute_efficiency` is called on RANDOM weights at Solution.__init__ before crossover overwrites the weights → ROI/risk perpetually stale on offspring. **SHIPPED (commit 27cbcd2)**: NC8b-minimal added `_finalize_offspring_objectives` helper called from 4 thesis/v2 operators.
 - **NC8c** — KF state does not persist across walk-forward periods; born and dies within each period; intra-period evolution noise is the only signal the KF could fit, not actual t→t+1 dynamics.
 
-**Mitigation path for next session** (NOT bundled per controlled-probe discipline): smoke NC8a (1-line change: init KF with historical-mean state). If gap closes ≥ 50%, escalate to NC8b/NC8c. If even NC8a+b+c can't close it, F-matrix replacement is required (random walk / AR(1) / regime-switching).
+**NC12 SMOKING-GUN (SHIPPED, commit 2154270)**:
+`AnticipativeDistribution.__init__` was setting
+`anticipative_covariance = current_covariance + predicted_covariance` —
+a naïve SUM violating paper Eq (15) which specifies weighted-sum-of-squared-weights
+`Σ = w_c² · Σ_current + w_p² · Σ_predicted`. The SUM caused
+`_update_solution_state_anticipative` (line 1412) to blend kalman_state.P
+toward `≥ 2× current_P` each generation, growing P by factor (1+α) per gen.
+After ~30 generations: P[0,0] = 542 (from 0.0091 baseline, ~60,000× growth).
+With P[:2,:2] large, TIP MC sampling collapses to noise → TIP ≈ 0.5 →
+λ uniform → no per-portfolio differentiation. This is the smoking-gun
+mechanism for Probe B's verdict.
+
+Note: NC12 affects the SINGLE-HORIZON path (`learn_single_solution`).
+The MULTI-HORIZON path (`learn_population`) already correctly uses Eq (15)
+formula (`combined_cov = w_0² · current + Σ w_h² · predicted_h` at
+multi_horizon_anticipatory.py:666-668). So NC12 fix may not fully resolve
+TIP saturation for `ASMS_mHDM_K3*` scenarios — those use multi-horizon.
+
+**NC13 candidate (DEFERRED, hypothesis only)**:
+N-step predictor (`n_step_prediction.py:42-55`) compounds covariance via
+`predicted_cov = F @ current_cov @ F.T` without process-noise cap or
+clamping. With NC7's high velocity prior (P[2,2]=1000), after each step
+the position component gains the full velocity uncertainty:
+`P_next[0,0] = P[0,0] + 2·P[0,2] + P[2,2] ≈ 1000.1`. For h=2:
+`P_step2[0,0] ≈ 2000.2`. With h=3: `~3000`.
+TIP MC sampling uses `predicted_cov` directly — samples with std `√3000 ≈ 55`
+around means ≈ 0.001 are essentially independent random noise → mutual
+non-dominance ≈ 0.5 → TIP saturates independently of NC12 fix in
+multi-horizon path. Predicted mechanism for residual TIP saturation if
+post-NC12 Probe B re-run still shows ≈ 0.5 saturation.
+
+Mitigation candidates if NC13 confirmed:
+- NC13a: clamp `predicted_cov` to bounded value (e.g., `min(F @ cov @ F^T, max_cov_clamp)`)
+- NC13b: add process-noise Q < 1 with damping per Q paper convention
+- NC13c: use FRESH measurement-noise R for TIP (not the propagated KF P)
+
+**Mitigation path priorities**:
+1. NC8b shipped (commit 27cbcd2) — being measured
+2. NC12 shipped (commit 2154270) — being measured
+3. If post-NC12 TIP still saturated → NC13 (likely the cause for multi-horizon)
+4. If KF predictions still = persistence → NC8a, NC8b-extended (offspring `kalman_update`), or NC8c (cross-period persistence)
+5. If even all NC8/NC12/NC13 insufficient → F-matrix replacement (random walk / AR(1) / regime-switching)
 
 ### Probe A summary (2026-05-18)
 
