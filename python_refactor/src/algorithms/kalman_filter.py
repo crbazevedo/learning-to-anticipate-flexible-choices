@@ -56,7 +56,30 @@ class KalmanParams:
     P_next: Optional[np.ndarray] = None # Next error covariance matrix
     
     def __post_init__(self):
-        """Initialize with default values if not provided."""
+        """Initialize with default values if not provided.
+
+        W22-NC7 P-INIT HARMONIZATION (2026-05-18):
+        Pre-W22-NC7, this default set P = eye(4)*0.1 — i.e. velocity-component
+        prior uncertainty = 0.1. But sms_emoa._initialize_kalman_state (initial
+        population path) set P[2,2]=P[3,3]=1000.0 — velocity prior uncertainty
+        ~4 orders of magnitude larger. Offspring (going through Solution.__init__
+        → Portfolio.initialize_kalman_filter → create_kalman_params → here)
+        inherited the small velocity uncertainty, so the Kalman gain for the
+        velocity component stayed near zero during updates: the KF could
+        observably NOT learn velocity, and predictions degenerated to
+        persistence (current observation).
+
+        W22 Probe A receipt: KF predictions were bit-identical to persistence
+        baseline across 583 records (Wilcoxon p=0.28 ROI / p=1.0 risk), with
+        logged kf_P_diag = [0.009, 0.009, 0.1, 0.1] confirming velocity
+        components stuck at the 0.1 prior. See
+        docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY.md for full evidence.
+
+        Fix: harmonize to the paper-canonical high-velocity-uncertainty prior
+        used by sms_emoa._initialize_kalman_state. Latent components (velocity)
+        get a large prior so the Kalman gain can move them quickly during
+        update; observed components (ROI, risk) keep the small prior 0.1.
+        """
         if self.x is None:
             # Paper Eq (11) ordering: [ROI, risk, ROI_velocity, risk_velocity]
             self.x = np.zeros(4)
@@ -65,9 +88,11 @@ class KalmanParams:
         if self.u is None:
             self.u = np.zeros(4)
         if self.P is None:
-            self.P = np.eye(4) * 0.1  # Initial covariance
+            # W22-NC7: diag([0.1, 0.1, 1000, 1000]) — small prior on observed
+            # ROI/risk, large prior on latent ROI_velocity/risk_velocity.
+            self.P = np.diag([0.1, 0.1, 1000.0, 1000.0])
         if self.P_next is None:
-            self.P_next = np.eye(4) * 0.1
+            self.P_next = np.diag([0.1, 0.1, 1000.0, 1000.0])
 
 
 def kalman_prediction(params: KalmanParams) -> None:
@@ -213,11 +238,17 @@ def create_kalman_params(initial_roi: float = 0.0, initial_risk: float = 0.0) ->
     
     # Initialize control input (zero for now)
     params.u = np.zeros(4)
-    
+
     # Initialize covariance matrices
-    params.P = np.eye(4) * 0.1
+    # W22-NC7 P-INIT HARMONIZATION (2026-05-18): see KalmanParams.__post_init__
+    # for full receipt. Pre-W22-NC7 this set P = eye(4)*0.1, inconsistent with
+    # sms_emoa._initialize_kalman_state's diag([0.1, 0.1, 1000, 1000]). Probe A
+    # smoking-gun evidence: offspring-path KFs had velocity-component prior of
+    # 0.1, predictions degenerated to persistence. Harmonize to high
+    # velocity-component prior matching the paper-canonical init.
+    params.P = np.diag([0.1, 0.1, 1000.0, 1000.0])
     params.P_next = params.P.copy()
-    
+
     return params
 
 

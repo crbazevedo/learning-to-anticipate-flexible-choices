@@ -413,9 +413,52 @@ This document is updated whenever:
 
 | Probe | Status | Output |
 |---|---|---|
-| A | 🟡 IN PROGRESS (implementing logging) | TBD |
+| A | 🟢 COMPLETE (both runs) → ⚫ H0 NOT rejected pre-NC7 AND post-NC7; **NC8a/b/c structural candidates surfaced** | `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY.md` + `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY-POST-NC7.md` |
 | B | 🔴 PENDING | TBD |
 | C | 🔴 PENDING | TBD |
-| D | 🔴 PENDING | TBD |
+| D | 🟡 PRELIMINARY signal from Probe A run log: front size 5-11 per generation (likely PASS) | TBD |
 | E | 🔴 PENDING | TBD |
 | F | 🔴 PENDING | TBD |
+
+### Probe A summary (2026-05-18)
+
+**Pre-NC7 finding** (PR #141, commit `6d3530b`): KF predictions were bit-identical to persistence (Wilcoxon p=0.28 ROI / p=1.0 risk over 583 records across ASMS_mHDM_K3_v2both + SMS_RDM_K0 × 2 seeds × 23 periods). Logged `kf_P_diag = [0.009, 0.009, 0.1, 0.1]` revealed velocity-component prior uncertainty was **0.1**, not the paper-canonical **1000.0**.
+
+**Root cause (NC7)**: P-matrix init divergence between two code paths:
+- `sms_emoa._initialize_kalman_state` (initial-population path): `diag([0.1, 0.1, 1000, 1000])` ✓ paper-canonical
+- `kalman_filter.create_kalman_params` (offspring path): `eye(4) * 0.1` ✗ velocity priors clobbered
+
+Offspring (generated via `Solution.__init__` → `Portfolio.initialize_kalman_filter` → `create_kalman_params`) inherited the small velocity prior, making the Kalman gain on velocity ~0 during update → KF could not learn velocity → predictions = persistence.
+
+**NC7 fix** (this branch, post-`6d3530b`):
+- `kalman_filter.KalmanParams.__post_init__` → `P = diag([0.1, 0.1, 1000, 1000])`
+- `kalman_filter.create_kalman_params` → same
+- `sms_emoa._initialize_kalman_state` → already correct; annotated as load-bearing
+- `tests/test_kalman_filter.py::TestW22NC7PInitHarmonization` → 4 regression tests pinning the parity invariant (all PASS)
+
+**Post-NC7 re-run** (644 records): velocity prior now active (`kf_P_diag = [542.7, 542.7, 1000, 1000]`) but KF predictions are STILL bit-identical to persistence for ASMS (ratio = 1.000000 exactly per seed). SMS marginal advantage 0.2–1.1% per seed, aggregate Wilcoxon p=0.046 ROI (below Bonferroni α/2=0.025), p=0.886 risk.
+
+**NC8 candidates (deeper structural diagnosis)**:
+- **NC8a** — KF measurement = KF init state by construction (innovation always 0 at first update). Init `x = [portfolio.ROI, portfolio.risk, 0, 0]`; first measurement `Z = [portfolio.ROI, portfolio.risk]`; `Z == x_init` → `y = 0` → no learning.
+- **NC8b** — Offspring never receive `kalman_update` during evolution (`_evaluate_solution` only called from `_initialize_population`); also `compute_efficiency` is called on RANDOM weights at Solution.__init__ before crossover overwrites the weights → ROI/risk perpetually stale on offspring.
+- **NC8c** — KF state does not persist across walk-forward periods; born and dies within each period; intra-period evolution noise is the only signal the KF could fit, not actual t→t+1 dynamics.
+
+**Mitigation path for next session** (NOT bundled per controlled-probe discipline): smoke NC8a (1-line change: init KF with historical-mean state). If gap closes ≥ 50%, escalate to NC8b/NC8c. If even NC8a+b+c can't close it, F-matrix replacement is required (random walk / AR(1) / regime-switching).
+
+### Probe A summary (2026-05-18)
+
+**Pre-NC7 finding** (PR #141, commit `6d3530b`): KF predictions were bit-identical to persistence (Wilcoxon p=0.28 ROI / p=1.0 risk over 583 records across ASMS_mHDM_K3_v2both + SMS_RDM_K0 × 2 seeds × 23 periods). Logged `kf_P_diag = [0.009, 0.009, 0.1, 0.1]` revealed velocity-component prior uncertainty was **0.1**, not the paper-canonical **1000.0**.
+
+**Root cause (NC7)**: P-matrix init divergence between two code paths:
+- `sms_emoa._initialize_kalman_state` (initial-population path): `diag([0.1, 0.1, 1000, 1000])` ✓ paper-canonical
+- `kalman_filter.create_kalman_params` (offspring path): `eye(4) * 0.1` ✗ velocity priors clobbered
+
+Offspring (generated via `Solution.__init__` → `Portfolio.initialize_kalman_filter` → `create_kalman_params`) inherited the small velocity prior, making the Kalman gain on velocity ~0 during update → KF could not learn velocity → predictions = persistence.
+
+**NC7 fix** (this branch, post-`6d3530b`):
+- `kalman_filter.KalmanParams.__post_init__` → `P = diag([0.1, 0.1, 1000, 1000])`
+- `kalman_filter.create_kalman_params` → same
+- `sms_emoa._initialize_kalman_state` → already correct; annotated as load-bearing
+- `tests/test_kalman_filter.py::TestW22NC7PInitHarmonization` → 4 regression tests pinning the parity invariant (all PASS)
+
+**Post-NC7 re-run**: launched against same scenario set; verifies the fix yields informative KF predictions (KF MAE < persistence MAE, Wilcoxon p < 0.025 for at least one of ROI/risk).

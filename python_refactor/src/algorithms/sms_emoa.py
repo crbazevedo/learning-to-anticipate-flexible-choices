@@ -290,20 +290,32 @@ class SMSEMOA:
             self.function_evaluations += 1
     
     def _initialize_kalman_state(self, solution: Solution, data: Dict[str, Any]):
-        """Initialize Kalman filter state for solution."""
+        """Initialize Kalman filter state for solution.
+
+        W22-NC7 NOTE (2026-05-18): post-NC7-fix, the P matrix here is now
+        IDENTICAL to what create_kalman_params produces (both produce
+        diag([0.1, 0.1, 1000, 1000])). This method is retained because it
+        re-anchors the state vector x to the actual portfolio (ROI, risk)
+        instead of (initial_roi=0, initial_risk=0). The offspring path
+        (Solution.__init__ → Portfolio.initialize_kalman_filter) DOES pass
+        portfolio.ROI/risk to create_kalman_params, so post-NC7 the two
+        paths produce identical KalmanParams modulo numerical jitter.
+
+        Pre-W22-NC7 the P matrix here diverged from create_kalman_params
+        (1000 vs 0.1 on velocity components); Probe A diagnosed the
+        offspring-path P as the smoking gun for KF==persistence.
+        """
         # Initialize with current portfolio state
         kalman_state = solution.P.kalman_state
-        
+
         # State vector: [ROI, risk, ROI_velocity, risk_velocity]
         kalman_state.x = np.array([solution.P.ROI, solution.P.risk, 0.0, 0.0])
-        
-        # Initial covariance matrix
-        kalman_state.P = np.array([
-            [0.1, 0.0, 0.0, 0.0],
-            [0.0, 0.1, 0.0, 0.0],
-            [0.0, 0.0, 1000.0, 0.0],
-            [0.0, 0.0, 0.0, 1000.0]
-        ])
+
+        # Initial covariance matrix.
+        # W22-NC7 HARMONIZED: this value is now equal to what
+        # create_kalman_params produces — both paths share the same
+        # paper-canonical high-velocity-uncertainty prior.
+        kalman_state.P = np.diag([0.1, 0.1, 1000.0, 1000.0])
         
         # State transition matrix (constant velocity model)
         kalman_state.F = np.array([
