@@ -142,6 +142,10 @@ def _train_and_extract_pareto(scenario: str, seed: int,
     results = mgr._run_algorithm(config, data)
     pareto = results.get("pareto_front", [])
     weights: list[np.ndarray] = []
+    # W22 Probe A: optionally also extract per-portfolio KF state +
+    # current-period (ROI, risk) for the persistence baseline.
+    from src.diagnostics import probe_a_kf_prediction_log as _probe_a
+    probe_a_records: list[dict] = []
     for sol in pareto:
         w = getattr(sol.P, "investment", None)
         if w is None:
@@ -149,7 +153,20 @@ def _train_and_extract_pareto(scenario: str, seed: int,
         w_arr = np.asarray(w, dtype=float)
         if w_arr.shape == (n_assets,):
             weights.append(w_arr)
-    return weights, n_assets
+            if _probe_a.is_enabled():
+                kf = getattr(sol.P, "kalman_state", None)
+                if kf is not None:
+                    # x_next post-final-predict = KF's t+1 prediction
+                    # ROI is x[0], risk is x[1] per paper Eq 11
+                    probe_a_records.append({
+                        "weights": w_arr.copy(),
+                        "kf_predicted_ROI_t_plus_1": float(kf.x_next[0]),
+                        "kf_predicted_risk_t_plus_1": float(kf.x_next[1]),
+                        "persistence_ROI_t": float(sol.P.ROI),
+                        "persistence_risk_t": float(sol.P.risk),
+                        "kf_P_diag": [float(kf.P[i, i]) for i in range(kf.P.shape[0])],
+                    })
+    return weights, n_assets, probe_a_records
 
 
 def run_walk_forward(scenario: str,
@@ -190,7 +207,7 @@ def run_walk_forward(scenario: str,
         train = full_returns.iloc[p["train_start"]:p["train_end"]]
         oos = full_returns.iloc[p["oos_start"]:p["oos_end"]]
         try:
-            weights, n_assets = _train_and_extract_pareto(
+            weights, n_assets, probe_a_records = _train_and_extract_pareto(
                 scenario, seed, train,
                 previous_weights=previous_weights,
                 lambda_trace_csv_path=lambda_trace_csv_path,
@@ -210,6 +227,37 @@ def run_walk_forward(scenario: str,
                               "efhv_mean": float("nan"), "efhv_std": float("nan"),
                               "error": "oos_window_too_short"})
             continue
+
+        # W22 Probe A: for each portfolio in the Pareto front, compute
+        # the ACTUAL t+1 ROI/risk by evaluating its weights under the
+        # OOS period's MLE (μ̂_{t+1}, Σ̂_{t+1}), then log the
+        # (KF prediction, persistence baseline, actual) triple.
+        from src.diagnostics import probe_a_kf_prediction_log as _probe_a
+        if _probe_a.is_enabled() and probe_a_records:
+            oos_arr = oos.values if hasattr(oos, "values") else np.asarray(oos)
+            if oos_arr.shape[0] >= 2:
+                mu_oos = oos_arr.mean(axis=0)
+                cov_oos = np.cov(oos_arr, rowvar=False, ddof=1)
+                if cov_oos.ndim == 0:
+                    cov_oos = np.array([[float(cov_oos)]])
+                for i, rec in enumerate(probe_a_records):
+                    w = rec["weights"]
+                    actual_roi = float(mu_oos @ w)
+                    actual_risk = float(w @ cov_oos @ w)
+                    _probe_a.log_period_kf_prediction(
+                        scenario=scenario,
+                        seed=seed,
+                        period_t=int(p["period"]),
+                        portfolio_idx=i,
+                        weights=w.tolist(),
+                        kf_predicted_ROI_t_plus_1=rec["kf_predicted_ROI_t_plus_1"],
+                        kf_predicted_risk_t_plus_1=rec["kf_predicted_risk_t_plus_1"],
+                        persistence_ROI_t=rec["persistence_ROI_t"],
+                        persistence_risk_t=rec["persistence_risk_t"],
+                        actual_ROI_t_plus_1=actual_roi,
+                        actual_risk_t_plus_1=actual_risk,
+                        kf_P_diag=rec["kf_P_diag"],
+                    )
         efhv = compute_oos_efhv(
             pareto_weights=weights,
             oos_returns=oos,
