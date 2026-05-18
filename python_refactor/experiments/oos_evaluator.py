@@ -384,7 +384,8 @@ def compute_per_portfolio_efhv(pareto_weights: list[np.ndarray],
                                 oos_returns: pd.DataFrame,
                                 n_samples: int = 1000,
                                 z_ref: tuple[float, float] = (0.2, 0.0),
-                                rng: np.random.Generator | None = None) -> np.ndarray:
+                                rng: np.random.Generator | None = None,
+                                use_closed_form: bool = False) -> np.ndarray:
     """W17-4: per-portfolio expected single-point HV against z_ref.
 
     Implements thesis §6.4 Eq 6.42 (AMFC selection) on the OOS side:
@@ -401,6 +402,15 @@ def compute_per_portfolio_efhv(pareto_weights: list[np.ndarray],
     walk_forward.run_walk_forward uses this argmax as u*_{t-1} for the
     next rolling period (W16-2-CARRY-1 closure: replaces "first
     Pareto-front portfolio" proxy).
+
+    W22 closed-form variant (use_closed_form=True): skips bootstrap MC;
+    uses single full-window MLE (μ̂, Σ̂) for a deterministic per-portfolio
+    single-point HV. Matches the Option A point-estimate methodology
+    used by compute_oos_efhv when its same flag is set. Fixes the
+    W17-4 "all per-portfolio EFHV are 0/NaN" fallback that surfaced
+    in W22 Options B/C calibration smokes (per_portfolio_efhv used to
+    always bootstrap-MC regardless of which Ŝ estimator was active).
+    n_samples is IGNORED when this flag is set.
 
     Returns:
         np.ndarray of length len(pareto_weights), each entry is the
@@ -428,7 +438,21 @@ def compute_per_portfolio_efhv(pareto_weights: list[np.ndarray],
             )
 
     risk_ref, return_ref = z_ref[0], z_ref[1]
-    # Accumulate per-portfolio HV samples across MC bootstrap.
+
+    if use_closed_form:
+        # Single full-window MLE → deterministic per-portfolio HV
+        mu = arr.mean(axis=0)
+        cov = np.cov(arr, rowvar=False, ddof=1)
+        if cov.ndim == 0:
+            cov = np.array([[float(cov)]])
+        per_portfolio_hv = np.zeros(n_portfolios, dtype=float)
+        for i, w in enumerate(weights_arr):
+            var = float(w @ cov @ w)
+            ret = float(mu @ w)
+            per_portfolio_hv[i] = max(0.0, ret - return_ref) * max(0.0, risk_ref - var)
+        return per_portfolio_hv
+
+    # Default: bootstrap MC (preserves W14-2 behavior)
     per_portfolio_hv = np.zeros(n_portfolios, dtype=float)
     for e in range(n_samples):
         idx = rng.integers(0, n_days, n_days)
