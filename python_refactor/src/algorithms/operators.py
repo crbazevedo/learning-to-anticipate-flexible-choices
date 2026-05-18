@@ -11,6 +11,50 @@ from .solution import Solution
 from ..portfolio.portfolio import Portfolio
 
 
+def _finalize_offspring_objectives(offspring: Solution) -> None:
+    """W22-NC8b: recompute ROI/risk + re-init KF state on offspring weights.
+
+    Pre-W22-NC8b, the thesis operators (thesis_uniform_crossover,
+    thesis_dual_mode_mutation, v2_*_mutation) created offspring via
+    `Solution(num_assets=n)` (which compute_efficiency'd random initial
+    weights from Portfolio.init()), then OVERWROTE the weights via
+    project_to_simplex WITHOUT recomputing objectives. Result: offspring
+    portfolio.ROI/risk reflected RANDOM initial weights — NOT the actual
+    crossover/mutation output weights — so selection downstream used STALE
+    objectives that bore no relation to the genome being selected.
+
+    Regression provenance: the OLD SBX `crossover`/`mutation` operators in
+    this same file (lines 47-54, 170-175) DID recompute efficiency after
+    weight assignment. The W15-2 introduction of thesis operators silently
+    dropped this discipline. NC8b is a regression introduced by W15-2.
+
+    Receipt:
+      W22 Probe A: Pareto-front portfolios' `kf_predicted_*` were
+      bit-identical to `persistence_*` (both read from kalman_state.x_next
+      and from portfolio.ROI/risk respectively, both of which were stale
+      relative to actual weights). NC7 (P-init harmonization) did not
+      change this empirically because the more fundamental issue was that
+      kf.x and portfolio.ROI were both stale random-weights values.
+      W22 Probe B preliminary signal: TIP saturated near 0.5 across all
+      first records — TIP was being computed on stale ROI/risk.
+
+    This helper recomputes ROI/risk on the actual weights AND re-initializes
+    KF state so kalman_state.x[0:2] matches the actual portfolio metrics
+    (not random-weights values). Both invariants must hold or downstream
+    TIP/HV/selection signals are flying on stale data.
+    """
+    if Portfolio.mean_ROI is None or Portfolio.covariance is None:
+        return  # Class-level stats not initialized; test-only path
+    if Portfolio.robustness:
+        Portfolio.compute_robust_efficiency(offspring.P)
+    else:
+        Portfolio.compute_efficiency(offspring.P)
+    # Re-init KF state so x[0:2] = actual portfolio ROI/risk (not random)
+    Portfolio.initialize_kalman_filter(
+        offspring.P, offspring.P.ROI, offspring.P.risk
+    )
+
+
 def crossover(parent1: Solution, parent2: Solution, crossover_rate: float = 0.9) -> Tuple[Solution, Solution]:
     """
     Perform crossover between two parent solutions.
@@ -461,6 +505,10 @@ def thesis_uniform_crossover(parent1: Solution, parent2: Solution,
     child2 = Solution(num_assets=n)
     child1.P.investment = project_to_simplex(w1, c_l, c_u, rng)
     child2.P.investment = project_to_simplex(w2, c_l, c_u, rng)
+    # W22-NC8b: recompute ROI/risk + re-init KF state on actual weights
+    # (regression introduced by W15-2; see _finalize_offspring_objectives docstring).
+    _finalize_offspring_objectives(child1)
+    _finalize_offspring_objectives(child2)
     return child1, child2
 
 
@@ -520,6 +568,8 @@ def thesis_dual_mode_mutation(solution: Solution,
                 jitter = rng.uniform(-add_jitter, add_jitter) * equal_alloc
                 w[asset] = max(equal_alloc + jitter, 1e-9)
     mutated.P.investment = project_to_simplex(w, c_l, c_u, rng)
+    # W22-NC8b: recompute ROI/risk + re-init KF state on actual weights.
+    _finalize_offspring_objectives(mutated)
     return mutated
 
 
@@ -550,6 +600,8 @@ def v2_raise_entropy_mutation(solution: Solution,
         w[max_elem] *= factor  # reduce (factor < 1)
         w[max_elem] = max(w[max_elem], 0.0)
     mutated.P.investment = project_to_simplex(w, c_l, c_u, rng)
+    # W22-NC8b: recompute ROI/risk + re-init KF state on actual weights.
+    _finalize_offspring_objectives(mutated)
     return mutated
 
 
@@ -577,6 +629,8 @@ def v2_lower_entropy_mutation(solution: Solution,
         factor = 1.0 + rng.uniform(p_factor_lo, p_factor_hi)
         w[max_elem] *= factor  # raise (factor > 1)
     mutated.P.investment = project_to_simplex(w, c_l, c_u, rng)
+    # W22-NC8b: recompute ROI/risk + re-init KF state on actual weights.
+    _finalize_offspring_objectives(mutated)
     return mutated
 
 
