@@ -1436,10 +1436,25 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
             optimal_expected_hv = self._compute_expected_hypervolume_contribution(
                 predicted_rois, predicted_risks, optimal_weights
             )
-            
+
             if optimal_expected_hv > current_expected_hv * 1.05:  # 5% improvement threshold
                 portfolio.investment = optimal_weights
                 portfolio.cardinality = np.sum(optimal_weights > 0.01)
+                # W22 STALE-ROI BUG FIX (2026-05-18):
+                # Pre-W22, _apply_predicted_rebalancing mutated
+                # portfolio.investment without recomputing portfolio.ROI/risk
+                # → selection downstream used STALE objectives (the
+                # anticipative-blended values, based on OLD weights) while
+                # OOS evaluation used the NEW weights → optimizer was
+                # selecting on the WRONG objectives, explaining why ASMS
+                # loses to SMS in our W17-5 → W21-1 chain.
+                #
+                # Fix: recompute Portfolio.compute_efficiency on the new
+                # weights so portfolio.ROI/risk reflect the actual portfolio.
+                # SMS path is unaffected (no anticipation → no rebalancing).
+                from src.portfolio.portfolio import Portfolio
+                if Portfolio.mean_ROI is not None and Portfolio.covariance is not None:
+                    Portfolio.compute_efficiency(portfolio)
     
     def _compute_expected_hypervolume_contribution(self, predicted_rois: np.ndarray, 
                                                  predicted_risks: np.ndarray, 

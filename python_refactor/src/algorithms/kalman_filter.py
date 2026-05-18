@@ -168,13 +168,24 @@ def initialize_kalman_matrices() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         [0.0, 1.0, 0.0, 0.0]   # Observe risk from x[1]
     ])
     
-    # Measurement noise covariance R (2x2)
-    # Initial values, will be updated based on data
+    # Measurement noise covariance R (2x2).
+    # W22 R-INCONSISTENCY FIX (2026-05-18):
+    # Pre-W22, this function set R off-diagonal = 0.005, while
+    # sms_emoa._initialize_kalman_state set R off-diagonal = 0.0.
+    # As evolution proceeds, offspring (going through Solution.__init__
+    # → Portfolio.initialize_kalman_filter → create_kalman_params →
+    # initialize_kalman_matrices) had a DIFFERENT noise model than the
+    # initial population. Kalman gain calculation diverged across the
+    # population, affecting StochasticParams-driven selection and
+    # anticipation differently than intended.
+    #
+    # Fix: harmonize to the sms_emoa._initialize_kalman_state value
+    # (zero off-diagonal). Both code paths now produce identical R.
     R = np.array([
-        [0.01, 0.005],  # ROI measurement noise
-        [0.005, 0.01]   # Risk measurement noise
+        [0.01, 0.0],  # ROI measurement noise (off-diagonal zero per W22 fix)
+        [0.0, 0.01]   # Risk measurement noise
     ])
-    
+
     return F, H, R
 
 
