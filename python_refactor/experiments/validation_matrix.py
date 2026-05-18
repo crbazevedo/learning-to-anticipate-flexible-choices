@@ -99,7 +99,12 @@ def _asms_learning_config(K: int, use_multi_horizon: bool = True,
         "parameters": {
             "window_size": K,        # K = OAL historical window
             "max_horizon": max_horizon,  # H per thesis Eq 7.16 (H-1 future steps)
-            "monte_carlo_samples": 500,
+            # NC6 FIX (W22 agent finding 2026-05-18): thesis §7.2.3 p.146
+            # specifies "E = 1000, i.e., the risk and return of each
+            # candidate portfolio is evaluated from 1000 simulated daily
+            # return values." Pre-fix default was 500 (also wrong;
+            # validation_matrix overrode to 200 via --n-mc CLI).
+            "monte_carlo_samples": 1000,
             "use_v2_anticipative_rate": use_v2_anticipative_rate,  # W20-1 / Reading-E
         },
     }
