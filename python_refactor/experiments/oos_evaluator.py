@@ -131,7 +131,8 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
                       z_ref: tuple[float, float] = (0.2, 0.0),
                       rng: np.random.Generator | None = None,
                       use_closed_form: bool = False,
-                      use_closed_form_expectation: bool = False) -> dict:
+                      use_closed_form_expectation: bool = False,
+                      use_v2_per_front: bool = False) -> dict:
     """Sample-average OOS Future Hypervolume per thesis Eqs 7.10+7.11.
 
     For each of n_samples MC scenarios e:
@@ -194,6 +195,107 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
             "efhv_mean": float(hv),
             "efhv_std": 0.0,
             "efhv_samples": np.array([hv], dtype=float),
+        }
+
+    if use_v2_per_front:
+        # W22 Option C: lift v2's per-front Δ_S formula
+        # (legacy-cpp-v2/source/asms_emoa.cpp:380+) directly to OOS
+        # aggregation. The Python equivalent lives at
+        # python_refactor/src/algorithms/sms_emoa.py:572-616.
+        #
+        # Setup: full-window MLE (μ̂, Σ̂).
+        # Per portfolio i: mu_i = μ̂^T u_i (= ROI_i), sigma2_i = u_i^T Σ̂ u_i (= risk_i).
+        # Conditional variance estimates (analogous to KF conditional
+        # parameters):
+        #   var_roi_i = sigma2_i / n_days (asymptotic MLE mean variance)
+        #   var_risk_i = 2 * sigma2_i^2 / (n_days - 1) (Wishart approx)
+        #
+        # Sort portfolios by ROI ASC, apply v2's per-position formula
+        # (sms_emoa.py:572-606 branching: first / middle / last):
+        #   First (i=0): mean_delta_ROI = ROI_0 - ROI_1
+        #                mean_delta_risk = z_ref[0] - risk_0
+        #                var_delta_* = sum of variances
+        #   Middle:      mean_delta_ROI = ROI_i - ROI_{i+1}
+        #                mean_delta_risk = risk_{i-1} - risk_i
+        #                var_delta_* = sums
+        #   Last (i=N-1): mean_delta_ROI = ROI_N - return_min
+        #                 mean_delta_risk = risk_{N-1} - risk_N
+        #                 var_delta_* = sums
+        # Then:
+        #   delta_S_i = (mean_delta_ROI * var_delta_risk
+        #                + mean_delta_risk * var_delta_ROI)
+        #               / (var_delta_ROI + var_delta_risk)
+        # Aggregate Ŝ = sum(delta_S_i)
+        risk_max, return_min = z_ref[0], z_ref[1]
+        mu_hat = arr.mean(axis=0)
+        Sigma_hat = np.cov(arr, rowvar=False, ddof=1)
+        if Sigma_hat.ndim == 0:
+            Sigma_hat = np.array([[float(Sigma_hat)]])
+
+        # Build (ROI, risk, var_ROI, var_risk) per portfolio.
+        rows = []
+        for w in weights_arr:
+            mu_i = float(mu_hat @ w)
+            sigma2_i = float(w @ Sigma_hat @ w)
+            sigma2_i = max(sigma2_i, 0.0)
+            var_roi = sigma2_i / max(n_days, 1)
+            var_risk = 2.0 * sigma2_i * sigma2_i / max(n_days - 1, 1)
+            rows.append((mu_i, sigma2_i, var_roi, var_risk))
+        # Sort by ROI ASC (matches sms_emoa.py:569: solutions.sort key=ROI)
+        rows.sort(key=lambda r: r[0])
+
+        if len(rows) == 0:
+            return {"efhv_mean": 0.0, "efhv_std": 0.0,
+                    "efhv_samples": np.zeros(0, dtype=float)}
+        if len(rows) == 1:
+            # Single-portfolio degenerate case: use the bare expected
+            # single-point HV vs z_ref (no neighbors to delta against).
+            roi, risk, var_roi, var_risk = rows[0]
+            mean_delta_roi = roi - return_min
+            mean_delta_risk = risk_max - risk
+            total_var = var_roi + var_risk
+            delta_s = (
+                (mean_delta_roi * var_risk + mean_delta_risk * var_roi) / total_var
+                if total_var > 0 else 0.0
+            )
+            return {"efhv_mean": float(delta_s), "efhv_std": 0.0,
+                    "efhv_samples": np.array([delta_s], dtype=float)}
+
+        N = len(rows)
+        total = 0.0
+        for i in range(N):
+            roi_i, risk_i, var_roi_i, var_risk_i = rows[i]
+            if i == 0:
+                roi_next, risk_next, var_roi_next, var_risk_next = rows[i + 1]
+                mean_delta_roi = roi_i - roi_next
+                mean_delta_risk = risk_max - risk_i
+                var_delta_roi = var_roi_i + var_roi_next
+                var_delta_risk = var_risk_i
+            elif i == N - 1:
+                roi_prev, risk_prev, var_roi_prev, var_risk_prev = rows[i - 1]
+                mean_delta_roi = roi_i - return_min
+                mean_delta_risk = risk_prev - risk_i
+                var_delta_roi = var_roi_i
+                var_delta_risk = var_risk_prev + var_risk_i
+            else:
+                roi_prev, risk_prev, var_roi_prev, var_risk_prev = rows[i - 1]
+                roi_next, risk_next, var_roi_next, var_risk_next = rows[i + 1]
+                mean_delta_roi = roi_i - roi_next
+                mean_delta_risk = risk_prev - risk_i
+                var_delta_roi = var_roi_i + var_roi_next
+                var_delta_risk = var_risk_prev + var_risk_i
+            total_var = var_delta_roi + var_delta_risk
+            if total_var > 0:
+                delta_s = (mean_delta_roi * var_delta_risk
+                            + mean_delta_risk * var_delta_roi) / total_var
+            else:
+                delta_s = 0.0
+            total += delta_s
+
+        return {
+            "efhv_mean": float(total),
+            "efhv_std": 0.0,
+            "efhv_samples": np.array([total], dtype=float),
         }
 
     if use_closed_form_expectation:
