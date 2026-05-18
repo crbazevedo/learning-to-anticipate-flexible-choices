@@ -60,7 +60,9 @@ def _run_one(scenario: str, seed: int,
               train_window_days: int, step_days: int,
               n_mc: int,
               lambda_trace_csv_path: str | None = None,
-              use_closed_form_efhv: bool = False) -> dict[str, Any]:
+              use_closed_form_efhv: bool = False,
+              use_closed_form_expectation_efhv: bool = False,
+              use_v2_per_front_efhv: bool = False) -> dict[str, Any]:
     """ProcessPoolExecutor entry: unpickle returns + run one
     (scenario, seed) walk-forward, return aggregate.
 
@@ -84,6 +86,8 @@ def _run_one(scenario: str, seed: int,
         rng=rng,
         lambda_trace_csv_path=lambda_trace_csv_path,
         use_closed_form_efhv=use_closed_form_efhv,
+        use_closed_form_expectation_efhv=use_closed_form_expectation_efhv,
+        use_v2_per_front_efhv=use_v2_per_front_efhv,
     )
     agg = aggregate_per_seed(per_period)
     return {
@@ -229,17 +233,48 @@ def main(argv: list[str] | None = None) -> int:
                           help="Restrict asset universe to the 87 thesis-faithful "
                                "assets per docs/H4-ASSET-UNIVERSE-EDA.md. "
                                "Default is the full 98-asset legacy archive.")
-    # W22 closed-form OOS eHypV variant (operator directive 2026-05-17):
-    # skip bootstrap MC; use single full-window MLE per period →
-    # deterministic Ŝ. n_mc is IGNORED when this flag is set.
+    # W22 OOS eHypV estimator variants (operator directive 2026-05-17):
+    # 4-way calibration: MC (default) + closed-form-point (Option A)
+    # + closed-form-expectation (Option B) + v2-per-front (Option C).
+    # These flags are MUTUALLY EXCLUSIVE — only one closed-form variant
+    # may be active per smoke. When any is set, n_mc is IGNORED.
     parser.add_argument("--use-closed-form-efhv",
                           action="store_true",
-                          help="W22 methodology pivot: skip bootstrap MC in "
+                          help="W22 Option A: skip bootstrap MC in "
                                "compute_oos_efhv; use single full-window MLE "
                                "(μ̂, Σ̂) per period for a deterministic Ŝ "
                                "point-estimate. Faster + zero MC noise; not "
                                "directly comparable to the W14-2 MC chain.")
+    parser.add_argument("--use-closed-form-expectation-efhv",
+                          action="store_true",
+                          help="W22 Option B: true closed-form expected Ŝ via "
+                               "per-portfolio Black-Scholes-style truncated-mean "
+                               "call/put pricing on (ROI, risk) Gaussians. "
+                               "Honest scar: no Pareto overlap correction → "
+                               "over-estimates vs true cloud HV.")
+    parser.add_argument("--use-v2-per-front-efhv",
+                          action="store_true",
+                          help="W22 Option C: lift v2's per-front Δ_S formula "
+                               "(asms_emoa.cpp:380+) directly to OOS "
+                               "aggregation. Honest scar: v2 actually uses Δ_S "
+                               "to RANK solutions, not as HV estimator; sum is "
+                               "a heuristic.")
     args = parser.parse_args(argv)
+
+    # Validate mutual exclusivity of W22 estimator flags
+    _w22_flags_active = sum([
+        args.use_closed_form_efhv,
+        args.use_closed_form_expectation_efhv,
+        args.use_v2_per_front_efhv,
+    ])
+    if _w22_flags_active > 1:
+        print(
+            "[wf-report] ERROR: --use-closed-form-efhv, "
+            "--use-closed-form-expectation-efhv, and --use-v2-per-front-efhv "
+            "are mutually exclusive. Pick at most one per smoke.",
+            file=sys.stderr,
+        )
+        return 2
 
     scenarios = [s.strip() for s in args.scenarios.split(",") if s.strip()]
     seeds = parse_seeds(args.seeds)
@@ -276,7 +311,9 @@ def main(argv: list[str] | None = None) -> int:
             pool.submit(_run_one, s, sd, full_returns_pickle,
                           args.train_window_days, args.step_days, args.n_mc,
                           lambda_trace_csv_path_str,
-                          args.use_closed_form_efhv): (s, sd)
+                          args.use_closed_form_efhv,
+                          args.use_closed_form_expectation_efhv,
+                          args.use_v2_per_front_efhv): (s, sd)
             for (s, sd) in pairs
         }
         done = 0
