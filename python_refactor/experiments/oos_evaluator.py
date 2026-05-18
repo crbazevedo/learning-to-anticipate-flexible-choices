@@ -34,6 +34,7 @@ from typing import Iterable
 
 import numpy as np
 import pandas as pd
+from scipy import stats as _stats  # W22 Option B: standard normal CDF/PDF
 
 
 # ---------------------------------------------------------------------------
@@ -129,7 +130,8 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
                       n_samples: int = 1000,
                       z_ref: tuple[float, float] = (0.2, 0.0),
                       rng: np.random.Generator | None = None,
-                      use_closed_form: bool = False) -> dict:
+                      use_closed_form: bool = False,
+                      use_closed_form_expectation: bool = False) -> dict:
     """Sample-average OOS Future Hypervolume per thesis Eqs 7.10+7.11.
 
     For each of n_samples MC scenarios e:
@@ -182,8 +184,8 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
             )
 
     if use_closed_form:
-        # W22 closed-form (point-estimate) variant: single full-window MLE
-        # → deterministic Ŝ. Skips bootstrap MC entirely.
+        # W22 Option A: closed-form (point-estimate) variant. Single
+        # full-window MLE → deterministic Ŝ. Skips bootstrap MC entirely.
         mu = arr.mean(axis=0)
         cov = np.cov(arr, rowvar=False, ddof=1)
         points = [(float(w @ cov @ w), float(mu @ w)) for w in weights_arr]
@@ -192,6 +194,67 @@ def compute_oos_efhv(pareto_weights: list[np.ndarray],
             "efhv_mean": float(hv),
             "efhv_std": 0.0,
             "efhv_samples": np.array([hv], dtype=float),
+        }
+
+    if use_closed_form_expectation:
+        # W22 Option B: TRUE closed-form expected Ŝ via per-portfolio
+        # Black-Scholes-style truncated-mean call/put pricing on
+        # (ROI, risk) modeled as independent Gaussians.
+        #
+        # Setup: full-window MLE (μ̂, Σ̂).
+        # Per portfolio i:
+        #   mu_i = μ̂^T u_i (mean of E[ROI_i])
+        #   sigma2_i = u_i^T Σ̂ u_i (point estimate of variance)
+        #   Var(ROI_i) ≈ sigma2_i / n_days (asymptotic MLE mean variance)
+        #   Var(risk_i) ≈ 2 * sigma2_i^2 / (n_days - 1) (Wishart approx)
+        #
+        # E[max(0, ROI_i - return_min)] using BS-like formula:
+        #   E[max(0, X - K)] = (μ - K) * Φ((μ - K) / σ) + σ * φ((μ - K) / σ)
+        # E[max(0, risk_max - risk_i)] using put-like formula:
+        #   E[max(0, K - X)] = (K - μ) * Φ((K - μ) / σ) + σ * φ((K - μ) / σ)
+        #
+        # E[HV_i] (independence) = product of the two truncated means.
+        # Aggregate Ŝ = SUM of per-portfolio E[HV_i] (no Pareto overlap
+        # correction → over-estimate; see HONEST SCAR in docstring).
+        risk_max, return_min = z_ref[0], z_ref[1]
+        mu_hat = arr.mean(axis=0)
+        Sigma_hat = np.cov(arr, rowvar=False, ddof=1)
+        # n_assets=1 → np.cov returns a 0-d array; coerce to 2D for matmul.
+        if Sigma_hat.ndim == 0:
+            Sigma_hat = np.array([[float(Sigma_hat)]])
+
+        total = 0.0
+        for w in weights_arr:
+            mu_i = float(mu_hat @ w)
+            sigma2_i = float(w @ Sigma_hat @ w)
+            sigma2_i = max(sigma2_i, 0.0)
+            var_roi = sigma2_i / max(n_days, 1)
+            var_risk = 2.0 * sigma2_i * sigma2_i / max(n_days - 1, 1)
+            sd_roi = float(np.sqrt(var_roi))
+            sd_risk = float(np.sqrt(var_risk))
+
+            # E[max(0, ROI - return_min)]: BS call
+            if sd_roi <= 0.0:
+                call_term = max(0.0, mu_i - return_min)
+            else:
+                d_roi = (mu_i - return_min) / sd_roi
+                call_term = (mu_i - return_min) * _stats.norm.cdf(d_roi) \
+                            + sd_roi * _stats.norm.pdf(d_roi)
+
+            # E[max(0, risk_max - risk)]: BS put on risk
+            if sd_risk <= 0.0:
+                put_term = max(0.0, risk_max - sigma2_i)
+            else:
+                d_risk = (risk_max - sigma2_i) / sd_risk
+                put_term = (risk_max - sigma2_i) * _stats.norm.cdf(d_risk) \
+                           + sd_risk * _stats.norm.pdf(d_risk)
+
+            total += call_term * put_term
+
+        return {
+            "efhv_mean": float(total),
+            "efhv_std": 0.0,
+            "efhv_samples": np.array([total], dtype=float),
         }
 
     samples_hv = np.empty(n_samples, dtype=float)
