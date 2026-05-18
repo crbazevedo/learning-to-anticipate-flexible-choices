@@ -224,11 +224,23 @@ def run_walk_forward(scenario: str,
         # — argmax over per-portfolio expected single-point HV against
         # z_ref. Replaces W16-2's "first Pareto-front portfolio" proxy.
         from .oos_evaluator import compute_per_portfolio_efhv
+        # W22: per-portfolio EFHV should match the chosen Ŝ estimator
+        # methodology to keep the AMFC u*_{t-1} selection consistent
+        # with the OOS scoring. ANY closed-form Ŝ flag (A, B, or C)
+        # triggers the closed-form per-portfolio variant; otherwise
+        # bootstrap MC (W14-2 default). Fixes the W17-4 "all
+        # per-portfolio EFHV are 0/NaN" fallback that surfaced in
+        # Options B/C smokes (per_portfolio_efhv was always MC,
+        # producing degenerate values when paired with a closed-form
+        # Ŝ estimator).
         per_portfolio_efhv = compute_per_portfolio_efhv(
             pareto_weights=weights,
             oos_returns=oos,
             n_samples=n_mc,
             rng=rng,
+            use_closed_form=(use_closed_form_efhv
+                              or use_closed_form_expectation_efhv
+                              or use_v2_per_front_efhv),
         )
         u_star_idx = _select_amfc_index(per_portfolio_efhv)
         previous_weights = weights[u_star_idx]
