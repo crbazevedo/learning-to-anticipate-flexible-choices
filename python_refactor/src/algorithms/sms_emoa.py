@@ -603,67 +603,152 @@ class SMSEMOA:
             solution.hypervolume_contribution *= stability_factor
 
     def _compute_stochastic_hypervolume_contributions_class(self, solutions: List[Solution]):
-        """Compute stochastic hypervolume contributions considering uncertainty."""
+        """Compute E[Δ_S] per Theorem 6.3.1 / Eq 6.41 in the thesis (p.131).
+
+        W22-EQ1 FIX (NC equation-review agent finding 2026-05-18).
+        Pre-fix the function used a heuristic
+            ``(mean_dROI·var_drisk + mean_drisk·var_dROI) / (var_dROI + var_drisk)``
+        that is dimensionally wrong (variances don't multiply out to a
+        hypervolume rectangle) and traces to NO equation in the thesis.
+
+        Theorem 6.3.1 / Eq 6.41 expands ``E[Δ_S(ẑ_t^(i))] = E[(a−b)(c−d)]``
+        where (per Eq 6.36):
+
+            a = ẑ_{1,t}^(i)|m̂_{2,t}^(i)      (self ROI cond. on self risk-mean)
+            b = ẑ_{1,t}^(i−1)|m̂_{2,t}^(i−1)  (LEFT-neighbor ROI cond. on its risk-mean)
+            c = ẑ_{2,t}^(i+1)|m̂_{1,t}^(i+1)  (RIGHT-neighbor risk cond. on its ROI-mean)
+            d = ẑ_{2,t}^(i)|m̂_{1,t}^(i)      (self risk cond. on self ROI-mean)
+
+        Using ``E[xy] = E[x]E[y] + Cov(x,y)`` (Eq 6.39) and ``E[X|Y=m_Y] = m_X``
+        when conditioning on the mean of a bivariate Gaussian (Eq 6.38),
+        the expansion ``(a−b)(c−d) = ac − ad − bc + bd`` yields:
+
+            E[Δ_S] = (m̂_{1,t}^(i) − m̂_{1,t}^(i−1))(m̂_{2,t}^(i+1) − m̂_{2,t}^(i))
+                   + Cov(a, c)   ← (+)
+                   − Cov(a, d)   ← (−)
+                   − Cov(b, c)   ← (−)
+                   + Cov(b, d)   ← (+)
+
+        which is exactly Eq 6.41 (the four Cov terms with signs +,−,−,+).
+        SCAR (HONEST): the C++ legacy (legacy-cpp-v2/source/asms_emoa.cpp
+        ``mean_delta_product``) computes ``Cov(a,c), Cov(b,c), Cov(b,d)``
+        **empirically** from per-solution Monte-Carlo samples
+        (``w_k->P.S.samples[j].roi`` etc.) that the Python refactor does
+        NOT store — only Kalman state covariances are kept per solution.
+        We therefore assume ``Cov(a,c) = Cov(b,c) = Cov(b,d) = 0`` (no
+        cross-solution information available). The within-solution
+        ``Cov(a,d)`` term — both random variables come from the same
+        solution i's bivariate Gaussian — is set to that solution's KF
+        state ROI↔risk covariance ``P[0,1]`` (matching how the C++ uses
+        ``w_1->P.S.covar`` for the self-product term).
+
+        DETERMINISTIC-VS-STOCHASTIC RECTANGLE NOTE: the deterministic
+        ``_compute_hypervolume_contributions_class`` middle branch uses
+        rectangle ``(ROI_i − ROI_{i+1})(risk_{i−1} − risk_i)`` (legacy
+        Python convention, same as C++ deterministic). Eq 6.36/6.41
+        specify rectangle ``(ROI_i − ROI_{i−1})(risk_{i+1} − risk_i)``.
+        Both yield POSITIVE values on a sorted-by-ROI Pareto front (with
+        risk DESC), but they are different rectangles. We implement
+        Eq 6.41 LITERALLY (prev-on-ROI, next-on-risk) because that is
+        the equation the operator's audit cited. Operator may decide
+        whether the deterministic version should be re-aligned.
+
+        Edge cases (|C| ∈ {1, 2}) use deterministic-style fallbacks since
+        Eq 6.41 is undefined without both neighbors:
+          - |C|=1: same rectangle as the deterministic single-solution
+            branch ``(ROI − R1)(R2 − risk)``, with the within-solution
+            ``Cov(ROI, risk)`` correction subtracted (mirroring the C++
+            single-solution stochastic branch term1−term2−term3+term4).
+          - |C|=2: i=0 uses LEFT-boundary R1 in place of m̂^(i−1); i=1
+            uses RIGHT-boundary R2 in place of m̂^(i+1). Cross-pair Cov
+            terms involving the boundary are zero (R1, R2 are
+            deterministic constants → Cov(R1, ·) = Cov(R2, ·) = 0).
+
+        Citations:
+          - Thesis Theorem 6.3.1, Eq 6.41, p.131
+          - Thesis Eq 6.36 (rectangle definition), p.130
+          - Thesis Eq 6.38 (conditioning on mean), p.130
+          - Thesis Eq 6.39 (E[xy] = E[x]E[y] + Cov(x,y)), p.130
+          - legacy-cpp-v2/source/asms_emoa.cpp::mean_delta_product (reference impl)
+        """
+
+        def _self_cov(stoch: "StochasticParams") -> float:
+            """Within-solution Cov(ROI, risk) for the Cov(a, d) self-term.
+
+            Mirrors C++ ``w_1->P.S.covar`` usage in
+            ``mean_delta_product`` (asms_emoa.cpp:361). In Python the
+            within-solution covariance is the Kalman state P[0,1].
+            """
+            return stoch.cov
+
         if len(solutions) == 1:
-            # Single solution with uncertainty
+            # |C|=1: deterministic rectangle (ROI − R1)(R2 − risk) with
+            # the within-solution Cov(ROI, risk) correction subtracted.
+            # Matches C++ compute_stochastic_Delta_S_front_id single-
+            # solution branch (asms_emoa.cpp:383-399):
+            #   term1 = ROI·R2,   term2 = ROI·risk + P.S.covar,
+            #   term3 = R1·R2,    term4 = R1·risk
+            #   Δ_S = term1 − term2 − term3 + term4
+            #       = (ROI − R1)(R2 − risk) − P.S.covar
             solution = solutions[0]
-            stoch_params = StochasticParams(solution)
-            
-            mean_delta_ROI = stoch_params.conditional_mean_ROI - self.R1
-            mean_delta_risk = self.R2 - stoch_params.conditional_mean_risk
-            var_delta_ROI = stoch_params.conditional_var_ROI
-            var_delta_risk = stoch_params.conditional_var_risk
-            
-            # Expected hypervolume contribution
-            solution.hypervolume_contribution = (mean_delta_ROI * var_delta_risk + mean_delta_risk * var_delta_ROI) / (var_delta_ROI + var_delta_risk)
+            stoch = StochasticParams(solution)
+            mean_roi = stoch.conditional_mean_ROI
+            mean_risk = stoch.conditional_mean_risk
+            delta_s = (mean_roi - self.R1) * (self.R2 - mean_risk) - _self_cov(stoch)
             stability_factor = 1.0 if self.use_v2_stability_weighting else solution.stability
-            solution.hypervolume_contribution *= stability_factor
+            solution.hypervolume_contribution = delta_s * stability_factor
             return
-        
-        # Sort by ROI
+
+        # Sort by ROI ascending — matches C++ sort_per_objective(_,0)
         solutions.sort(key=lambda s: s.P.ROI)
-        
-        # Compute stochastic contributions
+        n = len(solutions)
+
         for i, solution in enumerate(solutions):
-            stoch_params = StochasticParams(solution)
-            
+            stoch = StochasticParams(solution)
+            mean_roi_i = stoch.conditional_mean_ROI
+            mean_risk_i = stoch.conditional_mean_risk
+
+            # Resolve left ROI-mean (m̂_{1,t}^(i−1)) and right risk-mean
+            # (m̂_{2,t}^(i+1)) with boundary fallbacks: leftmost uses
+            # R1 (return floor) as the ROI lower bound; rightmost uses
+            # R2 (risk ceiling) as the risk upper bound — same boundary
+            # conventions as the C++ first/last branches.
             if i == 0:
-                # First solution
-                next_solution = solutions[i + 1]
-                next_stoch_params = StochasticParams(next_solution)
-                
-                mean_delta_ROI = stoch_params.conditional_mean_ROI - next_stoch_params.conditional_mean_ROI
-                mean_delta_risk = self.R2 - stoch_params.conditional_mean_risk
-                var_delta_ROI = stoch_params.conditional_var_ROI + next_stoch_params.conditional_var_ROI
-                var_delta_risk = stoch_params.conditional_var_risk
-                
-            elif i == len(solutions) - 1:
-                # Last solution
-                prev_solution = solutions[i - 1]
-                prev_stoch_params = StochasticParams(prev_solution)
-                
-                mean_delta_ROI = stoch_params.conditional_mean_ROI - self.R1
-                mean_delta_risk = prev_stoch_params.conditional_mean_risk - stoch_params.conditional_mean_risk
-                var_delta_ROI = stoch_params.conditional_var_ROI
-                var_delta_risk = prev_stoch_params.conditional_var_risk + stoch_params.conditional_var_risk
-                
+                # No left neighbor → use R1 as left ROI floor.
+                left_mean_roi = self.R1
+                left_stoch = None  # → Cov(b, ·) terms are 0 (R1 is deterministic)
             else:
-                # Middle solution
                 prev_solution = solutions[i - 1]
+                left_stoch = StochasticParams(prev_solution)
+                left_mean_roi = left_stoch.conditional_mean_ROI
+
+            if i == n - 1:
+                # No right neighbor → use R2 as right risk ceiling.
+                right_mean_risk = self.R2
+                right_stoch = None  # → Cov(·, c) terms are 0 (R2 is deterministic)
+            else:
                 next_solution = solutions[i + 1]
-                prev_stoch_params = StochasticParams(prev_solution)
-                next_stoch_params = StochasticParams(next_solution)
-                
-                # Compute mean delta product
-                mean_delta_ROI = stoch_params.conditional_mean_ROI - next_stoch_params.conditional_mean_ROI
-                mean_delta_risk = prev_stoch_params.conditional_mean_risk - stoch_params.conditional_mean_risk
-                var_delta_ROI = stoch_params.conditional_var_ROI + next_stoch_params.conditional_var_ROI
-                var_delta_risk = prev_stoch_params.conditional_var_risk + stoch_params.conditional_var_risk
-            
-            # Expected hypervolume contribution
-            solution.hypervolume_contribution = (mean_delta_ROI * var_delta_risk + mean_delta_risk * var_delta_ROI) / (var_delta_ROI + var_delta_risk)
+                right_stoch = StochasticParams(next_solution)
+                right_mean_risk = right_stoch.conditional_mean_risk
+
+            # Mean-product term from Eq 6.41 line 1:
+            #   (m̂_{1,t}^(i) − m̂_{1,t}^(i−1)) · (m̂_{2,t}^(i+1) − m̂_{2,t}^(i))
+            mean_product = (mean_roi_i - left_mean_roi) * (right_mean_risk - mean_risk_i)
+
+            # Four Cov terms from Eq 6.41 lines 2–5 with signs (+,−,−,+).
+            # In Python without per-solution MC samples, the only
+            # nonzero Cov is Cov(a, d) (within-solution self term).
+            # All cross-pair Cov terms are 0; boundary R1/R2 are
+            # deterministic so all Cov terms involving them are 0.
+            cov_a_c = 0.0  # cross-pair: Cov(self_ROI|self_risk_mean, right_risk|right_ROI_mean)
+            cov_a_d = _self_cov(stoch)  # self: within-solution Cov(ROI, risk)
+            cov_b_c = 0.0  # cross-pair: Cov(left_ROI|left_risk_mean, right_risk|right_ROI_mean)
+            cov_b_d = 0.0  # cross-pair: Cov(left_ROI|left_risk_mean, self_risk|self_ROI_mean)
+
+            delta_s = mean_product + cov_a_c - cov_a_d - cov_b_c + cov_b_d
+
             stability_factor = 1.0 if self.use_v2_stability_weighting else solution.stability
-            solution.hypervolume_contribution *= stability_factor
+            solution.hypervolume_contribution = delta_s * stability_factor
 
     def _tournament_selection(self) -> int:
         """Perform tournament selection based on hypervolume contribution."""
