@@ -356,6 +356,21 @@ class SMSEMOA:
             if (self.anticipatory_learning is not None
                     and hasattr(self.anticipatory_learning, "record_kf_residual")):
                 self.anticipatory_learning.record_kf_residual(residual_sq)
+            # W21-5 V6 (Reading D): mirror v2's combined update→predict
+            # lifecycle. v2's Kalman_filter() at legacy-cpp-v2/source/
+            # kalman_filter.cpp calls Kalman_update() BEFORE
+            # Kalman_prediction() — reversed vs Python's pre-W21-5
+            # predict→update order. The behavioral effect: at end of
+            # each _evaluate_solution call, v2's kalman_state.x_next
+            # holds the PREDICTED next-step state; Python's pre-W21-5
+            # holds the UPDATED current-step state. Downstream consumers
+            # that read x_next (e.g. multi_horizon TIP calculation) see
+            # different inputs. When use_v2_kf_lifecycle=True, follow
+            # the update with a prediction to match v2's effective
+            # end-of-call state.
+            if getattr(self, "use_v2_kf_lifecycle", False):
+                from .kalman_filter import kalman_prediction
+                kalman_prediction(solution.P.kalman_state)
 
         # W16-2: compute net-of-cost ROI for the NDS/HV objective.
         # Gross ROI stays on portfolio.ROI for reporting; only the
