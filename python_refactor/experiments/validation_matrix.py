@@ -227,6 +227,20 @@ SCENARIOS: dict[str, dict[str, Any]] = {
         "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True, max_horizon=3),
         "dm": "mHDM",
     },
+    # W21-5 Phase C kitchen-sink variant: ALL W22 ablation flags ON
+    # simultaneously. Tests whether the COMBINED effect of all closed
+    # divergences reverses the SMS-favorable direction.
+    "ASMS_mHDM_K3_v2_kitchen_sink": {
+        "name": "ASMS/mHDM K=3 + ALL W22 ablation flags (kitchen sink for Phase C)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True, max_horizon=3),
+        "algorithm_overrides": {
+            "use_v2_stability_weighting": True,
+            "use_thesis_eq74_risk": True,
+            "use_v2_kf_lifecycle": True,
+            "use_v2_entropy_operators": True,
+        },
+        "dm": "mHDM",
+    },
     # ─── Legacy aliases for backward compat with W12-W14 reports ─────────
     "S0": {
         "name": "[legacy alias for SMS_RDM_K0] Markowitz baseline",
