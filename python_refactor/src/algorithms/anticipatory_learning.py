@@ -26,29 +26,80 @@ from .temporal_incomparability_probability import TemporalIncomparabilityCalcula
 from .correspondence_mapping import CorrespondenceMapping
 
 class AnticipativeDistribution:
-    """Represents the anticipative distribution for portfolio state prediction."""
-    
-    def __init__(self, current_state: np.ndarray, predicted_state: np.ndarray, 
-                 current_covariance: np.ndarray, predicted_covariance: np.ndarray):
+    """Represents the anticipative distribution for portfolio state prediction.
+
+    Per paper Eq (15) / thesis §6.3, the anticipative covariance of a convex
+    combination ẑ = (1−λ)·ẑ_current + λ·ẑ_predicted (with current/predicted
+    independent) is:
+
+        Σ_anticipative = (1−λ)² · Σ_current + λ² · Σ_predicted
+
+    NOT the sum Σ_current + Σ_predicted (which would over-state uncertainty
+    by a factor 4× at λ=0.5 and grows the kalman_state.P matrix exponentially
+    when `_update_solution_state_anticipative` blends P toward this).
+
+    W22-NC12 PROVENANCE (2026-05-18): pre-NC12 line 48 set
+    `anticipative_covariance = current_covariance + predicted_covariance` —
+    a SUM, dimensionally consistent with neither paper Eq (15) nor standard
+    Bayesian fusion of two independent Gaussians under a convex combination.
+    The receipt:
+
+      W22 Probe A logged kf_P_diag = [542, 542, 1000, 1000] for ASMS
+      portfolios — position-component uncertainty grew from a fresh KF
+      P[0,0] = 0.1 to 542 over ~30 generations of evolution. Per-gen
+      `_update_solution_state_anticipative` blends P toward
+      anticipative_covariance with weight α, and since the pre-NC12 SUM
+      gives anticipative_covariance ≥ 2× current_covariance, the blend
+      grows P by factor (1 + α) each generation: (1 + 0.5)^30 ≈ 191,750×,
+      consistent with the observed ~60,000× growth (P[0,0] 0.0091 → 542).
+
+      W22 Probe B preliminary signal: TIP saturated near 0.5. With P[:2,:2]
+      grown to ~542, TIP MC sampling from Normal([ROI, risk], P[:2,:2]) draws
+      samples with std ≈ 23 around means ≈ 0.001 — the samples are
+      essentially independent random noise, mutual non-dominance ≈ 50%,
+      TIP collapses to 0.5. This is the smoking gun for Reading C (TIP
+      saturation hypothesis).
+
+    NC12 fix: use Eq (15) weighted-sum-of-squared-weights formula. With
+    equal weights (default λ=0.5), anticipative_covariance becomes
+    0.25 · (current + predicted) — 4× smaller than the SUM, and bounded
+    above by max(current, predicted) instead of 2× as before.
+    """
+
+    def __init__(self, current_state: np.ndarray, predicted_state: np.ndarray,
+                 current_covariance: np.ndarray, predicted_covariance: np.ndarray,
+                 weight_current: float = 0.5):
         """
-        Initialize anticipative distribution.
-        
+        Initialize anticipative distribution per paper Eq (15).
+
         Args:
             current_state: Current portfolio state [ROI, risk, ROI_velocity, risk_velocity]
             predicted_state: Predicted portfolio state
             current_covariance: Current state covariance matrix
             predicted_covariance: Predicted state covariance matrix
+            weight_current: Weight on current state (1−λ); default 0.5 (equal weights).
+                The weight on predicted is then 1 − weight_current = λ.
         """
         self.current_state = current_state
         self.predicted_state = predicted_state
         self.current_covariance = current_covariance
         self.predicted_covariance = predicted_covariance
-        
-        # Combined covariance for anticipative distribution
-        self.anticipative_covariance = current_covariance + predicted_covariance
-        
-        # Anticipative mean (weighted combination)
-        self.anticipative_mean = (current_state + predicted_state) / 2.0
+        self.weight_current = weight_current
+
+        weight_predicted = 1.0 - weight_current
+
+        # Anticipative mean per Eq (15): convex combination of means.
+        self.anticipative_mean = (
+            weight_current * current_state + weight_predicted * predicted_state
+        )
+
+        # Anticipative covariance per Eq (15): weighted-sum-of-squared-weights
+        # of independent component covariances.
+        # W22-NC12: replaced pre-NC12 SUM with squared-weight convex combo.
+        self.anticipative_covariance = (
+            (weight_current ** 2) * current_covariance
+            + (weight_predicted ** 2) * predicted_covariance
+        )
     
     def sample_anticipative_state(self, num_samples: int = 1000) -> np.ndarray:
         """Sample from anticipative distribution."""
