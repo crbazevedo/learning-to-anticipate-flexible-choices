@@ -1,0 +1,252 @@
+"""W22 Probe D post-hoc analysis: Pareto front diversity per period.
+
+Reads the per-period JSONL log produced by probe_a_kf_prediction_log
+(W22 Probe A infrastructure — reused here since each Pareto-front
+portfolio gets one record per period, so front size is derivable from
+record counts).
+
+Per Probe D spec:
+- H0: typical front size ≥ 5 (enough choices for DM)
+- H1: typical front size < 5 (front is sparse)
+
+Metrics:
+- Median front size across periods
+- Pareto-rank distribution
+- ROI range of front (max − min) per period
+- Risk range of front per period
+
+Usage:
+    uv run python -m experiments.analyze_probe_d \\
+        --log-path experiments/results/w22-probe-a-kf-accuracy-post-nc7/predictions.jsonl \\
+        --output ../docs/W22-PROBE-D-PARETO-FRONT-DIVERSITY.md
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+
+def load_records(log_path: Path) -> pd.DataFrame:
+    """Load JSONL records into a DataFrame."""
+    rows = []
+    with log_path.open() as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                rows.append(json.loads(line))
+    return pd.DataFrame(rows)
+
+
+def analyze(df: pd.DataFrame) -> dict:
+    """Compute front-size distribution + ROI/risk spread per period."""
+    out = {
+        "n_records": len(df),
+        "n_scenarios": df["scenario"].nunique(),
+        "n_seeds": df["seed"].nunique(),
+        "n_periods": df["period_t"].nunique(),
+    }
+
+    # Front size = count of distinct portfolio_idx per (scenario, seed, period)
+    grp_keys = ["scenario", "seed", "period_t"]
+    front_sizes = df.groupby(grp_keys)["portfolio_idx"].nunique()
+    fs_arr = front_sizes.values
+
+    out["front_size_n_periods"] = int(len(fs_arr))
+    out["front_size_mean"] = float(np.mean(fs_arr))
+    out["front_size_median"] = float(np.median(fs_arr))
+    out["front_size_std"] = float(np.std(fs_arr))
+    out["front_size_min"] = int(np.min(fs_arr))
+    out["front_size_max"] = int(np.max(fs_arr))
+    out["front_size_p25"] = float(np.percentile(fs_arr, 25))
+    out["front_size_p75"] = float(np.percentile(fs_arr, 75))
+
+    # H0 decision: median front size >= 5
+    out["front_size_H0_REJECTED"] = bool(out["front_size_median"] < 5)
+    out["front_size_meets_dm_threshold"] = bool(out["front_size_median"] >= 5)
+
+    # Fraction of periods with sparse front (< 3)
+    out["fraction_periods_sparse_lt_3"] = float(np.mean(fs_arr < 3))
+    out["fraction_periods_below_5"] = float(np.mean(fs_arr < 5))
+
+    # Front histogram
+    unique_sizes, counts = np.unique(fs_arr, return_counts=True)
+    out["front_size_histogram"] = {int(s): int(c) for s, c in zip(unique_sizes, counts)}
+
+    # Per-period ROI/risk spread (from KF-predicted values; persistence_ROI_t
+    # is also available as cross-check)
+    roi_ranges = []
+    risk_ranges = []
+    for _, grp in df.groupby(grp_keys):
+        if len(grp) >= 2:
+            roi_ranges.append(grp["persistence_ROI_t"].max() - grp["persistence_ROI_t"].min())
+            risk_ranges.append(grp["persistence_risk_t"].max() - grp["persistence_risk_t"].min())
+    if roi_ranges:
+        out["roi_range_mean"] = float(np.mean(roi_ranges))
+        out["roi_range_median"] = float(np.median(roi_ranges))
+        out["risk_range_mean"] = float(np.mean(risk_ranges))
+        out["risk_range_median"] = float(np.median(risk_ranges))
+    else:
+        out["roi_range_mean"] = float("nan")
+        out["risk_range_mean"] = float("nan")
+
+    # Per-scenario breakdown
+    per_scenario = {}
+    for scenario, scen_grp in df.groupby("scenario"):
+        scen_fs = scen_grp.groupby(["seed", "period_t"])["portfolio_idx"].nunique().values
+        per_scenario[scenario] = {
+            "front_size_median": float(np.median(scen_fs)),
+            "front_size_mean": float(np.mean(scen_fs)),
+            "front_size_min": int(np.min(scen_fs)),
+            "front_size_max": int(np.max(scen_fs)),
+            "n_periods": int(len(scen_fs)),
+        }
+    out["per_scenario"] = per_scenario
+
+    return out
+
+
+def per_period_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """Per-period front-size + spread table."""
+    rows = []
+    for (scenario, seed, period), grp in df.groupby(["scenario", "seed", "period_t"]):
+        rows.append({
+            "scenario": scenario,
+            "seed": seed,
+            "period": period,
+            "front_size": grp["portfolio_idx"].nunique(),
+            "roi_range": float(grp["persistence_ROI_t"].max() - grp["persistence_ROI_t"].min()) if len(grp) >= 2 else 0.0,
+            "risk_range": float(grp["persistence_risk_t"].max() - grp["persistence_risk_t"].min()) if len(grp) >= 2 else 0.0,
+        })
+    return pd.DataFrame(rows)
+
+
+def format_report(summary: dict, per_period: pd.DataFrame) -> str:
+    lines = []
+    lines.append("# W22 Probe D — Pareto front diversity per period")
+    lines.append("")
+    lines.append("*Auto-generated by `experiments/analyze_probe_d.py`.*")
+    lines.append("")
+    lines.append("## Sample")
+    lines.append("")
+    lines.append(f"- Records: {summary['n_records']}")
+    lines.append(f"- Scenarios: {summary['n_scenarios']}")
+    lines.append(f"- Seeds: {summary['n_seeds']}")
+    lines.append(f"- Periods: {summary['n_periods']}")
+    lines.append("")
+
+    lines.append("## Verdict")
+    lines.append("")
+    if summary["front_size_meets_dm_threshold"]:
+        verdict = (f"🟢 **Front size meets DM threshold** "
+                   f"(median = {summary['front_size_median']:.0f} ≥ 5; "
+                   f"H0 'front sparse' NOT rejected — front is NOT sparse)")
+    else:
+        verdict = (f"🔴 **Front is sparse** (median = {summary['front_size_median']:.0f} < 5; "
+                   f"H0 'front sparse' rejected — increase pop/gens per H2 hypothesis)")
+    lines.append(verdict)
+    lines.append("")
+
+    lines.append("## Front-size distribution")
+    lines.append("")
+    lines.append("| metric | value |")
+    lines.append("|---|---|")
+    lines.append(f"| n periods observed | {summary['front_size_n_periods']} |")
+    lines.append(f"| median front size | {summary['front_size_median']:.1f} |")
+    lines.append(f"| mean front size | {summary['front_size_mean']:.2f} |")
+    lines.append(f"| std | {summary['front_size_std']:.2f} |")
+    lines.append(f"| min | {summary['front_size_min']} |")
+    lines.append(f"| max | {summary['front_size_max']} |")
+    lines.append(f"| p25 | {summary['front_size_p25']:.1f} |")
+    lines.append(f"| p75 | {summary['front_size_p75']:.1f} |")
+    lines.append(f"| fraction periods sparse (< 3) | {summary['fraction_periods_sparse_lt_3']:.4f} |")
+    lines.append(f"| fraction periods below DM threshold (< 5) | {summary['fraction_periods_below_5']:.4f} |")
+    lines.append("")
+
+    lines.append("### Front-size histogram")
+    lines.append("")
+    lines.append("| front size | period count |")
+    lines.append("|---|---|")
+    for size in sorted(summary["front_size_histogram"].keys()):
+        count = summary["front_size_histogram"][size]
+        bar = "█" * count
+        lines.append(f"| {size} | {count} {bar} |")
+    lines.append("")
+
+    lines.append("## ROI / risk spread on the front")
+    lines.append("")
+    lines.append("| metric | ROI | risk |")
+    lines.append("|---|---|---|")
+    lines.append(f"| mean range (max − min) | {summary['roi_range_mean']:.4e} | {summary['risk_range_mean']:.4e} |")
+    lines.append(f"| median range | {summary['roi_range_median']:.4e} | {summary['risk_range_median']:.4e} |")
+    lines.append("")
+
+    lines.append("## Per-scenario breakdown")
+    lines.append("")
+    lines.append("| scenario | n periods | median | mean | min | max |")
+    lines.append("|---|---|---|---|---|---|")
+    for scenario, stats in summary["per_scenario"].items():
+        lines.append(
+            f"| {scenario} | {stats['n_periods']} "
+            f"| {stats['front_size_median']:.1f} "
+            f"| {stats['front_size_mean']:.2f} "
+            f"| {stats['front_size_min']} "
+            f"| {stats['front_size_max']} |"
+        )
+    lines.append("")
+
+    lines.append("## Per-period summary (first 20)")
+    lines.append("")
+    lines.append("```")
+    lines.append(per_period.head(20).to_string(index=False, float_format=lambda v: f"{v:.4e}"))
+    lines.append("```")
+    lines.append("")
+
+    lines.append("## Decision per backlog spec")
+    lines.append("")
+    if summary["front_size_meets_dm_threshold"]:
+        lines.append("Per W22-INSPECTION-BACKLOG.md Probe D decision criteria:")
+        lines.append("- ✅ Front size median ≥ 5 → DM has enough choices; problem isn't front sparsity")
+        lines.append("- Probe D rules OUT trivial-front DM scenario → AMFC analysis (Probe C) becomes meaningful")
+    else:
+        lines.append("Per W22-INSPECTION-BACKLOG.md Probe D decision criteria:")
+        lines.append("- ⚠️  Front size median < 5 → DM has trivial choice → **increase pop/gens** (H2 hypothesis: thesis pop=200, gens=500)")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--log-path", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args(argv)
+
+    if not args.log_path.exists():
+        print(f"ERROR: log file not found at {args.log_path}", file=sys.stderr)
+        return 1
+
+    df = load_records(args.log_path)
+    if df.empty:
+        print(f"ERROR: log file is empty at {args.log_path}", file=sys.stderr)
+        return 1
+
+    summary = analyze(df)
+    per_period = per_period_summary(df)
+
+    report = format_report(summary, per_period)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(report)
+    print(f"[probe-d] wrote report to {args.output}")
+
+    summary_json = args.output.parent / (args.output.stem + "_summary.json")
+    summary_json.write_text(json.dumps(summary, indent=2))
+    print(f"[probe-d] wrote summary JSON to {summary_json}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

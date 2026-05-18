@@ -1,0 +1,51 @@
+{
+  "n_records": 644,
+  "n_scenarios": 2,
+  "n_seeds": 2,
+  "n_periods": 23,
+  "front_size_n_periods": 92,
+  "front_size_mean": 7.0,
+  "front_size_median": 7.0,
+  "front_size_std": 2.413728849005567,
+  "front_size_min": 3,
+  "front_size_max": 13,
+  "front_size_p25": 5.0,
+  "front_size_p75": 9.0,
+  "front_size_H0_REJECTED": false,
+  "front_size_meets_dm_threshold": true,
+  "fraction_periods_sparse_lt_3": 0.0,
+  "fraction_periods_below_5": 0.16304347826086957,
+  "front_size_histogram": {
+    "3": 7,
+    "4": 8,
+    "5": 11,
+    "6": 16,
+    "7": 13,
+    "8": 12,
+    "9": 10,
+    "10": 7,
+    "11": 5,
+    "12": 1,
+    "13": 2
+  },
+  "roi_range_mean": 0.0012195624726575101,
+  "roi_range_median": 0.0006999513527169073,
+  "risk_range_mean": 0.012767265151685992,
+  "risk_range_median": 0.003447650429446749,
+  "per_scenario": {
+    "ASMS_mHDM_K3_v2both": {
+      "front_size_median": 6.0,
+      "front_size_mean": 6.521739130434782,
+      "front_size_min": 3,
+      "front_size_max": 11,
+      "n_periods": 46
+    },
+    "SMS_RDM_K0": {
+      "front_size_median": 8.0,
+      "front_size_mean": 7.478260869565218,
+      "front_size_min": 3,
+      "front_size_max": 13,
+      "n_periods": 46
+    }
+  }
+}
