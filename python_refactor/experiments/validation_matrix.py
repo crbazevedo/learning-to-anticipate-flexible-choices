@@ -142,6 +142,20 @@ SCENARIOS: dict[str, dict[str, Any]] = {
         "learning": _asms_learning_config(K=2),
         "dm": "mHDM",
     },
+    # W22 (operator 2026-05-18): thesis §7.2.3 may specify K=2 historical
+    # periods for the FTSE study (not K=3 as W20-1 / W21-1 used). Add
+    # K=2 + v2_rate variants to test under Option A closed-form.
+    "ASMS_mHDM_K2_v2rate": {
+        "name": "ASMS/mHDM K=2 + v2 anticipative-rate (Reading-E, K=2 thesis-faithful)",
+        "learning": _asms_learning_config(K=2, use_v2_anticipative_rate=True),
+        "dm": "mHDM",
+    },
+    "ASMS_mHDM_K2_v2both": {
+        "name": "ASMS/mHDM K=2 + v2 rate + v2 stability (Reading-E+F-INV at K=2)",
+        "learning": _asms_learning_config(K=2, use_v2_anticipative_rate=True),
+        "algorithm_overrides": {"use_v2_stability_weighting": True},
+        "dm": "mHDM",
+    },
     "ASMS_mHDM_K3": {
         "name": "ASMS/mHDM K=3 — PAPER HEADLINE configuration (Fig 7.15)",
         "learning": _asms_learning_config(K=3),
