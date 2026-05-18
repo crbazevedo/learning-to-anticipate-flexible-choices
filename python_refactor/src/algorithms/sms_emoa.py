@@ -52,7 +52,7 @@ class SMSEMOA:
     
     def __init__(self, population_size: int = 100, generations: int = 200,
                  crossover_rate: float = 0.9, mutation_rate: float = 0.1,
-                 tournament_size: int = 3,
+                 tournament_size: int = 2,  # NC4 FIX (W22): thesis specifies binary tournament (§7.2.3 p.147)
                  z_ref: tuple[float, float] = (0.0, 0.2),
                  use_v2_stability_weighting: bool = False,
                  use_thesis_eq74_risk: bool = False,
@@ -670,17 +670,34 @@ class SMSEMOA:
         # Select random individuals (handle case where tournament_size > population_size)
         tournament_size = min(self.tournament_size, len(self.population))
         indices = np.random.choice(len(self.population), tournament_size, replace=False)
-        
-        # Find the best based on hypervolume contribution
+
+        # NC5 FIX (W22 agent finding 2026-05-18): pre-fix tournament picked
+        # by hypervolume_contribution ONLY (single criterion). Thesis §7.2.3
+        # p.147 specifies "binary tournament selection was utilized using
+        # the Pareto Dominance over the sample mean vectors, with expected
+        # Hypv contribution (Eq. (6.35)) serving as a TIEBREAKER."
+        # So the correct ordering is: (1) lower Pareto_rank wins; (2) if
+        # ranks tie, higher hypervolume_contribution wins. Pre-fix, a
+        # rank-2 high-Δ_S could beat a rank-1 low-Δ_S — subverting NDS.
+        # Fix: sort by (Pareto_rank ASC, hypervolume_contribution DESC).
+        def _better(idx_a, idx_b):
+            """Returns idx of better solution per thesis-faithful tournament."""
+            sol_a = self.population[idx_a]
+            sol_b = self.population[idx_b]
+            # Lower rank is better
+            if sol_a.Pareto_rank < sol_b.Pareto_rank:
+                return idx_a
+            if sol_b.Pareto_rank < sol_a.Pareto_rank:
+                return idx_b
+            # Ranks tied → higher hypervolume_contribution wins
+            if sol_a.hypervolume_contribution >= sol_b.hypervolume_contribution:
+                return idx_a
+            return idx_b
+
         best_idx = indices[0]
-        best_contribution = self.population[best_idx].hypervolume_contribution
-        
         for idx in indices[1:]:
-            contribution = self.population[idx].hypervolume_contribution
-            if contribution > best_contribution:
-                best_contribution = contribution
-                best_idx = idx
-        
+            best_idx = _better(best_idx, idx)
+
         return best_idx
     
     def _remove_worst_solution(self):

@@ -755,10 +755,19 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
         )
         
         # Update state using anticipatory learning rate
-        x_state = np.array([anticipative_portfolio.P.ROI, anticipative_portfolio.P.risk, 0.0, 0.0])
+        # NC1 FIX (W22 agent finding 2026-05-18): pre-fix x_state zero-padded
+        # the velocity components ([ROI, risk, 0.0, 0.0]), but kalman_state.x_next
+        # carries the propagated (non-zero) velocities from the prior predict
+        # step. The blend `x_state + α*(x_next - x_state)` therefore treated
+        # the full velocity components of x_next as a delta against zero —
+        # imposing a phantom anticipative-velocity injection that overshoots.
+        # v2 keeps the filtered state's velocities in x_state.
+        # Fix: use full kalman_state.x (which carries the velocities) as the
+        # baseline rather than zero-padding.
+        x_state = anticipative_portfolio.P.kalman_state.x.copy()
         x = x_state.copy()
         C = anticipative_portfolio.P.kalman_state.P.copy()
-        
+
         if self.window_size > 0:
             # Update state vector
             x = x_state + solution.anticipation_rate * (anticipative_portfolio.P.kalman_state.x_next - x_state)
@@ -1163,9 +1172,19 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
         cov_roi_risk = np.cov(roi_samples, risk_samples)[0, 1] if len(roi_samples) > 1 else 0.0
         
         # Update measurement noise covariance
+        # NC2 FIX (W22 agent finding 2026-05-18): pre-fix divided sample
+        # variance by monte_carlo_simulations (default 1000), producing R
+        # of order 1e-5 to 1e-7. This made Kalman gain ≈ 1 → KF became
+        # identity pass-through. The W22 R-harmonization fix from PR #135
+        # (initializing R off-diagonal = 0) was IMMEDIATELY clobbered on
+        # the first learning call. v2 keeps R as a measurement-noise
+        # estimate (variance of the sample), NOT variance-of-the-mean.
+        # Fix: drop the /monte_carlo_simulations divisor. R is now the
+        # sample's own variance, which is the standard MLE measurement-
+        # noise estimate.
         kalman_state.R = np.array([
-            [var_roi / self.monte_carlo_simulations, cov_roi_risk / self.monte_carlo_simulations],
-            [cov_roi_risk / self.monte_carlo_simulations, var_risk / self.monte_carlo_simulations]
+            [var_roi, cov_roi_risk],
+            [cov_roi_risk, var_risk]
         ])
         
         # Update Kalman filter with observed state

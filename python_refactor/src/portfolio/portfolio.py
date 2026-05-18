@@ -54,7 +54,14 @@ class Portfolio:
     autocorrelation: Optional[np.ndarray] = None
     
     # Configuration
-    max_cardinality: int = 10
+    # NC3 FIX (W22 agent finding 2026-05-18): thesis §7.2.3 p.146 specifies
+    # c_u = 15 (maximum cardinality). Pre-fix Portfolio.max_cardinality = 10
+    # silently CULLED valid 11-15-asset portfolios via the dominance
+    # penalty in solution.py:90-93. The operators module already had the
+    # correct THESIS_CARDINALITY_MIN=5 / MAX=15 constants but they were
+    # not synced to Portfolio.max_cardinality. Fix: align to thesis.
+    max_cardinality: int = 15
+    min_cardinality: int = 5  # thesis c_l per §7.2.3 p.146
     robustness: bool = False
 
     # W21-5 V5 (W18-CARRY-1 Reading): when True, compute_risk returns the
