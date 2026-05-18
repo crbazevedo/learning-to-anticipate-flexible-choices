@@ -18,6 +18,103 @@ periods + OOS eHV)** if mitigated. Status reflects test progression:
 
 ---
 
+## 🔥 META-FINDING: FTSE 2006-2012 is among the WORST datasets in the PAPER itself
+
+Per other-markets agent (verbatim cite Table III ANOVA + §VI.E):
+- **FTSE WS (anticipation) factor: F=0.47, p ≈ ns** (NOT significant even in original paper)
+- HSI: F=0.34 ≈ ns
+- DJI: F=0.19 ≈ ns
+- **Best dataset: synthetic PO(8,1.0)** — high severity η=1.0, low frequency τ=8: F=23.22** p<0.01 + ~4× starting wealth by t=25
+- Paper §VI.E: FTSE 2006-2012 has periods 5-11 dominated by 2008 GFC crash; "anticipation cannot help when the market is in regime collapse"
+
+**Strategic implication**: our entire W17-5 → W22 chain has been calibrating against the algorithm's HARDEST real-world case. Of course we can't replicate dramatic ASMS > SMS gains; the paper couldn't either on FTSE.
+
+**Recommended pivot**: implement synthetic PO(8,1.0) generator (paper Eqs 31-32, thesis Eqs 7.6-7.9) and test ASMS-EMOA there. If we see anticipation gain on PO(8,1.0), we've validated the implementation. If we don't, the 6+ bugs are causal.
+
+## 🚨 NEW CRITICAL EQUATION-FIDELITY FINDINGS (2026-05-18 from eq agent)
+
+### EQ1: `_compute_stochastic_hypervolume_contributions_class` doesn't match Theorem 6.3.1
+- **Source**: equation review agent (high confidence)
+- **Location**: `sms_emoa.py:606-666`
+- **Bug**: Code uses heuristic `(mean_dROI*var_drisk + mean_drisk*var_dROI) / (var_dROI + var_drisk)` (line 664). Thesis Eq 6.41 has FOUR Cov terms `(+,−,−,+)` between neighbors' conditional Gaussians.
+- **Predicted Δ**: LARGE (central anticipation primitive completely wrong)
+- **Status**: 🔴 UNTESTED; needs derivation from Eq 6.41
+
+### EQ2: λ^K uses sigmoid instead of population min-max per Eq 6.9
+- **Source**: equation review agent (high confidence)
+- **Location**: `anticipatory_learning.py:444`
+- **Bug**: Thesis Eq 6.9 is `λ^K = (1/(H-1))(1 − (Z̃_i − Z̃_min)/(Z̃_max − Z̃_min))` (min-max RESCALING across population). Python uses `1 − exp(−residual_sum/(N·scale))` mapped to [0, 0.5] (sigmoid on single solution's own residuals). Code comment acknowledges this divergence.
+- **Predicted Δ**: MEDIUM (changes λ^K signal structure)
+
+### EQ3: `TIPIntegratedAnticipatoryLearning` legacy class still violates Eq 7.16
+- **Source**: equation review agent
+- **Location**: `anticipatory_learning.py:636-639`
+- **Bug**: legacy class has `if tip_rate > 0: combined = 0.5*(traditional+tip); else: combined = traditional`. Thesis mandates `λ = (1/2)(λ^H + λ^K)` UNCONDITIONALLY (even when tip=0).
+- **Predicted Δ**: SMALL (mostly bypassed by main class)
+
+### EQ4: Middle-solution Δ_S indexing scrambled
+- **Source**: equation review agent
+- **Location**: `sms_emoa.py:596`
+- **Bug**: Uses `(prev_solution.P.risk − solution.P.risk)` (negative after sort) but `next` for ROI delta. 2D HV exclusive contribution should be `(roi_i − roi_{i-1}) × (risk_{i+1} − risk_i)`. Index order scrambled.
+- **Predicted Δ**: MEDIUM (per-solution Δ_S calc affects selection)
+
+### EQ5: Default `compute_risk` returns std-dev (already known + flagged)
+- **Status**: 🟡 partial — `use_thesis_eq74_risk` flag exists but default still returns √
+- See R2 (sqrt removal effect: NULL) — but this was tested WITHOUT also fixing the stochastic HV formula. Combined fix may have different effect.
+
+## 🚨 NEW CRITICAL HYPOTHESES (2026-05-18 from specialist agents)
+
+### NC1: Velocity zero-padding bug in `anticipatory_learning_obj_space`
+- **Source**: code bug-hunt agent (high confidence)
+- **Location**: `anticipatory_learning.py:758-764`
+- **Bug**: `x_state` zero-pads velocities; blended with `x_next` containing real velocities → phantom anticipative-velocity injection per learning call
+- **Predicted Δ**: MEDIUM-LARGE (affects every TIPIntegrated/MultiHorizon dispatch)
+- **Status**: 🔴 UNTESTED; fix is one-line
+- **Cost**: ~5min dev + 1-2h smoke
+
+### NC2: R matrix clobbered by `_observe_state_1step_ahead`
+- **Source**: code bug-hunt agent (high confidence)
+- **Location**: `anticipatory_learning.py:1166-1169`
+- **Bug**: `R = sample_var / monte_carlo_simulations` (default 1000) → R ≈ 1e-5 → Kalman gain ≈ 1 → KF becomes identity pass-through. The W22 R-harmonization is immediately wiped.
+- **Predicted Δ**: LARGE (KF is core to anticipation)
+- **Status**: 🔴 UNTESTED; fix is one-line (drop divisor)
+- **Cost**: ~5min dev + 1-2h smoke
+
+### NC3: `Portfolio.max_cardinality = 10` vs thesis K_max = 15
+- **Source**: algo/param review agent (high confidence)
+- **Location**: `portfolio.py:57`
+- **Bug**: silently culls valid 11-15-asset portfolios via dominance penalty (`solution.py:90-93`); enforcement layer pins ≤15 but dominance layer penalizes >10 → structural disagreement
+- **Predicted Δ**: MEDIUM-LARGE (5 asset slots' worth of Pareto front variety silently excluded)
+- **Status**: 🔴 UNTESTED; fix is one-line (set to 15) + add min_cardinality=5
+- **Cost**: ~5min dev + 1-2h smoke
+
+### NC4: `tournament_size = 3` vs thesis "binary tournament" (=2)
+- **Source**: algo/param review agent
+- **Bug**: validation_matrix never passes tournament_size; default 3 used
+- **Predicted Δ**: SMALL-MEDIUM (selection-pressure effect)
+- **Status**: 🔴 UNTESTED; fix = pass tournament_size=2
+- **Cost**: ~5min dev + 1h smoke
+
+### NC5: Tournament tiebreaker is contribution-only (rank ignored)
+- **Source**: algo/param review agent (high confidence)
+- **Location**: `sms_emoa.py:668-684` (`_tournament_selection`)
+- **Bug**: picks by `hypervolume_contribution` only; doesn't first-sort by Pareto rank → rank-2 high-Δ_S can beat rank-1 low-Δ_S → subverts NDS
+- **Predicted Δ**: MEDIUM (rank-vs-contribution tradeoff)
+- **Status**: 🔴 UNTESTED; fix = rewrite tournament to match thesis "Pareto Dominance first, Δ_S as tiebreaker"
+- **Cost**: ~15min dev + 1-2h smoke
+
+### NC6: `n_mc = 200` vs thesis E = 1000
+- **Source**: algo/param review agent
+- **Bug**: validation_matrix uses 200; thesis spec is E=1000
+- **Predicted Δ**: SMALL-MEDIUM (MC noise reduction)
+- **Status**: 🔴 UNTESTED; fix = set n_mc=1000
+- **Cost**: ~1min dev + ~5x wall-clock per smoke
+
+### NC7: Thesis confirms FTSE-optimal is K=2 (revising R1)
+- **Source**: algo/param review agent (verbatim cite §7.3.2 p.156)
+- **Status**: 🔴 RE-EXAMINE — our MC test showed K=2 WORSE than K=3, but if any of NC1-NC6 affect K=2 implementation specifically, the verdict needs re-running on post-fix code
+- **Implication**: R1 (K=2 refuted) may itself be wrong because all our tests were on pre-CRITICAL-fix code
+
 ## ⭐ Active hypotheses (NOT YET TESTED OR PARTIALLY TESTED)
 
 ### H1: Training-time fitness degeneracy (replace closed-form Δ_S with MC or BS-style)
