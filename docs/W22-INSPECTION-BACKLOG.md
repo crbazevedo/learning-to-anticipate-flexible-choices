@@ -409,16 +409,70 @@ This document is updated whenever:
 - A new module-level hypothesis is raised
 - A mitigation lands and changes the empirical picture
 
-## Current state (2026-05-18 / updated after NC8b breakthrough + NC13a ship)
+## Current state (2026-05-18 / refined post-Probe-C-G + NC8c-v2/NC8d)
 
 | Probe | Status | Output |
 |---|---|---|
-| A | 🟢 COMPLETE (pre/post-NC7) → ⚫ H0 NOT rejected; NC8b shipped; **post-NC8b+NC13a re-run in flight** | `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY.md` + `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY-POST-NC7.md` |
-| B | 🟢 COMPLETE (pre/post-NC12) → 🔴 99.86%/99.87% TIP saturation both; multi-horizon root identified (NC13) | `docs/W22-PROBE-B-SIGNAL-DISTRIBUTIONS-PRE-NC12.md` + `docs/W22-PROBE-B-SIGNAL-DISTRIBUTIONS-POST-NC8b-NC12.md` |
-| C | 🔴 PENDING (analyzer-ready; can run on existing Pareto fronts no new run needed) | TBD |
+| A | 🟢 COMPLETE multiple iterations → KF=persistence at every fix combination (NC7, NC8b, NC8c, NC8c-v2 all do not unlock velocity) | `docs/W22-PROBE-A-*.md` |
+| B | 🟢 COMPLETE pre/post-NC12 → 🔴 99.86%/99.87% TIP saturation both; reframed as BENIGN for `v2_anticipative_rate` | `docs/W22-PROBE-B-SIGNAL-DISTRIBUTIONS-*.md` |
+| C | 🟢 COMPLETE → 🟢 **AMFC > Random (Wilcoxon p=0.0002)** but Sharpe DM marginally outperforms; gap-to-Oracle 27% | `docs/W22-PROBE-C-AMFC-VS-ALTERNATIVES.md` |
 | D | 🟢 COMPLETE → ✅ PASS (median front size 7 ≥ 5) | `docs/W22-PROBE-D-PARETO-FRONT-DIVERSITY.md` |
-| E | 🟢 COMPLETE → 🔴 **ASMS P[ROI] median = 486 vs SMS 0.1** (4860× drift via positive-feedback loop) | `docs/W22-PROBE-E-ANTICIPATIVE-DISTRIBUTION-SANITY.md` |
-| F | 🔴 PENDING | TBD |
+| E | 🟢 COMPLETE → 🔴 ASMS P[ROI] 4860× drift PRE; **POST-NC13a: 0.17** (drift fixed) | `docs/W22-PROBE-E-*.md` |
+| F | 🔴 PENDING (Dirichlet) | TBD |
+| **G (NEW)** | 🟢 COMPLETE → 🔴 **AMFC weights CHAOTIC** (mean Jaccard = 0.169, 17 asset switches per period) | `docs/W22-PROBE-G-WEIGHT-STABILITY.md` |
+| H (NEW) | 🔴 PENDING — selection pressure / pop=gens ratio | TBD |
+| I (NEW) | 🔴 PENDING — transaction-cost asymmetric impact | TBD |
+| J (NEW) | 🔴 PENDING — "do nothing" baseline (always pick prev AMFC, skip optimization) | TBD |
+
+## New probe specs (added 2026-05-18 after reflection cycle)
+
+### Probe G: Pareto front weight stability + composition coherence
+
+**Status**: 🟢 SHIPPED — 🔴 verdict: AMFC weights chaotic (Jaccard 0.169 < 0.2 threshold)
+
+**Receipt**: AMFC selections across consecutive walk-forward periods have:
+- Mean L1 distance = 1.51 (max 2.0 = totally disjoint)
+- Mean Jaccard of active asset sets = 0.169 (chaotic threshold < 0.2)
+- Mean asset switches = 17 per period (cardinality is ~12 = nearly total turnover)
+
+**Implication**: NC8c-v2 carries prev_AMFC's (ROI, risk) into a portfolio with completely different weight composition → KF velocity learns essentially NOISE per period. NC8c+NC8d may be a net negative because they propagate this noise into anticipation.
+
+Also: high transaction-cost burden expected (weights rebalance 75%+ each period).
+
+### Probe H: Selection pressure / pop=gens ratio (PENDING)
+
+**Motivation**: We use pop=20 / gens=30 (thesis spec: pop=200, gens=500). Maybe small pop + selection pressure cause Pareto front instability.
+
+**Methodology**: re-run smoke with pop=50, gens=100 (medium step toward thesis spec). Compare Pareto front diversity, weight stability, ASMS−SMS Δ %.
+
+**Decision**: if larger pop/gens dramatically reduces chaos → algo-param H2 hypothesis confirmed → consider ship pop=100+ as default for ASMS scenarios.
+
+### Probe I: Transaction-cost asymmetric impact (PENDING)
+
+**Motivation**: thesis §7.2.2 transaction cost subtracts a cost from optimizer's ROI objective when `previous_weights` is set. If ASMS produces more chaotic weights (Probe G), its cost burden is HIGHER per period than SMS → asymmetric penalty.
+
+**Methodology**: walk_forward.py exposes `enforce_thesis_continuous_trades`. Run with cost=0 vs default cost. Measure ASMS−SMS Δ change.
+
+**Decision**: if Δ improves with cost=0 → transaction-cost machinery is asymmetrically hurting ASMS → tune cost model.
+
+### Probe J: "Do nothing" baseline (PENDING)
+
+**Motivation**: with chaotic AMFC, maybe "always re-use prev AMFC weights" is a better strategy than re-optimizing. This is the "buy and hold" baseline (with periodic re-balance trigger).
+
+**Methodology**: at each period t > 0, skip optimization and just use prev AMFC weights. Compute realized OOS Ŝ. Compare to SMS/ASMS.
+
+**Decision**: if "do nothing" beats SMS/ASMS → the optimizer is HURTING; rethink Pareto-front DM machinery.
+
+## New mitigation candidates (NC15-NC20)
+
+| NC | Description | Trigger | Status |
+|---|---|---|---|
+| NC15 | λ-per-portfolio variation (make λ depend on per-portfolio uncertainty, not population-wide TIP) | If TIP saturation re-emerges as issue | PENDING |
+| NC16 | Use pop=200 gens=500 thesis-spec sizing (algo-param H2) | If Probe H confirms small pop causes chaos | PENDING |
+| NC17 | **Replace AMFC with Sharpe DM** (Probe C showed Sharpe marginally outperforms) | If post-NC8c-v2 smoke doesn't help | PENDING — high priority |
+| NC18 | Transaction-cost-aware DM (penalize Pareto-front portfolios with low Jaccard vs prev AMFC) | If Probe G chaos persists | PENDING |
+| NC19 | Asymmetric anticipation (ROI only, skip risk since risk has higher post-NC13a residual noise) | If selective anticipation outperforms | PENDING |
+| NC20 | Robust KF (Huber loss in kalman_update to ignore outlier residuals) | If KF velocity bootstrap (NC8c-v2/d) learns noise | PENDING |
 
 ## 🎯 HILL-CLIMB BREAKTHROUGH (2026-05-18)
 

@@ -1,0 +1,98 @@
+{
+  "n_records": 1839,
+  "n_scenarios": 2,
+  "n_seeds": 5,
+  "n_periods": 23,
+  "R1": 0.0,
+  "R2": 0.2,
+  "dm_aggregate": {
+    "amfc_realized_hv": {
+      "n_periods": 230,
+      "mean": 0.00021011948781011366,
+      "median": 0.0,
+      "std": 0.00037560852921284535,
+      "max": 0.0020904888486595915
+    },
+    "persistence_amfc_realized_hv": {
+      "n_periods": 230,
+      "mean": 0.00021011948781011366,
+      "median": 0.0,
+      "std": 0.00037560852921284535,
+      "max": 0.0020904888486595915
+    },
+    "highroi_realized_hv": {
+      "n_periods": 230,
+      "mean": 0.00020556688239337567,
+      "median": 0.0,
+      "std": 0.000380111555104582,
+      "max": 0.0020904888486595915
+    },
+    "lowrisk_realized_hv": {
+      "n_periods": 230,
+      "mean": 0.00012737217005139611,
+      "median": 0.0,
+      "std": 0.00024763366483600746,
+      "max": 0.0014324856936730435
+    },
+    "sharpe_realized_hv": {
+      "n_periods": 230,
+      "mean": 0.00021327752560259007,
+      "median": 0.0,
+      "std": 0.00038106009400160914,
+      "max": 0.0020904888486595915
+    },
+    "median_realized_hv": {
+      "n_periods": 230,
+      "mean": 0.00018085518241954093,
+      "median": 0.0,
+      "std": 0.0003563062664827986,
+      "max": 0.00207688559033478
+    },
+    "first_realized_hv": {
+      "n_periods": 230,
+      "mean": 0.00015499545913030393,
+      "median": 0.0,
+      "std": 0.0002915423684110501,
+      "max": 0.0016270151431850973
+    },
+    "random_realized_hv_mean": {
+      "n_periods": 230,
+      "mean": 0.0001781090688843622,
+      "median": 5.3893693354320254e-05,
+      "std": 0.0003254867142434022,
+      "max": 0.001732486840638152
+    },
+    "oracle_realized_hv": {
+      "n_periods": 230,
+      "mean": 0.0002866268635282705,
+      "median": 0.0001519612160352788,
+      "std": 0.00044611026033996453,
+      "max": 0.002259428262819053
+    }
+  },
+  "per_scenario": {
+    "ASMS_mHDM_K3_v2both": {
+      "n_periods": 115,
+      "amfc_mean": 0.00022100585581370582,
+      "oracle_mean": 0.0002951447169243182,
+      "highroi_mean": 0.00020869568482109578,
+      "random_mean": 0.00018659659296179008,
+      "spearman_mean": 0.23777030310490777
+    },
+    "SMS_RDM_K0": {
+      "n_periods": 115,
+      "amfc_mean": 0.0001992331198065215,
+      "oracle_mean": 0.00027810901013222293,
+      "highroi_mean": 0.0002024380799656555,
+      "random_mean": 0.0001696215448069343,
+      "spearman_mean": 0.24700106526295157
+    }
+  },
+  "amfc_vs_random_wilcoxon_stat": 16816.0,
+  "amfc_vs_random_wilcoxon_pvalue": 0.00021889899587882692,
+  "amfc_beats_random": true,
+  "gap_to_oracle_amfc": 0.26692325616789503,
+  "spearman_mean": 0.24241987219192243,
+  "spearman_median": 0.3,
+  "fraction_positive_spearman": 0.6888888888888889
+}

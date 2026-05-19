@@ -1,0 +1,40 @@
+{
+  "n_records": 1839,
+  "n_scenarios": 2,
+  "n_seeds": 5,
+  "n_periods": 23,
+  "l1_distance_mean": 1.5086649574679907,
+  "l1_distance_median": 1.5222786638260348,
+  "l1_distance_max": 2.0,
+  "jaccard_mean": 0.16874368607690265,
+  "jaccard_median": 0.15789473684210525,
+  "n_switches_mean": 16.845454545454544,
+  "n_switches_median": 17.0,
+  "n_switches_max": 26,
+  "cardinality_mean": 11.652173913043478,
+  "cardinality_median": 12.0,
+  "cardinality_min": 6,
+  "cardinality_max": 15,
+  "per_scenario": {
+    "ASMS_mHDM_K3_v2both": {
+      "n_consecutive_pairs": 110,
+      "l1_mean": 1.5006324142480527,
+      "jaccard_mean": 0.17275094494754853,
+      "switches_mean": 16.427272727272726,
+      "cardinality_mean": 11.452173913043477,
+      "cardinality_min": 6,
+      "cardinality_max": 15
+    },
+    "SMS_RDM_K0": {
+      "n_consecutive_pairs": 110,
+      "l1_mean": 1.5166975006879286,
+      "jaccard_mean": 0.1647364272062567,
+      "switches_mean": 17.263636363636362,
+      "cardinality_mean": 11.852173913043478,
+      "cardinality_min": 7,
+      "cardinality_max": 15
+    }
+  },
+  "jaccard_stable": false,
+  "jaccard_chaotic": true
+}
