@@ -103,8 +103,9 @@ def _select_amfc_index(per_portfolio_efhv: np.ndarray) -> int:
 def _train_and_extract_pareto(scenario: str, seed: int,
                                train_returns: pd.DataFrame,
                                previous_weights: np.ndarray | None = None,
+                               previous_kf_state=None,
                                lambda_trace_csv_path: str | None = None,
-                               ) -> tuple[list[np.ndarray], int]:
+                               ) -> tuple[list[np.ndarray], int, list, list]:
     """Train SMS-EMOA on the train window; extract Pareto weights.
 
     Mirrors oos_report._run_one_scenario_seed but takes the pre-sliced
@@ -115,6 +116,19 @@ def _train_and_extract_pareto(scenario: str, seed: int,
     Table 7.1 transaction costs from the ROI objective per §7.2
     Eqs (7.4)-(7.5). On period 1 / no prior portfolio, pass None →
     no cost subtraction.
+
+    W22-NC8c (2026-05-18): optional ``previous_kf_state`` carries the
+    previous period's AMFC portfolio KF state forward. When set,
+    sms_emoa._initialize_population uses this as the initial KF state
+    for the new period's portfolios (specifically: copies the velocity
+    components x[2:4] and the P[2:4, 2:4] block per portfolio, allowing
+    velocity learning to persist across walk-forward periods).
+
+    Returns:
+        (weights, n_assets, probe_a_records, pareto_kf_states)
+        - pareto_kf_states: list of KalmanParams snapshots, one per
+          Pareto-front portfolio (parallel to weights). For NC8c
+          downstream consumption by run_walk_forward.
     """
     from experiments.validation_matrix import build_experiment_config
     from src.experiments.experiment_manager import ExperimentManager
@@ -136,12 +150,17 @@ def _train_and_extract_pareto(scenario: str, seed: int,
     # algorithm setter can call set_previous_weights post-init).
     if previous_weights is not None:
         data["previous_weights"] = np.asarray(previous_weights, dtype=float)
+    # W22-NC8c: thread previous period's AMFC KF state for cross-period
+    # velocity learning persistence.
+    if previous_kf_state is not None:
+        data["previous_kf_state"] = previous_kf_state
     # W16-4: thread λ trace CSV path; ExperimentManager flushes per-period.
     if lambda_trace_csv_path is not None:
         data["lambda_trace_csv_path"] = str(lambda_trace_csv_path)
     results = mgr._run_algorithm(config, data)
     pareto = results.get("pareto_front", [])
     weights: list[np.ndarray] = []
+    pareto_kf_states: list = []
     # W22 Probe A: optionally also extract per-portfolio KF state +
     # current-period (ROI, risk) for the persistence baseline.
     from src.diagnostics import probe_a_kf_prediction_log as _probe_a
@@ -153,8 +172,12 @@ def _train_and_extract_pareto(scenario: str, seed: int,
         w_arr = np.asarray(w, dtype=float)
         if w_arr.shape == (n_assets,):
             weights.append(w_arr)
+            # W22-NC8c: capture KF state per Pareto portfolio so
+            # run_walk_forward can pick AMFC's KF state for next period.
+            kf_for_carry = getattr(sol.P, "kalman_state", None)
+            pareto_kf_states.append(kf_for_carry)
             if _probe_a.is_enabled():
-                kf = getattr(sol.P, "kalman_state", None)
+                kf = kf_for_carry
                 if kf is not None:
                     # x_next post-final-predict = KF's t+1 prediction
                     # ROI is x[0], risk is x[1] per paper Eq 11
@@ -166,7 +189,7 @@ def _train_and_extract_pareto(scenario: str, seed: int,
                         "persistence_risk_t": float(sol.P.risk),
                         "kf_P_diag": [float(kf.P[i, i]) for i in range(kf.P.shape[0])],
                     })
-    return weights, n_assets, probe_a_records
+    return weights, n_assets, probe_a_records, pareto_kf_states
 
 
 def run_walk_forward(scenario: str,
@@ -203,13 +226,18 @@ def run_walk_forward(scenario: str,
     # argmax-EFHV (or first if EFHV not yet computed) from the
     # previous period's Pareto front. None on period 1 (no prior).
     previous_weights: np.ndarray | None = None
+    # W22-NC8c (2026-05-18): carry the AMFC portfolio's KF state across
+    # walk-forward periods so velocity learning persists across t boundaries
+    # (vs being reset to zero at each fresh period init).
+    previous_kf_state = None
     for p in periods:
         train = full_returns.iloc[p["train_start"]:p["train_end"]]
         oos = full_returns.iloc[p["oos_start"]:p["oos_end"]]
         try:
-            weights, n_assets, probe_a_records = _train_and_extract_pareto(
+            weights, n_assets, probe_a_records, pareto_kf_states = _train_and_extract_pareto(
                 scenario, seed, train,
                 previous_weights=previous_weights,
+                previous_kf_state=previous_kf_state,
                 lambda_trace_csv_path=lambda_trace_csv_path,
             )
         except Exception as exc:
@@ -292,6 +320,14 @@ def run_walk_forward(scenario: str,
         )
         u_star_idx = _select_amfc_index(per_portfolio_efhv)
         previous_weights = weights[u_star_idx]
+        # W22-NC8c: carry the AMFC portfolio's KF state to next period.
+        # pareto_kf_states[u_star_idx] is the same Solution-shaped KF state;
+        # _initialize_population will use it as initial state for new period.
+        if (0 <= u_star_idx < len(pareto_kf_states)
+                and pareto_kf_states[u_star_idx] is not None):
+            import copy as _copy
+            previous_kf_state = _copy.deepcopy(pareto_kf_states[u_star_idx])
+        # If AMFC has no KF state (shouldn't happen post-NC7), keep prior.
         results.append({
             **p,
             "n_pareto": len(weights),

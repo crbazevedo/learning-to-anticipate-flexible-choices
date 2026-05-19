@@ -262,6 +262,28 @@ class SMSEMOA:
         else:
             num_assets = data.get('num_assets', 3)
 
+        # W22-NC8c: set Portfolio.carried_velocity from data['previous_kf_state']
+        # BEFORE creating any solutions. Both Solution.__init__ and offspring
+        # creation (via _finalize_offspring_objectives) will then pick up
+        # the carried velocity through Portfolio.initialize_kalman_filter.
+        # Reset to None to start so a stale carried_velocity from a previous
+        # run doesn't leak across SMSEMOA instances.
+        from ..portfolio.portfolio import Portfolio
+        Portfolio.carried_velocity = None
+        Portfolio.carried_velocity_covariance = None
+        previous_kf_state = data.get("previous_kf_state") if data else None
+        if previous_kf_state is not None:
+            prev_x = getattr(previous_kf_state, "x", None)
+            prev_P = getattr(previous_kf_state, "P", None)
+            if prev_x is not None and prev_P is not None:
+                Portfolio.carried_velocity = np.array([
+                    float(prev_x[2]), float(prev_x[3])
+                ])
+                Portfolio.carried_velocity_covariance = np.array([
+                    [float(prev_P[2, 2]), float(prev_P[2, 3])],
+                    [float(prev_P[3, 2]), float(prev_P[3, 3])],
+                ])
+
         self.population = []
         for _ in range(self.population_size):
             solution = Solution(num_assets=num_assets)
@@ -304,6 +326,28 @@ class SMSEMOA:
         Pre-W22-NC7 the P matrix here diverged from create_kalman_params
         (1000 vs 0.1 on velocity components); Probe A diagnosed the
         offspring-path P as the smoking gun for KF==persistence.
+
+        W22-NC8c (2026-05-18): if `data['previous_kf_state']` is provided
+        (passed from walk_forward.run_walk_forward when t > 0), CARRY
+        FORWARD the previous period's AMFC portfolio velocity components
+        (x[2:4]) AND the corresponding P[2:4, 2:4] block. Position
+        components (x[0:2], P[0:2, 0:2]) are reset per-portfolio to the
+        fresh values (so each portfolio in the new period reflects its
+        own weights' ROI/risk) — only velocity carries forward.
+
+        Mechanism: with velocity carried across periods, the first
+        kalman_update in `_evaluate_solution` has a NON-ZERO innovation
+        (current measurement vs predicted F·x_init with non-zero velocity)
+        → KF position estimate gets corrected meaningfully → KF
+        prediction x_next[0:2] = x[0:2] + x[2:4] reflects actual
+        period-over-period dynamics, not persistence.
+
+        Receipt for why this matters: docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY*.md
+        showed KF predictions bit-identical to persistence both pre- and
+        post-NC7. Root cause (NC8c): KF state is born/dies per period,
+        so velocity x[2:4] always init to 0, x_next = F·x = [x[0], x[1], 0, 0]
+        = persistence. With NC8c, x[2:4] carries forward = non-zero,
+        x_next becomes a meaningful prediction.
         """
         # Initialize with current portfolio state
         kalman_state = solution.P.kalman_state
@@ -316,6 +360,26 @@ class SMSEMOA:
         # create_kalman_params produces — both paths share the same
         # paper-canonical high-velocity-uncertainty prior.
         kalman_state.P = np.diag([0.1, 0.1, 1000.0, 1000.0])
+
+        # W22-NC8c: if previous_kf_state in data, carry velocity forward.
+        previous_kf_state = data.get("previous_kf_state") if data else None
+        if previous_kf_state is not None:
+            prev_x = getattr(previous_kf_state, "x", None)
+            prev_P = getattr(previous_kf_state, "P", None)
+            if prev_x is not None and prev_P is not None:
+                # Carry velocity components (indices 2, 3) from prior period
+                kalman_state.x[2] = float(prev_x[2])
+                kalman_state.x[3] = float(prev_x[3])
+                # Carry velocity-block covariance to preserve learned
+                # uncertainty about velocities (P[2:4, 2:4] = 4 entries)
+                kalman_state.P[2, 2] = float(prev_P[2, 2])
+                kalman_state.P[3, 3] = float(prev_P[3, 3])
+                kalman_state.P[2, 3] = float(prev_P[2, 3])
+                kalman_state.P[3, 2] = float(prev_P[3, 2])
+                # Initialize x_next consistently — this matters for
+                # downstream consumers that read x_next before any
+                # prediction call (probe-A logging, TIP MC).
+                kalman_state.x_next = kalman_state.F @ kalman_state.x
         
         # State transition matrix (constant velocity model)
         kalman_state.F = np.array([
