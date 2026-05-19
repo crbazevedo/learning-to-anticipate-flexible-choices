@@ -140,6 +140,33 @@ class POGeneratorConfig:
     """RNG seed for reproducibility — same seed must produce
     bit-identical output."""
 
+    interpolation: str = "linear"
+    """W22-sPO (2026-05-19): intra-segment interpolation between milestone
+    boundaries. Choices:
+
+    * ``"linear"`` (paper-faithful default per Eq 7.9): linear blend
+      `X_t = (1 - alpha) * X_{t_lo} + alpha * X_{t_hi}`. Velocity (first
+      derivative wrt t) is PIECEWISE CONSTANT within each segment but
+      JUMPS at milestone boundaries (kink). The constant-velocity KF
+      sees these kinks as misleading "infinite acceleration" events.
+    * ``"cosine"`` (Smooth PO / sPO mode): cosine ease-in-ease-out
+      `smooth_alpha = (1 - cos(alpha * pi)) / 2`. Velocity is ZERO at
+      milestone boundaries and reaches maximum mid-segment. No kinks —
+      first derivative is continuous across boundaries. This is the
+      Smooth PO bench called for by the operator (each period advances
+      smoothly toward the next milestone, no abrupt changes).
+    * ``"smoothstep"`` (cubic Hermite): `s = 3 alpha^2 - 2 alpha^3`.
+      Similar to cosine — zero derivative at boundaries — but
+      polynomial (slightly less smooth at corners since 2nd derivative
+      is non-zero at boundaries).
+
+    Receipt for sPO mode: PO(8, 1.0) at n=10 showed ASMS LOSES to SMS
+    (Δ=-7.25%, p=0.15) because constant-velocity KF can't track
+    discontinuous velocity at segment boundaries. sPO removes this
+    pathology to test whether the breakthrough mechanism generalizes
+    when underlying dynamics are KF-compatible.
+    """
+
 
 def _sample_random_P(
     rng: np.random.Generator, cfg: POGeneratorConfig
@@ -283,8 +310,28 @@ def generate_po_parameter_stream(
         denom = float(t_hi - t_lo)
         alpha = (t - t_lo) / denom if denom > 0 else 0.0
 
-        mu_t = (1.0 - alpha) * mu_lo + alpha * mu_hi
-        Sigma_t = (1.0 - alpha) * Sigma_lo + alpha * Sigma_hi
+        # W22-sPO: apply chosen interpolation curve.
+        # The blend variable `s` is what multiplies `mu_hi`/`Sigma_hi`;
+        # `1 - s` multiplies `mu_lo`/`Sigma_lo`.
+        if cfg.interpolation == "cosine":
+            # Cosine ease-in-ease-out: smooth velocity, zero at boundaries.
+            # d(s)/d(alpha) = (sin(alpha * pi) * pi) / 2 → 0 at alpha=0,1.
+            # First derivative continuous across milestone boundaries
+            # → no kinks → constant-velocity KF can track this smoothly.
+            s = 0.5 * (1.0 - np.cos(alpha * np.pi))
+        elif cfg.interpolation == "smoothstep":
+            # Cubic Hermite smoothstep: 3α² - 2α³.
+            # d(s)/d(alpha) = 6α(1-α) → 0 at alpha=0,1.
+            # Similar smoothness properties to cosine but polynomial.
+            s = alpha * alpha * (3.0 - 2.0 * alpha)
+        else:
+            # Default: paper-faithful linear interpolation (Eq 7.9).
+            # d(s)/d(alpha) = 1 (constant) → velocity-piecewise-constant
+            # with kinks at milestone boundaries.
+            s = alpha
+
+        mu_t = (1.0 - s) * mu_lo + s * mu_hi
+        Sigma_t = (1.0 - s) * Sigma_lo + s * Sigma_hi
         mus.append(mu_t)
         sigmas.append(Sigma_t)
 
