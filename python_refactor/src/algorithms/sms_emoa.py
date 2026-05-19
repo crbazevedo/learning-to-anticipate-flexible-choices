@@ -262,15 +262,23 @@ class SMSEMOA:
         else:
             num_assets = data.get('num_assets', 3)
 
-        # W22-NC8c: set Portfolio.carried_velocity from data['previous_kf_state']
-        # BEFORE creating any solutions. Both Solution.__init__ and offspring
-        # creation (via _finalize_offspring_objectives) will then pick up
-        # the carried velocity through Portfolio.initialize_kalman_filter.
-        # Reset to None to start so a stale carried_velocity from a previous
-        # run doesn't leak across SMSEMOA instances.
+        # W22-NC8c-v2 (2026-05-18): carry both POSITION (x[0:2]) AND velocity
+        # (x[2:4]) from prev period's AMFC KF state, not just velocity.
+        # Without position carry, NC8c was inert because prev_AMFC's velocity
+        # was always 0 (chicken-and-egg: first update has y = Z - x_init = 0
+        # if x_init = portfolio.ROI = Z; no learning; AMFC has zero velocity;
+        # NC8c carries zero forward).
+        #
+        # NC8c-v2 mechanism: carry position → first update at period t+1 has
+        # Z (current portfolio ROI) ≠ x_init (prev_AMFC.ROI) → non-zero
+        # innovation y = current.ROI - prev_AMFC.ROI → velocity learns this
+        # period-over-period change → KF prediction ≠ persistence going
+        # forward. Combined with NC8d (predict before first update) below.
         from ..portfolio.portfolio import Portfolio
         Portfolio.carried_velocity = None
         Portfolio.carried_velocity_covariance = None
+        Portfolio.carried_position = None        # NC8c-v2 NEW
+        Portfolio.carried_position_covariance = None  # NC8c-v2 NEW
         previous_kf_state = data.get("previous_kf_state") if data else None
         if previous_kf_state is not None:
             prev_x = getattr(previous_kf_state, "x", None)
@@ -282,6 +290,14 @@ class SMSEMOA:
                 Portfolio.carried_velocity_covariance = np.array([
                     [float(prev_P[2, 2]), float(prev_P[2, 3])],
                     [float(prev_P[3, 2]), float(prev_P[3, 3])],
+                ])
+                # NC8c-v2: also carry position
+                Portfolio.carried_position = np.array([
+                    float(prev_x[0]), float(prev_x[1])
+                ])
+                Portfolio.carried_position_covariance = np.array([
+                    [float(prev_P[0, 0]), float(prev_P[0, 1])],
+                    [float(prev_P[1, 0]), float(prev_P[1, 1])],
                 ])
 
         self.population = []
@@ -361,25 +377,50 @@ class SMSEMOA:
         # paper-canonical high-velocity-uncertainty prior.
         kalman_state.P = np.diag([0.1, 0.1, 1000.0, 1000.0])
 
-        # W22-NC8c: if previous_kf_state in data, carry velocity forward.
+        # W22-NC8c-v2 (2026-05-18): if previous_kf_state in data, carry
+        # POSITION (x[0:2]) and VELOCITY (x[2:4]) forward.
         previous_kf_state = data.get("previous_kf_state") if data else None
         if previous_kf_state is not None:
             prev_x = getattr(previous_kf_state, "x", None)
             prev_P = getattr(previous_kf_state, "P", None)
             if prev_x is not None and prev_P is not None:
+                # Carry position components (indices 0, 1) — NC8c-v2.
+                # Override the freshly-set [portfolio.ROI, portfolio.risk]
+                # with prev_AMFC's position so first kalman_update has
+                # non-zero innovation y = current.ROI - prev_AMFC.ROI.
+                kalman_state.x[0] = float(prev_x[0])
+                kalman_state.x[1] = float(prev_x[1])
                 # Carry velocity components (indices 2, 3) from prior period
                 kalman_state.x[2] = float(prev_x[2])
                 kalman_state.x[3] = float(prev_x[3])
-                # Carry velocity-block covariance to preserve learned
-                # uncertainty about velocities (P[2:4, 2:4] = 4 entries)
+                # Carry full P block (position + velocity + cross-terms)
+                kalman_state.P[0, 0] = float(prev_P[0, 0])
+                kalman_state.P[1, 1] = float(prev_P[1, 1])
+                kalman_state.P[0, 1] = float(prev_P[0, 1])
+                kalman_state.P[1, 0] = float(prev_P[1, 0])
                 kalman_state.P[2, 2] = float(prev_P[2, 2])
                 kalman_state.P[3, 3] = float(prev_P[3, 3])
                 kalman_state.P[2, 3] = float(prev_P[2, 3])
                 kalman_state.P[3, 2] = float(prev_P[3, 2])
-                # Initialize x_next consistently — this matters for
-                # downstream consumers that read x_next before any
-                # prediction call (probe-A logging, TIP MC).
-                kalman_state.x_next = kalman_state.F @ kalman_state.x
+                # Also carry position-velocity cross terms (critical for K[2,0] gain)
+                kalman_state.P[0, 2] = float(prev_P[0, 2])
+                kalman_state.P[2, 0] = float(prev_P[2, 0])
+                kalman_state.P[1, 3] = float(prev_P[1, 3])
+                kalman_state.P[3, 1] = float(prev_P[3, 1])
+
+        # W22-NC8d (2026-05-18): run kalman_prediction-equivalent BEFORE
+        # the first kalman_update fires in _evaluate_solution. This sets
+        # x_next = F @ x and P_next = F @ P @ F^T, introducing the position
+        # ↔ velocity cross-terms in P_next that are required for the
+        # Kalman gain K[2, :] to be non-zero. Without this, the first
+        # kalman_update has K[2, :] = 0 (because P_next starts diagonal)
+        # → velocity NEVER learns from observations.
+        #
+        # This is the standard KF lifecycle: predict → update. Pre-NC8d
+        # the code did update-only (no predict), so cross-terms never
+        # developed and velocity was effectively unlearnable.
+        kalman_state.x_next = kalman_state.F @ kalman_state.x
+        kalman_state.P_next = kalman_state.F @ kalman_state.P @ kalman_state.F.T
         
         # State transition matrix (constant velocity model)
         kalman_state.F = np.array([

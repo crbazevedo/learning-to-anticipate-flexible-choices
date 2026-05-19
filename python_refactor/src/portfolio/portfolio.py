@@ -65,15 +65,16 @@ class Portfolio:
     robustness: bool = False
 
     # W22-NC8c (2026-05-18): cross-period KF velocity carry-forward.
-    # Set by sms_emoa._initialize_population at the start of each period
-    # from previous_kf_state['x'][2:4] (the AMFC portfolio's velocity).
-    # Consumed by Portfolio.initialize_kalman_filter (used by
-    # Solution.__init__ AND _finalize_offspring_objectives) to set the
-    # initial KF state x[2:4] = carried velocity, instead of [0, 0].
-    # Reset to None when no previous period exists (period 0).
-    # When None, behavior matches pre-NC8c (fresh velocity = 0).
-    carried_velocity: Optional[np.ndarray] = None  # shape (2,) = [vel_ROI, vel_risk]
-    carried_velocity_covariance: Optional[np.ndarray] = None  # shape (2, 2)
+    # W22-NC8c-v2: also carry POSITION (x[0:2]), not just velocity.
+    # Both set by sms_emoa._initialize_population at start of each period
+    # from previous_kf_state. Consumed by Portfolio.initialize_kalman_filter
+    # to set x[0:2] = carried position AND x[2:4] = carried velocity.
+    # NC8c-v2 is essential: without position carry, NC8c was INERT (prev
+    # AMFC's velocity was always 0 due to chicken-and-egg).
+    carried_velocity: Optional[np.ndarray] = None
+    carried_velocity_covariance: Optional[np.ndarray] = None
+    carried_position: Optional[np.ndarray] = None  # NC8c-v2
+    carried_position_covariance: Optional[np.ndarray] = None  # NC8c-v2
 
     # W21-5 V5 (W18-CARRY-1 Reading): when True, compute_risk returns the
     # bare variance per thesis Eq 7.4 (`u^T Σ u`) instead of std-dev
@@ -579,19 +580,37 @@ class Portfolio:
         from ..algorithms.kalman_filter import create_kalman_params
         portfolio.kalman_state = create_kalman_params(initial_roi, initial_risk)
 
-        # W22-NC8c: apply carried velocity if available
-        if cls.carried_velocity is not None and portfolio.kalman_state is not None:
-            cv = cls.carried_velocity
-            portfolio.kalman_state.x[2] = float(cv[0])
-            portfolio.kalman_state.x[3] = float(cv[1])
-            # Also refresh x_next to be consistent (F applied to new x)
-            portfolio.kalman_state.x_next = (
-                portfolio.kalman_state.F @ portfolio.kalman_state.x
-            )
-            # Carry velocity-block covariance if available
-            if cls.carried_velocity_covariance is not None:
-                cvc = cls.carried_velocity_covariance
-                portfolio.kalman_state.P[2, 2] = float(cvc[0, 0])
-                portfolio.kalman_state.P[3, 3] = float(cvc[1, 1])
-                portfolio.kalman_state.P[2, 3] = float(cvc[0, 1])
-                portfolio.kalman_state.P[3, 2] = float(cvc[1, 0])
+        # W22-NC8c + NC8c-v2: apply carried position + velocity if available
+        if portfolio.kalman_state is not None:
+            # NC8c-v2: carried position
+            if cls.carried_position is not None:
+                cp = cls.carried_position
+                portfolio.kalman_state.x[0] = float(cp[0])
+                portfolio.kalman_state.x[1] = float(cp[1])
+                if cls.carried_position_covariance is not None:
+                    cpc = cls.carried_position_covariance
+                    portfolio.kalman_state.P[0, 0] = float(cpc[0, 0])
+                    portfolio.kalman_state.P[1, 1] = float(cpc[1, 1])
+                    portfolio.kalman_state.P[0, 1] = float(cpc[0, 1])
+                    portfolio.kalman_state.P[1, 0] = float(cpc[1, 0])
+            # NC8c: carried velocity
+            if cls.carried_velocity is not None:
+                cv = cls.carried_velocity
+                portfolio.kalman_state.x[2] = float(cv[0])
+                portfolio.kalman_state.x[3] = float(cv[1])
+                if cls.carried_velocity_covariance is not None:
+                    cvc = cls.carried_velocity_covariance
+                    portfolio.kalman_state.P[2, 2] = float(cvc[0, 0])
+                    portfolio.kalman_state.P[3, 3] = float(cvc[1, 1])
+                    portfolio.kalman_state.P[2, 3] = float(cvc[0, 1])
+                    portfolio.kalman_state.P[3, 2] = float(cvc[1, 0])
+            # NC8d: run predict-equivalent so first kalman_update sees
+            # cross-terms in P_next (required for K[2,0] gain → velocity learns)
+            if cls.carried_position is not None or cls.carried_velocity is not None:
+                portfolio.kalman_state.x_next = (
+                    portfolio.kalman_state.F @ portfolio.kalman_state.x
+                )
+                portfolio.kalman_state.P_next = (
+                    portfolio.kalman_state.F @ portfolio.kalman_state.P
+                    @ portfolio.kalman_state.F.T
+                )

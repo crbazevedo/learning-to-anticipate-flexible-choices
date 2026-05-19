@@ -1,0 +1,51 @@
+{
+  "n_records": 1839,
+  "n_scenarios": 2,
+  "n_seeds": 5,
+  "n_periods": 23,
+  "P_roi_n": 1839,
+  "P_roi_mean": 0.17412932200659345,
+  "P_roi_median": 0.1,
+  "P_roi_std": 0.10993778373524263,
+  "P_roi_min": 0.009090909090909084,
+  "P_roi_max": 0.37377114986432547,
+  "P_risk_mean": 0.17412932200659345,
+  "P_risk_median": 0.1,
+  "P_risk_std": 0.10993778373524263,
+  "P_risk_max": 0.37377114986432547,
+  "P_roi_vel_mean": 1000.0,
+  "P_risk_vel_mean": 1000.0,
+  "cond_pos_mean": 1.0,
+  "cond_pos_max": 1.0,
+  "cond_pos_p99": 1.0,
+  "n_degenerate_position": 0,
+  "fraction_degenerate_position": 0.0,
+  "degeneracy_H0_REJECTED": false,
+  "vel_pos_ratio_mean": 10362.700128277505,
+  "vel_pos_ratio_min": 2675.4338861171823,
+  "vel_pos_ratio_median": 10000.0,
+  "vel_pos_ratio_healthy": true,
+  "trace_pos_drift_slope": -0.0013301727003752009,
+  "trace_pos_drift_intercept": 0.3632731111631089,
+  "P_drifting": false,
+  "per_scenario": {
+    "ASMS_mHDM_K3_v2both": {
+      "n": 858,
+      "P_roi_median": 0.321726048955677,
+      "P_risk_median": 0.321726048955677,
+      "P_roi_max": 0.37377114986432547,
+      "P_risk_max": 0.37377114986432547,
+      "P_roi_vel_median": 1000.0,
+      "fraction_pos_diag_above_10": 0.0
+    },
+    "SMS_RDM_K0": {
+      "n": 981,
+      "P_roi_median": 0.1,
+      "P_risk_median": 0.1,
+      "P_roi_max": 0.1,
+      "P_risk_max": 0.1,
+      "P_roi_vel_median": 1000.0,
+      "fraction_pos_diag_above_10": 0.0
+    }
+  }
+}

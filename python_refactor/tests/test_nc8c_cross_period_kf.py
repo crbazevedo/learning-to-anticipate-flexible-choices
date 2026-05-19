@@ -27,12 +27,30 @@ from src.algorithms.solution import Solution
 
 @pytest.fixture(autouse=True)
 def reset_portfolio_state():
-    """Reset Portfolio class state between tests to avoid pollution."""
-    saved_velocity = Portfolio.carried_velocity
-    saved_velocity_cov = Portfolio.carried_velocity_covariance
+    """Reset Portfolio class state between tests to avoid pollution.
+
+    Saves+restores carried_velocity, carried_velocity_covariance,
+    carried_position, carried_position_covariance (NC8c-v2 additions).
+    Also resets Portfolio.mean_ROI/covariance to None to prevent
+    `_init_portfolio_class_stats` from one test leaking to others.
+    """
+    saved = (
+        Portfolio.carried_velocity,
+        Portfolio.carried_velocity_covariance,
+        getattr(Portfolio, "carried_position", None),
+        getattr(Portfolio, "carried_position_covariance", None),
+        Portfolio.mean_ROI,
+        Portfolio.covariance,
+    )
     yield
-    Portfolio.carried_velocity = saved_velocity
-    Portfolio.carried_velocity_covariance = saved_velocity_cov
+    (
+        Portfolio.carried_velocity,
+        Portfolio.carried_velocity_covariance,
+        Portfolio.carried_position,
+        Portfolio.carried_position_covariance,
+        Portfolio.mean_ROI,
+        Portfolio.covariance,
+    ) = saved
 
 
 def _init_portfolio_class_stats(n_assets: int = 8) -> None:
@@ -100,6 +118,50 @@ class TestNC8cCarriedVelocity:
         # x_next[0] = x[0] + 0.005 ≠ x[0]
         assert abs(float(x_next_carry[0]) - float(sol_carry.P.kalman_state.x[0]) - 0.005) < 1e-9
         assert abs(float(x_next_carry[1]) - float(sol_carry.P.kalman_state.x[1]) + 0.002) < 1e-9
+
+    def test_nc8c_v2_carried_position_is_applied(self):
+        """W22-NC8c-v2: carried_position overrides x[0:2] in fresh KF state."""
+        _init_portfolio_class_stats(n_assets=8)
+        Portfolio.carried_position = np.array([0.0042, 0.0035])
+        Portfolio.carried_position_covariance = np.array(
+            [[0.01, 0.0], [0.0, 0.01]]
+        )
+        sol = Solution(num_assets=8)
+        np.testing.assert_allclose(sol.P.kalman_state.x[0], 0.0042)
+        np.testing.assert_allclose(sol.P.kalman_state.x[1], 0.0035)
+        # Position-block covariance also applied
+        np.testing.assert_allclose(sol.P.kalman_state.P[0, 0], 0.01)
+
+    def test_nc8d_predict_before_first_update_consistency(self):
+        """W22-NC8d: when carry is active, x_next must equal F @ x and
+        P_next must equal F @ P @ F^T. This ensures cross-terms exist in
+        P_next so K[2, 0] can be non-zero on the first kalman_update
+        → velocity actually learns from observations."""
+        _init_portfolio_class_stats(n_assets=8)
+        Portfolio.carried_position = np.array([0.001, 0.001])
+        Portfolio.carried_position_covariance = np.array(
+            [[0.1, 0.0], [0.0, 0.1]]
+        )
+        Portfolio.carried_velocity = np.array([0.0005, 0.0002])
+        Portfolio.carried_velocity_covariance = np.array(
+            [[100.0, 0.0], [0.0, 100.0]]
+        )
+
+        sol = Solution(num_assets=8)
+        kf = sol.P.kalman_state
+        # NC8d invariant: x_next = F @ x
+        np.testing.assert_array_almost_equal(kf.x_next, kf.F @ kf.x)
+        # NC8d invariant: P_next = F @ P @ F^T
+        np.testing.assert_array_almost_equal(
+            kf.P_next, kf.F @ kf.P @ kf.F.T
+        )
+        # And P_next has cross-terms (P_next[0, 2] != 0) — this is the
+        # KEY enabler for velocity learning on the first kalman_update.
+        assert abs(float(kf.P_next[0, 2])) > 0.5, (
+            f"NC8d INVARIANT VIOLATED: P_next[0, 2] = {kf.P_next[0, 2]:.4e}, "
+            f"expected ≥ 0.5 (≈ carried_velocity_covariance diag = 100). "
+            f"Without this cross-term, K[2, 0] = 0 and velocity cannot learn."
+        )
 
     def test_offspring_finalize_inherits_carried_velocity(self):
         """W22-NC8b's `_finalize_offspring_objectives` calls
