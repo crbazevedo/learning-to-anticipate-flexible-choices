@@ -100,6 +100,83 @@ def _select_amfc_index(per_portfolio_efhv: np.ndarray) -> int:
     return int(np.argmax(per_portfolio_efhv))
 
 
+def _select_close_to_prev_amfc_index(
+    per_portfolio_efhv: np.ndarray,
+    weights: list,
+    previous_weights,
+    lambda_balance: float = 0.5,
+) -> int:
+    """W22-NC18 (2026-05-18): transaction-cost-aware AMFC selector.
+
+    Hybrid score balancing expected HV against composition continuity:
+        score_i = lambda_balance * efhv_norm_i
+                + (1 - lambda_balance) * jaccard(weights_i, previous_weights)
+
+    where:
+      - efhv_norm_i = (per_portfolio_efhv[i] - min) / (max - min)
+        normalized to [0, 1]
+      - jaccard(w, prev) = |active(w) ∩ active(prev)| / |active(w) ∪ active(prev)|
+        ∈ [0, 1]; 1 = identical asset set, 0 = disjoint sets
+
+    Period 0 / no `previous_weights`: falls back to standard AMFC (just argmax EFHV).
+
+    Receipt: W22 Probe G found mean Jaccard between consecutive AMFC weights
+    = 0.169 (chaotic; < 0.2 threshold), with 17 asset switches per period
+    out of ~12 active (nearly total turnover). Chaotic AMFC trajectory:
+      1. Incurs full transaction cost each period (per thesis §7.2.2 model)
+      2. Makes NC8c-v2 cross-period KF carry meaningless (prev_AMFC's
+         (ROI, risk) belongs to a totally different portfolio)
+      3. Adds noise to the "implemented portfolio" track u*_{t-1}
+
+    NC18 mitigation: at AMFC selection time, prefer Pareto-front portfolios
+    whose composition is closer to the previous AMFC (high Jaccard), while
+    still rewarding high expected HV. With default lambda_balance=0.5,
+    the two factors are equally weighted.
+
+    Args:
+        per_portfolio_efhv: array of expected future HV per Pareto-front portfolio
+        weights: list of weight vectors (one per portfolio), parallel to per_portfolio_efhv
+        previous_weights: previous period's AMFC weights (or None for period 0)
+        lambda_balance: ∈ [0, 1]; weight on EFHV (vs Jaccard stability).
+            1.0 = pure AMFC (no stability penalty);
+            0.0 = pure stability (ignore EFHV).
+            Default 0.5 = equal weighting.
+
+    Returns:
+        Selected portfolio index.
+    """
+    if per_portfolio_efhv.size == 0:
+        return 0
+    if previous_weights is None or len(weights) == 0:
+        return _select_amfc_index(per_portfolio_efhv)
+
+    # Normalize EFHV to [0, 1] (handles all-equal case gracefully)
+    efhv = np.asarray(per_portfolio_efhv, dtype=float)
+    efhv = np.where(np.isfinite(efhv), efhv, 0.0)
+    efhv_min = float(np.min(efhv))
+    efhv_max = float(np.max(efhv))
+    efhv_range = efhv_max - efhv_min
+    if efhv_range < 1e-12:
+        efhv_norm = np.zeros_like(efhv)
+    else:
+        efhv_norm = (efhv - efhv_min) / efhv_range
+
+    # Compute Jaccard of each portfolio's active set vs previous AMFC's
+    prev_w = np.asarray(previous_weights, dtype=float)
+    prev_active = set(np.flatnonzero(np.abs(prev_w) > 1e-12).tolist())
+    jaccards = np.zeros(len(weights))
+    for i, w in enumerate(weights):
+        w = np.asarray(w, dtype=float)
+        curr_active = set(np.flatnonzero(np.abs(w) > 1e-12).tolist())
+        union = prev_active | curr_active
+        inter = prev_active & curr_active
+        jaccards[i] = float(len(inter) / len(union)) if union else 1.0
+
+    # Combined score
+    scores = lambda_balance * efhv_norm + (1.0 - lambda_balance) * jaccards
+    return int(np.argmax(scores))
+
+
 def _train_and_extract_pareto(scenario: str, seed: int,
                                train_returns: pd.DataFrame,
                                previous_weights: np.ndarray | None = None,
@@ -318,7 +395,22 @@ def run_walk_forward(scenario: str,
                               or use_closed_form_expectation_efhv
                               or use_v2_per_front_efhv),
         )
-        u_star_idx = _select_amfc_index(per_portfolio_efhv)
+        # W22-NC18 (2026-05-18): allow env-var-driven choice of DM selector.
+        # W22_DM_SELECTOR=amfc (default) → standard argmax-EFHV (W17-4)
+        # W22_DM_SELECTOR=close_to_prev → transaction-cost-aware (NC18)
+        # W22_DM_SELECTOR_LAMBDA=<0..1> → balance for close_to_prev (default 0.5)
+        import os as _os
+        dm_selector = _os.environ.get("W22_DM_SELECTOR", "amfc").strip().lower()
+        if dm_selector == "close_to_prev":
+            try:
+                lam = float(_os.environ.get("W22_DM_SELECTOR_LAMBDA", "0.5"))
+            except ValueError:
+                lam = 0.5
+            u_star_idx = _select_close_to_prev_amfc_index(
+                per_portfolio_efhv, weights, previous_weights, lambda_balance=lam,
+            )
+        else:
+            u_star_idx = _select_amfc_index(per_portfolio_efhv)
         previous_weights = weights[u_star_idx]
         # W22-NC8c: carry the AMFC portfolio's KF state to next period.
         # pareto_kf_states[u_star_idx] is the same Solution-shaped KF state;
