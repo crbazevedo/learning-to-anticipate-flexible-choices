@@ -1,0 +1,19 @@
+# Walk-Forward OOS Future Hypervolume — PO(8,1.0) synthetic data
+
+*PO data: 1250 days × 30 assets*
+
+## Protocol
+
+- Train window: 378 days
+- Step: 50 days
+- MC scenarios per period (E): 200
+- Scenarios: ASMS_mHDM_K3_v2both,SMS_RDM_K0
+- Seeds: 5
+- Wall-clock: 1579.8s
+
+## Aggregated results
+
+| scenario | n_seeds | grand mean Ŝ | std | median | min | max |
+|---|---|---|---|---|---|---|
+| ASMS_mHDM_K3_v2both | 5 | 3.284007e-04 | 3.119684e-05 | 3.360073e-04 | 2.937428e-04 | 3.683988e-04 |
+| SMS_RDM_K0 | 5 | 3.561577e-04 | 2.932580e-05 | 3.556453e-04 | 3.254071e-04 | 3.948964e-04 |
