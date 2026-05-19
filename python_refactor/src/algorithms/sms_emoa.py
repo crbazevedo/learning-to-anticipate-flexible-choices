@@ -493,8 +493,18 @@ class SMSEMOA:
         # Gross ROI stays on portfolio.ROI for reporting; only the
         # objective vector (used by dominance + HV contribution)
         # uses ROI_net.
+        #
+        # W22 Probe I (2026-05-19): allow disabling transaction cost via
+        # env var W22_DISABLE_TXN_COST=1. Tests asymmetric impact
+        # hypothesis: if Probe G's chaotic AMFC (Jaccard 0.169 = 75% asset
+        # turnover per period) is HURTING ASMS more than SMS via txn cost,
+        # then setting cost=0 should narrow or reverse the ASMS-SMS gap.
+        # If gap WIDENS with cost=0, cost is asymmetrically penalizing
+        # ASMS; if NEUTRAL, cost is symmetric noise.
+        import os as _os
+        disable_txn_cost = (_os.environ.get("W22_DISABLE_TXN_COST", "0").strip() == "1")
         roi_objective = portfolio.ROI
-        if self.previous_weights is not None:
+        if self.previous_weights is not None and not disable_txn_cost:
             from ..portfolio.portfolio import Portfolio
             txn_cost = Portfolio.compute_thesis_transaction_cost(
                 weights_new=np.asarray(portfolio.investment, dtype=float),
