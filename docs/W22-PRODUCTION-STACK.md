@@ -82,7 +82,7 @@ Under `use_v2_anticipative_rate=True` (set in `ASMS_mHDM_K3_v2both`):
 
 The v2_anticipative_rate flag **defends ASMS** against the thesis Eq 7.16 pathology where saturated TIP would silently disable anticipation.
 
-## Probe coverage (8 of 10 complete, A-J)
+## Probe coverage (ALL 10 complete, A-J)
 
 | Probe | Status | Verdict |
 |---|---|---|
@@ -91,11 +91,13 @@ The v2_anticipative_rate flag **defends ASMS** against the thesis Eq 7.16 pathol
 | C — AMFC vs alternative DMs | 🟢 | AMFC > Random p=0.0002; Sharpe marginally better |
 | D — Pareto front diversity | 🟢 | Median front size 7+ |
 | E — Anticipative distribution sanity | 🟢 | P[ROI] 486 → 0.049 (NC13a worked) |
-| F — Dirichlet predictor informativeness | ⏳ pending | (decision-space sibling of A) |
+| F — Dirichlet predictor informativeness | 🔴 | Wilcoxon p=0.9992 — Dirichlet does NOT beat persistence; simplify |
 | G — AMFC weight stability | 🔴 ⚫ | Jaccard 0.169 chaotic; but NC18 fix REJECTED → chaos is feature not bug |
 | H — Selection pressure (pop/gens) | 🟡 | ASMS>SMS at pop=30/gens=40 (p=0.0098) but Δ-of-Δ NS vs baseline |
 | I — Transaction cost asymmetric impact | 🟢 | Cost taxes ASMS by +8.36 pp (p=0.006, n=10) |
 | J — "Do nothing" baseline | 🟢 | AMFC > DoNothing 83% of transitions (+20% HV) |
+
+**ASMS algorithmic ceiling on FTSE 2006-2012: ~0.000494 grand-mean Ŝ** (consistent across Probe H, Probe I, and combined H+I — helpers saturate at the same ceiling, don't stack additively).
 
 ## Rejected candidates (with evidence)
 
@@ -144,7 +146,7 @@ The v2_anticipative_rate flag **defends ASMS** against the thesis Eq 7.16 pathol
 
 ## Session commit log
 
-36 commits total, mostly on `feat/w22-inspection-backlog`. Key milestones:
+40 commits total on `feat/w22-inspection-backlog`. Key milestones:
 - `e6fc6ba` NC7 + Probe A definitive
 - `27cbcd2` NC8b breakthrough (first ASMS > SMS at +1.7%)
 - `3d41e91` NC13a clamp
@@ -153,3 +155,5 @@ The v2_anticipative_rate flag **defends ASMS** against the thesis Eq 7.16 pathol
 - `c0e462b` Probe H validated n=6 (+13.62%, before noise emerged at n=10)
 - `1a803a8` Probe H honest n=10 (+8.89%; Δ-of-Δ NS)
 - `5bed18d` Probe I validated n=10 (+16.11%, +8.36 pp Δ-of-Δ p=0.006)
+- `e4c758f` Combined H+I (n=5): helpers don't stack; ASMS ceiling ~0.000494
+- `150a9bf` Probe F: Dirichlet does NOT beat persistence (p=0.9992) — completes A-J probe alphabet
