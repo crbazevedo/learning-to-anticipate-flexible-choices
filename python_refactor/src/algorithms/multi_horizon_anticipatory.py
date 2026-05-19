@@ -231,6 +231,37 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
             else:
                 lambda_combined = 0.5 * (lambda_h + lambda_k)
 
+            # W22-NC15 (2026-05-19): per-portfolio λ shrinkage by
+            # KF position-block uncertainty. Even when TIP is saturated
+            # (→ uniform λ ≈ 0.5 under v2_anticipative_rate), we can
+            # still differentiate per-portfolio anticipation rates by
+            # shrinking λ for portfolios with HIGH KF prediction
+            # uncertainty (don't trust predictions when we're uncertain).
+            #
+            # Shrinkage factor: λ_eff = λ_combined / (1 + α · trace(P[:2,:2]))
+            # where α = NC15_SHRINK_ALPHA (env-var, default 1.0).
+            #   - trace(P[:2,:2]) ≈ 0.1 (low unc.) → shrink ≈ 0.91 → λ_eff ≈ 0.45
+            #   - trace(P[:2,:2]) ≈ 1.0 (high unc.) → shrink ≈ 0.5 → λ_eff ≈ 0.25
+            #
+            # Mechanism: portfolios with stable KF state get FULL anticipation;
+            # portfolios with noisy KF state get DAMPENED anticipation. This
+            # provides per-portfolio λ differentiation even with saturated TIP.
+            #
+            # Enabled via env var W22_NC15_LAMBDA_SHRINKAGE=1 (default off
+            # for backward compatibility). Tunable via W22_NC15_SHRINK_ALPHA
+            # (default 1.0).
+            import os as _os
+            if _os.environ.get("W22_NC15_LAMBDA_SHRINKAGE", "0").strip() == "1":
+                try:
+                    shrink_alpha = float(_os.environ.get("W22_NC15_SHRINK_ALPHA", "1.0"))
+                except ValueError:
+                    shrink_alpha = 1.0
+                kf = getattr(solution.P, "kalman_state", None)
+                if kf is not None and getattr(kf, "P", None) is not None:
+                    pos_trace = float(kf.P[0, 0] + kf.P[1, 1])
+                    shrink = 1.0 / (1.0 + shrink_alpha * max(0.0, pos_trace))
+                    lambda_combined = lambda_combined * shrink
+
             # Trace row per horizon (consumed by W16-4 flush_lambda_trace_csv)
             self._lambda_trace_rows.append({
                 "period": current_time,
