@@ -409,16 +409,67 @@ This document is updated whenever:
 - A new module-level hypothesis is raised
 - A mitigation lands and changes the empirical picture
 
-## Current state
+## Current state (2026-05-18 / updated after NC8b breakthrough + NC13a ship)
 
 | Probe | Status | Output |
 |---|---|---|
-| A | 🟢 COMPLETE (both runs) → ⚫ H0 NOT rejected pre-NC7 AND post-NC7; **NC8a/b/c structural candidates surfaced** | `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY.md` + `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY-POST-NC7.md` |
-| B | 🔴 PENDING | TBD |
-| C | 🔴 PENDING | TBD |
-| D | 🟡 PRELIMINARY signal from Probe A run log: front size 5-11 per generation (likely PASS) | TBD |
-| E | 🔴 PENDING | TBD |
+| A | 🟢 COMPLETE (pre/post-NC7) → ⚫ H0 NOT rejected; NC8b shipped; **post-NC8b+NC13a re-run in flight** | `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY.md` + `docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY-POST-NC7.md` |
+| B | 🟢 COMPLETE (pre/post-NC12) → 🔴 99.86%/99.87% TIP saturation both; multi-horizon root identified (NC13) | `docs/W22-PROBE-B-SIGNAL-DISTRIBUTIONS-PRE-NC12.md` + `docs/W22-PROBE-B-SIGNAL-DISTRIBUTIONS-POST-NC8b-NC12.md` |
+| C | 🔴 PENDING (analyzer-ready; can run on existing Pareto fronts no new run needed) | TBD |
+| D | 🟢 COMPLETE → ✅ PASS (median front size 7 ≥ 5) | `docs/W22-PROBE-D-PARETO-FRONT-DIVERSITY.md` |
+| E | 🟢 COMPLETE → 🔴 **ASMS P[ROI] median = 486 vs SMS 0.1** (4860× drift via positive-feedback loop) | `docs/W22-PROBE-E-ANTICIPATIVE-DISTRIBUTION-SANITY.md` |
 | F | 🔴 PENDING | TBD |
+
+## 🎯 HILL-CLIMB BREAKTHROUGH (2026-05-18)
+
+**NC8b shipped (commit `27cbcd2`) → ASMS BEATS SMS for the first time** in the W17–W22 chain:
+
+| Run | ASMS Ŝ | SMS Ŝ | Δ % |
+|---|---|---|---|
+| Baseline (post-NC7) | 0.000381 | 0.000405 | −5.92% |
+| **NC8b only** | 0.000422 | 0.000415 | **+1.70%** ✅ |
+| NC8b + NC12 | 0.000401 | 0.000414 | −3.09% |
+
+(Caveat: n=2 seeds; needs wider validation.)
+
+NC8b mechanism: `_finalize_offspring_objectives` recomputes Portfolio.compute_efficiency + re-initializes KF state on the ACTUAL crossover/mutation output weights instead of leaving stale random-init values. Both SMS and ASMS gain; ASMS gains more because TIP/λ machinery was amplifying stale noise.
+
+NC12 mechanism: mathematically correct (Eq 15 vs naïve SUM) but ZERO production effect for multi-horizon ASMS scenarios (the path `learn_population` uses) — multi-horizon already uses correct Eq 15 at `multi_horizon_anticipatory.py:666-668`. NC12 may help future single-horizon configurations.
+
+## Positive-feedback loop diagnosis (NC14, 2026-05-18)
+
+Probe E revealed a self-reinforcing loop in ASMS:
+
+```
+Large P[:2,:2] → TIP MC samples are pure noise → TIP ≈ 0.5 → λ ≈ 0.5 →
+combined_cov = w_h² · predicted_cov puts 0.25 weight on each large
+predicted_cov → kalman_state.P[:2,:2] stays large → next iteration's
+TIP also noise → loop continues
+```
+
+Empirical receipt (Probe E on post-NC7 pre-NC8b data):
+- ASMS_mHDM_K3_v2both P[ROI] median = **486** (300 records)
+- SMS_RDM_K0 P[ROI] median = **0.1** (344 records)
+- 4860× factor difference — entirely attributable to anticipation arm
+
+**NC13a (shipped, commit `3d41e91`)** breaks the loop by clamping
+`predicted_cov` ≤ 1.0 in the n-step predictor. Predicted post-NC13a effect:
+- combined_cov upper bound becomes `w_0² · current + Σ w_h² · 1.0`
+- Steady state: P[:2,:2] ≤ 1 / (1 - w_0²) ≈ 2-100 (far below 486)
+- TIP MC samples should concentrate near means → TIP escapes (0.45, 0.55) → λ becomes informative
+
+## Refined priority order (post-breakthrough)
+
+| P | Item | Status | Justification |
+|---|---|---|---|
+| P0 | NC8b+NC13a 3-seed combined smoke | IN FLIGHT (PID 66499, ~37min) | Validates NC13a effect on multi-horizon TIP |
+| P1 | Probe A post-NC8b+NC13a (1 scenario × 1 seed) | IN FLIGHT (PID 67xxx) | Does NC8b unblock KF velocity learning? |
+| P2 | NC8c — cross-period KF state persistence | PENDING | Highest remaining structural change; biggest potential gain on KF velocity learning |
+| P3 | Probe C (AMFC vs alternative DMs) | analyzer-ready | Can use existing data; tests if DM is informative |
+| P4 | Probe F (Dirichlet predictor) | PENDING | Decision-space sibling of A; lower priority since A's mechanism is well-understood |
+| P5 | Wider 5-seed NC8b validation | PENDING (CPU-constrained) | Statistical confidence on +1.70% |
+| P6 | PO(8,1.0) loader (synthetic data) | PENDING | Separate stream; tests strongest-signal dataset |
+| P7 | W21-6 final synthesis | PENDING | Post-probes consolidation
 
 ### Probe A summary (2026-05-18)
 
