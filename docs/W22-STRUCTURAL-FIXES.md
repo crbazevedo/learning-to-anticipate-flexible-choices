@@ -4,7 +4,7 @@
 procedure should not happen. We should fix those."
 
 **Branch:** `feat/w22-inspection-backlog`
-**Status:** 7 fixes shipped, 98 tests passing, all opt-in/-out via env var or kwarg
+**Status:** 8 fixes shipped, 102 NC + multi-horizon tests passing, all opt-in/-out via env var or kwarg. Pre-existing failures in test_anticipatory_learning / test_algorithms / test_portfolio / test_scenario_differentiation are unchanged by these fixes (verified via stash compare).
 
 ---
 
@@ -145,6 +145,24 @@ identity-flip verification at high α.
 
 ---
 
+### 8. NC31: TIP Defn 6.1 conditional mode
+**Commit:** `7940604`
+**Degeneracy:** Per W22 Inspection 1, the TIP code samples BOTH current and
+predicted as Gaussians, violating Defn 6.1's conditional `| ẑ_t` (which
+requires current to be OBSERVED, not sampled). Inspection 1 found empirically
+equivalent results in close-means regimes (<1.5% delta) — but the
+implementation is mathematically WRONG per the definition.
+
+**Structural fix:** Opt-in via `W22_NC31_TIP_CONDITIONAL=1`. When enabled,
+current is treated as observed (no sampling) and only predicted is sampled —
+matching Defn 6.1 exactly. Default OFF preserves legacy behavior.
+
+**Tests:** 4 new tests in `tests/test_nc31_tip_conditional.py` including
+the empirical-equivalence regression lock and the deterministic-predicted-
+variance dominance limit.
+
+---
+
 ## Activation matrix
 
 | Fix | Default | How to opt-in / out |
@@ -158,6 +176,7 @@ identity-flip verification at high α.
 | NC13b smooth clamp | OFF | `W22_NC13B_SMOOTH_CLAMP=1` env var |
 | NC27-deep posterior | OFF | `W22_NC27_PREDICTOR=dirichlet_posterior` |
 | NC30 c variance penalty | OFF (α=0) | `variance_penalty=N` (try 1.0 first) |
+| NC31 TIP conditional mode | OFF | `W22_NC31_TIP_CONDITIONAL=1` |
 
 **Rationale for defaults:** the four ON-by-default fixes change ASMS
 computations that were ALWAYS degenerate (no good behavior to preserve);
@@ -177,8 +196,10 @@ validated on FTSE).
 | NC29a (γ^h discount) | 5 | ✓ |
 | NC13b (smooth clamp) | 7 | ✓ |
 | NC30 (AMFC selector + telemetry + b/c/d) | 28 | ✓ |
+| NC31 (TIP conditional mode) | 4 | ✓ |
 | multi_horizon_anticipatory (pre-existing) | 28 | ✓ |
-| **Total** | **98** | **✓** |
+| temporal_incomparability_probability (pre-existing) | 23 | ✓ |
+| **Total** | **125** | **✓** |
 
 ---
 
