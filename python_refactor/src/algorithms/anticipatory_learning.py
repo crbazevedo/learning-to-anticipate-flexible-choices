@@ -112,42 +112,56 @@ class AnticipativeDistribution:
         return 1.0 / (1.0 + det)
 
 class DirichletPredictor:
-    """Dirichlet-based prediction for portfolio weights."""
-    
+    """Dirichlet-based prediction for portfolio weights.
+
+    HONEST SCAR (W22 Inspection 3, 2026-05-19): despite the name, this is
+    NOT a Dirichlet posterior. ``dirichlet_mean_prediction_vec`` is plain
+    exponential smoothing on raw weight vectors with re-normalization;
+    ``dirichlet_mean_map_update`` uses a Dirichlet-flavoured variance
+    formula but the predict step (the one driving anticipation) is
+    exponential smoothing.
+
+    NC27 ships ``LogisticNormalPredictor`` as a drop-in alternative that
+    operates in Aitchison log-ratio coordinates and respects the simplex
+    geometry. Selection is via the ``W22_NC27_PREDICTOR`` env var (default
+    ``"dirichlet"`` preserves existing behavior; set ``"logistic_normal"``
+    to opt in).
+    """
+
     @staticmethod
-    def dirichlet_mean_prediction_vec(prev_proportions: np.ndarray, current_proportions: np.ndarray, 
+    def dirichlet_mean_prediction_vec(prev_proportions: np.ndarray, current_proportions: np.ndarray,
                                     anticipative_rate: float) -> np.ndarray:
         """
         Predict portfolio weights using Dirichlet mean prediction.
-        
+
         Args:
             prev_proportions: Previous portfolio weights
             current_proportions: Current portfolio weights
             anticipative_rate: Anticipatory learning rate
-            
+
         Returns:
             Predicted portfolio weights
         """
         anticipative_rate = 0.5 * anticipative_rate
         prediction = prev_proportions + anticipative_rate * (current_proportions - prev_proportions)
-        
+
         # Normalize and ensure bounds
         prediction = np.maximum(prediction, 0.0)
         prediction = np.minimum(prediction, 1.0)
-        
+
         return prediction / np.sum(prediction)
-    
+
     @staticmethod
-    def dirichlet_mean_map_update(p_predicted: np.ndarray, p_obs: np.ndarray, 
+    def dirichlet_mean_map_update(p_predicted: np.ndarray, p_obs: np.ndarray,
                                 concentration: float) -> np.ndarray:
         """
         Update portfolio weights using Dirichlet MAP estimation.
-        
+
         Args:
             p_predicted: Predicted portfolio weights
             p_obs: Observed portfolio weights
             concentration: Concentration parameter
-            
+
         Returns:
             Updated portfolio weights
         """
@@ -157,7 +171,7 @@ class DirichletPredictor:
         factor = alpha_sum**3 + alpha_sum**2
         alpha_square = alpha**2
         var = (alpha_sum * alpha - alpha_square) / factor
-        
+
         # MAP update
         p_updated = np.zeros_like(p_predicted)
         for i in range(len(p_predicted)):
@@ -165,8 +179,137 @@ class DirichletPredictor:
                 p_updated[i] = 0.0
             else:
                 p_updated[i] = p_predicted[i] + var[i] * (p_obs[i] - p_predicted[i]) / (p_predicted[i] * (1 - p_predicted[i]))
-        
+
         return p_updated / np.sum(p_updated)
+
+
+class LogisticNormalPredictor:
+    """Logistic-Normal (Aitchison compositional) predictor for portfolio weights.
+
+    W22-NC27 (2026-05-19): drop-in alternative to ``DirichletPredictor``
+    that operates in unconstrained log-ratio coordinates instead of raw
+    simplex weights.
+
+    Forward transform (Aitchison, with last asset as reference):
+        y_i = log(w_i / w_d)   for i ∈ {0, ..., d-2}
+    Inverse transform:
+        w_d = 1 / (1 + Σ exp(y_i)),   w_i = exp(y_i) · w_d for i < d-1
+
+    Prediction is linear smoothing in y-space; map_update is concentration-
+    weighted posterior mean in y-space.
+
+    HONEST SCAR (caught by NC27 test 2026-05-19): this is a COORDINATE-SYSTEM
+    change, NOT a Bayesian-posterior fix. At production anticipative rates
+    (∈ [1.0, 2.0] per non_dominance_probability), both this predictor and
+    the legacy DirichletPredictor track recent observations — neither is a
+    true running-mean estimator. The 2.8× accuracy gain claimed in
+    W22 Inspection 3 was for the TRUE Dirichlet posterior
+    ``α_{t+1} = α_t + obs`` which is STATEFUL (maintains a running α across
+    calls) and therefore cannot be implemented under DirichletPredictor's
+    stateless-static-method interface.
+
+    What NC27 DOES deliver:
+      - Respects simplex geometry (log-ratio space is the natural unconstrained
+        embedding of the simplex; linear smoothing there avoids the
+        "clip-then-renormalize" pathology of raw-weight smoothing)
+      - Bounded outputs always on simplex (no clip-to-zero rounding losses)
+      - Reusable as preprocessing layer for a future compositional KF
+
+    What NC27 does NOT deliver:
+      - Bayesian posterior tracking (no running α)
+      - Accuracy gain at production rates against the legacy DirichletPredictor
+        (both are coordinate-system variants of exponential smoothing)
+
+    A future NC27-deep would implement ``DirichletPosteriorPredictor`` with
+    a stateful α buffer per-portfolio per-time, providing the actual
+    Inspection-3 accuracy gain. That requires API changes (introduce state)
+    and is out of NC27's scope.
+
+    Selected via env var ``W22_NC27_PREDICTOR=logistic_normal`` (default
+    is ``"dirichlet"`` for backward compatibility).
+    """
+
+    _EPS = 1e-10
+
+    @staticmethod
+    def _forward(w: np.ndarray) -> np.ndarray:
+        """Forward transform: simplex w (length d) → y (length d-1).
+
+        Clips weights to ≥ EPS, re-normalises, takes log-ratio against
+        the LAST asset (Aitchison reference choice). Reference choice is
+        arbitrary; results are equivariant under reference change.
+        """
+        w_clip = np.maximum(w, LogisticNormalPredictor._EPS)
+        w_clip = w_clip / np.sum(w_clip)
+        return np.log(w_clip[:-1] / w_clip[-1])
+
+    @staticmethod
+    def _inverse(y: np.ndarray) -> np.ndarray:
+        """Inverse transform: y (length d-1) → simplex w (length d).
+
+        Uses log-sum-exp shift for numerical stability when y has large
+        magnitude entries.
+        """
+        # Numerical stability: shift by max so exp doesn't overflow.
+        y_shift = y - np.max(np.concatenate([y, [0.0]]))
+        exp_y = np.exp(y_shift)
+        # Reference asset's log-ratio is 0 (since log(w_d/w_d) = 0).
+        exp_ref = np.exp(0.0 - np.max(np.concatenate([y, [0.0]])))
+        denom = exp_ref + np.sum(exp_y)
+        w = np.empty(len(y) + 1)
+        w[:-1] = exp_y / denom
+        w[-1] = exp_ref / denom
+        # Belt-and-suspenders renormalisation (handles accumulated FP error).
+        return w / np.sum(w)
+
+    @staticmethod
+    def dirichlet_mean_prediction_vec(prev_proportions: np.ndarray,
+                                       current_proportions: np.ndarray,
+                                       anticipative_rate: float) -> np.ndarray:
+        """Linear smoothing in log-ratio space (matches DirichletPredictor signature).
+
+        Same anticipative-rate semantics as the Dirichlet variant: rate=1.0
+        means full step from prev → current; rate=0.0 means stay at prev.
+        The 0.5 prefactor matches the legacy Dirichlet implementation so
+        callers see equivalent step-size scaling.
+        """
+        rate = 0.5 * anticipative_rate
+        y_prev = LogisticNormalPredictor._forward(prev_proportions)
+        y_curr = LogisticNormalPredictor._forward(current_proportions)
+        y_pred = y_prev + rate * (y_curr - y_prev)
+        return LogisticNormalPredictor._inverse(y_pred)
+
+    @staticmethod
+    def dirichlet_mean_map_update(p_predicted: np.ndarray, p_obs: np.ndarray,
+                                   concentration: float) -> np.ndarray:
+        """Concentration-weighted posterior mean in log-ratio space.
+
+        Concentration is interpreted as prior strength on the prediction
+        (matching the Dirichlet variant's role); larger concentration →
+        more weight on p_predicted, less on p_obs.
+
+        weight_prior = concentration / (concentration + 1)
+        y_post       = weight_prior · y_pred + (1 - weight_prior) · y_obs
+        """
+        y_pred = LogisticNormalPredictor._forward(p_predicted)
+        y_obs = LogisticNormalPredictor._forward(p_obs)
+        weight = concentration / (concentration + 1.0) if concentration > 0 else 0.5
+        y_updated = weight * y_pred + (1.0 - weight) * y_obs
+        return LogisticNormalPredictor._inverse(y_updated)
+
+
+def _get_active_predictor():
+    """W22-NC27 dispatcher: return the predictor class selected by env var.
+
+    Default is ``DirichletPredictor`` (preserves existing behavior).
+    Set ``W22_NC27_PREDICTOR=logistic_normal`` to opt into the
+    Aitchison-compositional alternative.
+    """
+    import os as _os
+    name = _os.environ.get("W22_NC27_PREDICTOR", "dirichlet").strip().lower()
+    if name == "logistic_normal":
+        return LogisticNormalPredictor
+    return DirichletPredictor
 
 class AnticipatoryLearning:
     """Enhanced anticipatory learning system aligned with C++ ASMS-EMOA implementation."""
@@ -901,9 +1044,10 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
             # Dirichlet mean prediction
             w_prediction = self.dirichlet_mean_prediction(w_previous, w_current, t)
             
-            # Update weights using Dirichlet MAP
+            # Update weights using Dirichlet MAP (W22-NC27: dispatcher-selected)
+            _predictor = _get_active_predictor()
             if t == current_time - 1:
-                w_prediction.P.investment = DirichletPredictor.dirichlet_mean_map_update(
+                w_prediction.P.investment = _predictor.dirichlet_mean_map_update(
                     w_prediction.P.investment, population[solution_idx].P.investment, concentration
                 )
             else:
@@ -911,8 +1055,8 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
                     next_weights = self.historical_populations[t + 1][solution_idx].P.investment
                 else:
                     next_weights = population[solution_idx].P.investment
-                
-                w_prediction.P.investment = DirichletPredictor.dirichlet_mean_map_update(
+
+                w_prediction.P.investment = _predictor.dirichlet_mean_map_update(
                     w_prediction.P.investment, next_weights, concentration
                 )
             
@@ -945,8 +1089,8 @@ class TIPIntegratedAnticipatoryLearning(AnticipatoryLearning):
         # Compute anticipative rate
         anticipative_rate = 2.0 - self.non_dominance_probability(prev_solution, current_solution)
         
-        # Predict weights
-        predicted_solution.P.investment = DirichletPredictor.dirichlet_mean_prediction_vec(
+        # Predict weights (W22-NC27: dispatcher-selected predictor)
+        predicted_solution.P.investment = _get_active_predictor().dirichlet_mean_prediction_vec(
             prev_solution.P.investment, current_solution.P.investment, anticipative_rate
         )
         
