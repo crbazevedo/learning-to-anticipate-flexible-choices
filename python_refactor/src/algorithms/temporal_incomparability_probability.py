@@ -151,38 +151,57 @@ class TemporalIncomparabilityCalculator:
         This is the most accurate method as it uses the actual uncertainty
         estimates from the Kalman filter state.
         """
+        # W22-NC31 STRUCTURAL FIX (operator directive 2026-05-19): per Defn 6.1,
+        # TIP = Pr[ẑ_t || ẑ_{t+h} | ẑ_t] — the conditional `| ẑ_t` means
+        # current is OBSERVED (fixed), only predicted is sampled.
+        # Pre-fix the code sampled BOTH current and predicted (joint mode),
+        # which is empirically close to the conditional in most regimes
+        # (Inspection 1: <1.5% delta across 5 scenarios) but is mathematically
+        # WRONG per the definition.
+        #
+        # Opt-in via env var W22_NC31_TIP_CONDITIONAL=1 (default OFF for
+        # backward compat). When enabled, current is treated as observed
+        # (no sampling) and only predicted is sampled — matching Defn 6.1
+        # exactly.
+        import os as _os
+        conditional_mode = _os.environ.get("W22_NC31_TIP_CONDITIONAL", "0").strip() == "1"
+
         try:
             # Monte Carlo sampling with proper covariance
             mutual_non_dominance = 0
-            
+
             for _ in range(self.monte_carlo_samples):
-                # Sample from current distribution
-                current_sample = np.random.multivariate_normal(
-                    [current_roi, current_risk], current_cov
-                )
-                c_roi, c_risk = current_sample
-                
+                if conditional_mode:
+                    # NC31: current is FIXED at its observed value (Defn 6.1 correct)
+                    c_roi, c_risk = current_roi, current_risk
+                else:
+                    # Legacy: sample current too (empirically equivalent)
+                    current_sample = np.random.multivariate_normal(
+                        [current_roi, current_risk], current_cov
+                    )
+                    c_roi, c_risk = current_sample
+
                 # Sample from predicted distribution
                 predicted_sample = np.random.multivariate_normal(
                     [predicted_roi, predicted_risk], predicted_cov
                 )
                 p_roi, p_risk = predicted_sample
-                
+
                 # Check dominance relationships
                 current_dominates = (c_roi > p_roi) and (c_risk < p_risk)
                 predicted_dominates = (p_roi > c_roi) and (p_risk < c_risk)
-                
+
                 # Count mutual non-dominance
                 if not current_dominates and not predicted_dominates:
                     mutual_non_dominance += 1
-            
+
             tip = mutual_non_dominance / self.monte_carlo_samples
-            
+
         except np.linalg.LinAlgError:
             # Fallback to simple method if covariance is not positive definite
             logger.warning("Covariance matrix not positive definite, using fallback TIP calculation")
             tip = self._calculate_tip_simple(current_roi, current_risk, predicted_roi, predicted_risk)
-        
+
         return self._clamp_tip(tip)
     
     def _calculate_tip_monte_carlo(self, current_roi: float, current_risk: float,
