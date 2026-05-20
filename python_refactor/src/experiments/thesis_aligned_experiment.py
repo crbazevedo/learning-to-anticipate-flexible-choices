@@ -213,7 +213,32 @@ class ThesisAlignedExperiment:
         if dm_type == 'Hv-DM':
             # Select solution with maximum expected hypervolume
             return max(population, key=lambda s: s.Delta_S)
-        
+
+        elif dm_type == 'Hv-DM-AMFC':
+            # W22-NC30: operator-correct AMFC (Anticipative Maximal Flexible Choice).
+            # argmax_{s in P_t}  E[ HV-contribution(s_{t+h} in forecast F_{t+h}) ]
+            # See docs/W22-NC30-CONTRACT.md and src/algorithms/amfc_selector.py.
+            from ..algorithms.amfc_selector import select_amfc
+            horizon = int(dm_config.get('horizon', 1))
+            n_mc = int(dm_config.get('n_mc', 200))
+            # z_ref: caller-supplied via dm_config, else attempt sliding-window
+            # derivation, else use the SMS-EMOA default (0.0, 0.05). The
+            # ambiguity here is the same one Inspection 6 flagged — z_ref
+            # should ideally be data-derived; this is the v1 placeholder.
+            R1 = float(dm_config.get('R1', 0.0))
+            R2 = float(dm_config.get('R2', 0.05))
+            seed = dm_config.get('seed', None)
+            rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
+            return select_amfc(
+                population,
+                horizon=horizon,
+                n_mc=n_mc,
+                R1=R1,
+                R2=R2,
+                pareto_only=True,
+                rng=rng,
+            )
+
         elif dm_type == 'R-DM':
             # Random selection from Pareto frontier
             pareto_front = [s for s in population if s.Pareto_rank == 0]
@@ -221,14 +246,14 @@ class ThesisAlignedExperiment:
                 return np.random.choice(pareto_front)
             else:
                 return np.random.choice(population)
-        
+
         elif dm_type == 'M-DM':
             # Median portfolio by weight vector
             # Sort by first objective (ROI) and select median
             sorted_pop = sorted(population, key=lambda s: s.P.ROI)
             median_idx = len(sorted_pop) // 2
             return sorted_pop[median_idx]
-        
+
         else:
             raise ValueError(f"Unknown decision maker type: {dm_type}")
     
