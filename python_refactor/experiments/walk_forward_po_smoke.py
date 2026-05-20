@@ -152,6 +152,21 @@ def main(argv=None):
             )
     output.write_text("\n".join(lines))
     print(f"[po-smoke] wrote results to {output}", file=sys.stderr)
+
+    # W22 NC smoke runner expects JSON when --output ends with .json
+    # (the legacy default is markdown; new path is JSON-compatible).
+    if str(output).endswith(".json"):
+        json_payload = [
+            {
+                "scenario": r["scenario"],
+                "seed": r["seed"],
+                "grand_mean": float(r.get("grand_mean", float("nan"))),
+                "wall": float(r.get("wall", 0.0)),
+            }
+            for r in results
+        ]
+        output.write_text(json.dumps(json_payload, indent=2))
+        print(f"[po-smoke] wrote JSON results to {output}", file=sys.stderr)
     return 0
 
 

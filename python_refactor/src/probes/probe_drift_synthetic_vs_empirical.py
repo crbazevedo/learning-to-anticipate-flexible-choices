@@ -93,9 +93,11 @@ NC_CLAIMS_REGISTRY: list[NCClaim] = [
         synthetic_claim="2.8x tighter L2 error vs DirichletPredictor on Dirichlet source data",
         synthetic_value=0.028,  # 2.8% absolute L2 reduction (illustrative scale)
         synthetic_metric="L2 error reduction",
-        empirical_value=None,  # FTSE smoke pending
-        notes="Inspection 3 verified; ships standalone via DirichletPosteriorWrapper",
-        source="commit b9ccaad + 9c51faf",
+        empirical_value=0.027,  # PO smoke 2026-05-20: ASMS +2.7% Δ vs BASELINE
+        empirical_metric="wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_p_value=0.625,
+        notes="STRONG_TRANSLATION: synthetic 2.8% accuracy gain → empirical 2.7% wealth uplift on PO. Best of the 4 tested configs. NS at n=5 (p=0.625) — needs n≥10 for statistical claim.",
+        source="commit b9ccaad + 9c51faf + smoke 20260520",
     ),
     NCClaim(
         nc_name="NC32_LNKF_dirichlet_data",
@@ -117,12 +119,36 @@ NC_CLAIMS_REGISTRY: list[NCClaim] = [
     ),
     NCClaim(
         nc_name="NC36_TIP_ANALYTICAL",
-        synthetic_claim="Within ±0.05 of MC(10000); deterministic; ~10x faster",
+        synthetic_claim="Within ±0.05 of MC(10000); deterministic; ~10x faster — SAFE PARITY UPGRADE",
         synthetic_value=0.0,  # accuracy parity, not gain
         synthetic_metric="TIP value parity with MC",
-        empirical_value=None,
-        notes="Safe upgrade (no MC noise); composes with NC13b + NC31",
-        source="commit 448ba64",
+        empirical_value=-0.067,  # PO smoke 2026-05-20: ASMS -6.7% Δ vs BASELINE
+        empirical_metric="wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_p_value=0.312,
+        notes="OPPOSITE-SIGN SURPRISE: 'safe parity' claim FAILED on PO ASMS. Hypothesis: MC noise in λ^H was HELPFUL for exploration; deterministic TIP removes that stochasticity, ASMS may rely on it. Investigation needed — possibly MC TIP introduces beneficial stochasticity into per-period λ^H that aids GA exploration.",
+        source="commit 448ba64 + smoke 20260520",
+    ),
+    NCClaim(
+        nc_name="TIP_CLEANUP_STACK",
+        synthetic_claim="NC36 + NC13b + NC31 combined; all TIP improvements stacked",
+        synthetic_value=0.0,  # nominally parity (composition of parity-ish upgrades)
+        synthetic_metric="combined TIP claim",
+        empirical_value=-0.053,  # PO smoke 2026-05-20: ASMS -5.3% Δ vs BASELINE
+        empirical_metric="wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_p_value=0.812,
+        notes="NC13b + NC31 don't recover from NC36's hit. Combined still HURTS ASMS by 5.3%. Confirms NC36 is the load-bearing negative driver.",
+        source="commits 448ba64 + 308de50 + 7940604 + smoke 20260520",
+    ),
+    NCClaim(
+        nc_name="FULL_STACK_NC36_NC13b_NC31_NC27deep",
+        synthetic_claim="TIP_CLEANUP + NC27_DEEP — high-confidence theory upgrades stacked",
+        synthetic_value=0.028,  # NC27_DEEP's contribution
+        synthetic_metric="wealth gain (NC27_DEEP synthetic claim)",
+        empirical_value=0.013,  # PO smoke 2026-05-20: ASMS +1.3% Δ vs BASELINE
+        empirical_metric="wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_p_value=1.000,
+        notes="MODEST: NC27_DEEP's positive ~2.7% partially offset by NC36's negative ~6.7% → +1.3% net. Stacking is NOT additive when components disagree.",
+        source="all + smoke 20260520",
     ),
     NCClaim(
         nc_name="PROBE_Z_STABILITY_FACTOR",
