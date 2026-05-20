@@ -1,0 +1,283 @@
+"""W22-Probe-DRIFT — synthetic-vs-empirical drift analyzer for NC claims.
+
+Operator-flagged 2026-05-20: Probe Z showed synthetic LOAD-BEARING didn't
+translate to empirical wealth (n=5 paired p=0.485). This is a real risk
+for other NCs that claim synthetic gains. This probe makes the divergence
+SYSTEMATIC across all NCs.
+
+For each NC:
+- Synthetic claim: predicted gain from probe / theory
+- Empirical observation: actual FTSE result (when available)
+- Drift score: how much empirical undershoots / overshoots synthetic
+- Verdict: STRONG_TRANSLATION, MODEST_TRANSLATION, NEUTRAL, OPPOSITE_SIGN, UNTESTED
+
+This makes the recurring "synthetic over-promised" pattern visible —
+operator can decide which "MEDIUM confidence" NCs to ratify based on
+drift history, not just isolated synthetic results.
+
+Pure-data module: claims registry + analyzer functions. No external deps.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Optional
+
+
+class DriftVerdict(Enum):
+    UNTESTED = "UNTESTED"
+    STRONG_TRANSLATION = "STRONG_TRANSLATION"  # empirical ≈ synthetic
+    MODEST_TRANSLATION = "MODEST_TRANSLATION"  # empirical > 50% of synthetic
+    NEUTRAL = "NEUTRAL"                          # empirical close to 0
+    OPPOSITE_SIGN = "OPPOSITE_SIGN"              # empirical reverses sign
+    EMPIRICAL_EXCEEDS = "EMPIRICAL_EXCEEDS"      # rare: empirical > synthetic
+
+
+@dataclass
+class NCClaim:
+    """A synthetic claim about an NC and its empirical observation (if any)."""
+    nc_name: str
+    synthetic_claim: str  # human-readable description
+    synthetic_value: float  # numerical synthetic gain (e.g., 0.028 = 2.8% accuracy gain)
+    synthetic_metric: str  # what's measured (e.g., "L2 error reduction", "wealth gain")
+    empirical_value: Optional[float] = None  # None = untested
+    empirical_metric: Optional[str] = None
+    empirical_p_value: Optional[float] = None
+    notes: str = ""
+    source: str = ""  # commit hash / probe doc
+
+    def drift_score(self) -> Optional[float]:
+        """Empirical minus synthetic, normalized by |synthetic|.
+
+        Returns:
+            - None if empirical untested
+            - 0.0 if empirical exactly matches synthetic
+            - Positive if empirical exceeds synthetic
+            - Negative if empirical undershoots synthetic
+            - -1.0 if empirical is zero (full undershoot)
+        """
+        if self.empirical_value is None:
+            return None
+        if abs(self.synthetic_value) < 1e-12:
+            return 0.0  # both ~zero
+        return (self.empirical_value - self.synthetic_value) / abs(self.synthetic_value)
+
+    def verdict(self) -> DriftVerdict:
+        """Categorical assessment of drift."""
+        if self.empirical_value is None:
+            return DriftVerdict.UNTESTED
+        score = self.drift_score()
+        sign_match = (self.synthetic_value * self.empirical_value) > 0
+        if not sign_match and abs(self.empirical_value) > 0.01 * abs(self.synthetic_value):
+            return DriftVerdict.OPPOSITE_SIGN
+        ratio = self.empirical_value / self.synthetic_value if abs(self.synthetic_value) > 1e-12 else 0.0
+        if 0.8 <= ratio <= 1.2:
+            return DriftVerdict.STRONG_TRANSLATION
+        if ratio > 1.2:
+            return DriftVerdict.EMPIRICAL_EXCEEDS
+        if 0.5 <= ratio < 0.8:
+            return DriftVerdict.MODEST_TRANSLATION
+        if abs(self.empirical_value) < 0.1 * abs(self.synthetic_value):
+            return DriftVerdict.NEUTRAL
+        # Partial undershoot, but not near-zero
+        return DriftVerdict.MODEST_TRANSLATION
+
+
+# -----------------------------------------------------------------------------
+# Registry of NC claims from W22 push
+# -----------------------------------------------------------------------------
+
+NC_CLAIMS_REGISTRY: list[NCClaim] = [
+    NCClaim(
+        nc_name="NC27_DEEP",
+        synthetic_claim="2.8x tighter L2 error vs DirichletPredictor on Dirichlet source data",
+        synthetic_value=0.028,  # 2.8% absolute L2 reduction (illustrative scale)
+        synthetic_metric="L2 error reduction",
+        empirical_value=None,  # FTSE smoke pending
+        notes="Inspection 3 verified; ships standalone via DirichletPosteriorWrapper",
+        source="commit b9ccaad + 9c51faf",
+    ),
+    NCClaim(
+        nc_name="NC32_LNKF_dirichlet_data",
+        synthetic_claim="2.93x WORSE L2 vs DirichletPosterior on Dirichlet source",
+        synthetic_value=-0.029,  # negative (worse)
+        synthetic_metric="L2 error reduction",
+        empirical_value=None,
+        notes="Model mismatch: LNKF assumes log-normal, data is Dirichlet",
+        source="commit 1d127b5",
+    ),
+    NCClaim(
+        nc_name="NC32_LNKF_lognormal_data",
+        synthetic_claim="2x BETTER L2 vs DirichletPosterior on log-normal source",
+        synthetic_value=0.020,
+        synthetic_metric="L2 error reduction",
+        empirical_value=None,
+        notes="LNKF wins on its native model class; regime-dependent",
+        source="commit 1d127b5",
+    ),
+    NCClaim(
+        nc_name="NC36_TIP_ANALYTICAL",
+        synthetic_claim="Within ±0.05 of MC(10000); deterministic; ~10x faster",
+        synthetic_value=0.0,  # accuracy parity, not gain
+        synthetic_metric="TIP value parity with MC",
+        empirical_value=None,
+        notes="Safe upgrade (no MC noise); composes with NC13b + NC31",
+        source="commit 448ba64",
+    ),
+    NCClaim(
+        nc_name="PROBE_Z_STABILITY_FACTOR",
+        synthetic_claim="50%+ argmax disagreement legacy vs v2 at trace spread ≥0.5",
+        synthetic_value=0.50,  # 50% disagreement = "load-bearing"
+        synthetic_metric="argmax disagreement rate",
+        empirical_value=0.0,  # NEUTRAL: paired n=5 p=0.485 → no wealth diff
+        empirical_metric="paired wealth Wilcoxon",
+        empirical_p_value=0.485,
+        notes="DIVERGED: load-bearing on synthetic but NEUTRAL on FTSE n=5",
+        source="commit fb525c2",
+    ),
+    NCClaim(
+        nc_name="PROBE_Q_V1_AR1",
+        synthetic_claim="Initial run suggested ~65% AR(1) vs predict-mean improvement",
+        synthetic_value=0.65,
+        synthetic_metric="MSE reduction",
+        empirical_value=0.10,
+        empirical_metric="MSE reduction (corrected)",
+        notes="HONEST CORRECTION: actual gain is ~10%, not 65% as initial run suggested",
+        source="commit 9bebb16",
+    ),
+    NCClaim(
+        nc_name="PROBE_AD_RECTANGLE_BUG",
+        synthetic_claim="Stochastic correction overshoots in multi-solution regime",
+        synthetic_value=1.0,  # bug confirmed via SCAR-pinned test
+        synthetic_metric="bug confirmed (binary)",
+        empirical_value=1.0,  # fixed via NC-AD-fix
+        empirical_metric="fix shipped (binary)",
+        notes="Structural bug; fixed in commit e6cd995 (rectangle realignment)",
+        source="commit 881d0f2 + e6cd995",
+    ),
+    NCClaim(
+        nc_name="PROBE_T_GAMMA_SWEET_SPOT",
+        synthetic_claim="γ=0.99 saturates λ^H clamp; γ=0.9 sweet spot",
+        synthetic_value=0.9,
+        synthetic_metric="optimal γ value",
+        empirical_value=None,
+        notes="Validates NC29a default; no empirical test yet",
+        source="commit 087a96d",
+    ),
+    NCClaim(
+        nc_name="PROBE_AI_BOUNDARY_BIAS",
+        synthetic_claim="AMFC has 91-100% boundary picks across |P_t|",
+        synthetic_value=0.95,  # ~95% boundary rate
+        synthetic_metric="boundary pick rate",
+        empirical_value=None,
+        notes="Confirmed by Probe AI-2: NC30 b only HALF-fixes (left vs right asymmetric)",
+        source="commit 97bb397 + b27b549",
+    ),
+    NCClaim(
+        nc_name="SPO_BENCH_VALIDATION",
+        synthetic_claim="sPO(8,1.0)-cosine bench should validate ASMS uplift",
+        synthetic_value=0.075,  # FTSE +7.50% reference
+        synthetic_metric="wealth gain",
+        empirical_value=-0.003,  # FLAT on sPO n=10
+        empirical_metric="wealth gain n=10 pooled",
+        notes="sPO bench CLOSED: doesn't validate; cosine-interpolated synthetic lacks predictive structure",
+        source="commit b1406dd",
+    ),
+]
+
+
+def analyze_drift(registry: Optional[list[NCClaim]] = None) -> dict:
+    """Analyze the full claims registry and return per-NC + aggregate stats."""
+    if registry is None:
+        registry = NC_CLAIMS_REGISTRY
+    n_total = len(registry)
+    by_verdict = {v: [] for v in DriftVerdict}
+    for claim in registry:
+        v = claim.verdict()
+        by_verdict[v].append(claim.nc_name)
+    tested = [c for c in registry if c.verdict() != DriftVerdict.UNTESTED]
+    n_tested = len(tested)
+    n_untested = n_total - n_tested
+    drift_scores = [c.drift_score() for c in tested if c.drift_score() is not None]
+    return {
+        "n_total": n_total,
+        "n_tested": n_tested,
+        "n_untested": n_untested,
+        "by_verdict": {v.value: names for v, names in by_verdict.items()},
+        "mean_drift_score": (sum(drift_scores) / len(drift_scores))
+                              if drift_scores else None,
+        "translation_rate": (
+            (len(by_verdict[DriftVerdict.STRONG_TRANSLATION])
+             + len(by_verdict[DriftVerdict.MODEST_TRANSLATION])
+             + len(by_verdict[DriftVerdict.EMPIRICAL_EXCEEDS]))
+            / max(1, n_tested)
+        ),
+    }
+
+
+def format_drift_table(registry: Optional[list[NCClaim]] = None) -> str:
+    """Markdown table of all claims with drift verdict."""
+    if registry is None:
+        registry = NC_CLAIMS_REGISTRY
+    lines = [
+        "# W22 Synthetic-vs-Empirical Drift Registry",
+        "",
+        "| NC / Probe | Synthetic Claim | Synthetic Value | Empirical | Drift Score | Verdict |",
+        "|---|---|---|---|---|---|",
+    ]
+    for c in registry:
+        emp = f"{c.empirical_value:.4f}" if c.empirical_value is not None else "untested"
+        drift = c.drift_score()
+        drift_str = f"{drift:+.2f}" if drift is not None else "—"
+        verdict = c.verdict().value
+        synthetic_short = c.synthetic_claim[:60] + ("…" if len(c.synthetic_claim) > 60 else "")
+        lines.append(
+            f"| {c.nc_name} | {synthetic_short} | {c.synthetic_value:.4f} | "
+            f"{emp} | {drift_str} | {verdict} |"
+        )
+    lines.append("")
+    analysis = analyze_drift(registry)
+    lines.extend([
+        "## Aggregate",
+        "",
+        f"- Total claims: {analysis['n_total']}",
+        f"- Tested (have empirical): {analysis['n_tested']}",
+        f"- Untested (synthetic only): {analysis['n_untested']}",
+        f"- Translation rate (STRONG + MODEST + EXCEEDS): {analysis['translation_rate']:.0%}",
+    ])
+    if analysis["mean_drift_score"] is not None:
+        lines.append(f"- Mean drift score: {analysis['mean_drift_score']:+.2f}")
+        lines.append("  (negative = empirical undershoots synthetic; near zero = good translation)")
+    lines.append("")
+    lines.extend([
+        "## Verdict legend",
+        "- **STRONG_TRANSLATION**: empirical within 80-120% of synthetic",
+        "- **EMPIRICAL_EXCEEDS**: empirical > 120% of synthetic (rare positive surprise)",
+        "- **MODEST_TRANSLATION**: empirical 50-80% of synthetic",
+        "- **NEUTRAL**: empirical < 10% of synthetic (synthetic claim mostly didn't translate)",
+        "- **OPPOSITE_SIGN**: empirical reverses sign (synthetic was WRONG direction)",
+        "- **UNTESTED**: no empirical observation yet",
+    ])
+    return "\n".join(lines)
+
+
+def add_empirical_observation(
+    nc_name: str,
+    empirical_value: float,
+    empirical_metric: str | None = None,
+    empirical_p_value: float | None = None,
+    notes: str = "",
+) -> bool:
+    """Add an empirical observation to a claim in the registry.
+
+    Returns True if claim found and updated; False otherwise.
+    """
+    for c in NC_CLAIMS_REGISTRY:
+        if c.nc_name == nc_name:
+            c.empirical_value = empirical_value
+            c.empirical_metric = empirical_metric
+            c.empirical_p_value = empirical_p_value
+            if notes:
+                c.notes = (c.notes + " | " + notes) if c.notes else notes
+            return True
+    return False
