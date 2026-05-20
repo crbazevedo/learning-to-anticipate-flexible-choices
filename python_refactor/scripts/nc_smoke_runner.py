@@ -74,6 +74,15 @@ NC_CONFIGS = {
         "W22_NC31_TIP_CONDITIONAL": "1",
         "W22_NC27_PREDICTOR": "dirichlet_posterior",
     },
+    # W22-NC-SMOKE-EMPIRICAL-N5 follow-up: NC27_DEEP +NC13b +NC31 WITHOUT NC36
+    # to test if removing the load-bearing-negative NC36 recovers NC27_DEEP's
+    # full +2.7% empirical gain. Per docs/W22-NC-SMOKE-EMPIRICAL-N5.md
+    # ratification recommendations.
+    "NC27_NO_NC36": {
+        "W22_NC13B_SMOOTH_CLAMP": "1",
+        "W22_NC31_TIP_CONDITIONAL": "1",
+        "W22_NC27_PREDICTOR": "dirichlet_posterior",
+    },
     "ANTICIPATORY_OPS": {
         # Path C — requires NC34/NC39 integration into SMSEMOA (not yet wired)
         # When integrated: would set W22_NC34_ENABLE=1, W22_NC39_ENABLE=1
