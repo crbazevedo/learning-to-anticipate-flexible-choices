@@ -93,11 +93,16 @@ NC_CLAIMS_REGISTRY: list[NCClaim] = [
         synthetic_claim="2.8x tighter L2 error vs DirichletPredictor on Dirichlet source data",
         synthetic_value=0.028,  # 2.8% absolute L2 reduction (illustrative scale)
         synthetic_metric="L2 error reduction",
-        empirical_value=0.027,  # PO smoke 2026-05-20: ASMS +2.7% Δ vs BASELINE
-        empirical_metric="wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_value=0.0137,  # PO smoke 2026-05-20: ASMS +1.37% paired n=10
+        empirical_metric="paired wealth Δ vs BASELINE on PO(8,1.0) ASMS n=10",
         empirical_p_value=0.625,
-        notes="STRONG_TRANSLATION: synthetic 2.8% accuracy gain → empirical 2.7% wealth uplift on PO. Best of the 4 tested configs. NS at n=5 (p=0.625) — needs n≥10 for statistical claim.",
-        source="commit b9ccaad + 9c51faf + smoke 20260520",
+        notes=(
+            "MODEST_TRANSLATION at n=10 (down from +2.7% at n=5 — lucky-seed effect). "
+            "Direction holds (positive, 6/10 wins) but effect is HALF the synthetic claim. "
+            "Still the cleanest empirical win in the sweep. NS at n=10 (p=0.625); "
+            "would need n≥30 for statistical significance on ~1% effects."
+        ),
+        source="commit b9ccaad + 9c51faf + smoke n=10 20260520",
     ),
     NCClaim(
         nc_name="NC32_LNKF_dirichlet_data",
@@ -122,11 +127,63 @@ NC_CLAIMS_REGISTRY: list[NCClaim] = [
         synthetic_claim="Within ±0.05 of MC(10000); deterministic; ~10x faster — SAFE PARITY UPGRADE",
         synthetic_value=0.0,  # accuracy parity, not gain
         synthetic_metric="TIP value parity with MC",
-        empirical_value=-0.067,  # PO smoke 2026-05-20: ASMS -6.7% Δ vs BASELINE
-        empirical_metric="wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_value=-0.0613,  # paired n=5
+        empirical_metric="paired wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
         empirical_p_value=0.312,
-        notes="OPPOSITE-SIGN SURPRISE: 'safe parity' claim FAILED on PO ASMS. Hypothesis: MC noise in λ^H was HELPFUL for exploration; deterministic TIP removes that stochasticity, ASMS may rely on it. Investigation needed — possibly MC TIP introduces beneficial stochasticity into per-period λ^H that aids GA exploration.",
+        notes=(
+            "OPPOSITE-SIGN SURPRISE: 'safe parity' claim FAILED. Paired n=5 = -6.13% "
+            "(2/5 wins). Hypothesis: MC noise in λ^H acts as beneficial EXPLORATION "
+            "for the GA; deterministic TIP removes it. NOT recommended for ratification."
+        ),
         source="commit 448ba64 + smoke 20260520",
+    ),
+    NCClaim(
+        nc_name="NC13b_ALONE",
+        synthetic_claim="Smooth clamp recovers tail signal; safe at low saturation",
+        synthetic_value=0.0,  # neutral expected
+        synthetic_metric="wealth impact (neutral baseline expected)",
+        empirical_value=-0.0041,  # paired n=5
+        empirical_metric="paired wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_p_value=0.812,
+        notes=(
+            "NEUTRAL/SAFE: paired n=5 = -0.41% (essentially zero). Cleanest of the "
+            "TIP fixes. Could be ratified as safe upgrade if TIP saturation is "
+            "non-trivial in production."
+        ),
+        source="commit 308de50 + smoke 20260520",
+    ),
+    NCClaim(
+        nc_name="NC31_ALONE",
+        synthetic_claim="Defn 6.1 conditional mode — mathematically correct",
+        synthetic_value=0.0,  # parity expected per Inspection 1
+        synthetic_metric="wealth impact (parity expected per Inspection 1 <1.5% delta)",
+        empirical_value=-0.0444,  # paired n=5
+        empirical_metric="paired wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_p_value=0.625,
+        notes=(
+            "NEGATIVE: paired n=5 = -4.44% (1/5 wins). Despite Inspection 1 finding "
+            "joint-vs-conditional empirically equivalent (<1.5% TIP delta), the "
+            "wealth impact is meaningful. Same MC-noise-as-exploration hypothesis "
+            "as NC36 may apply (fewer samples needed under conditional mode → less "
+            "exploration). NOT recommended for ratification."
+        ),
+        source="commit 7940604 + smoke 20260520",
+    ),
+    NCClaim(
+        nc_name="NC27_NO_NC36",
+        synthetic_claim="Remove NC36 from FULL_STACK to recover NC27_DEEP's full gain",
+        synthetic_value=0.027,  # NC27_DEEP synthetic value
+        synthetic_metric="wealth gain (expected NC27_DEEP solo)",
+        empirical_value=-0.0545,  # paired n=5
+        empirical_metric="paired wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
+        empirical_p_value=0.312,
+        notes=(
+            "OPPOSITE_SIGN: paired n=5 = -5.45% (1/5 wins). Hypothesis FAILED — "
+            "removing NC36 from FULL_STACK doesn't recover NC27_DEEP's gain. "
+            "NC13b + NC31 + NC27_DEEP combination is HARMFUL. The +1.9% FULL_STACK "
+            "result requires NC36 as a counter-balance. Non-linear interactions."
+        ),
+        source="commit (no-NC36 test) + smoke 20260520",
     ),
     NCClaim(
         nc_name="TIP_CLEANUP_STACK",
