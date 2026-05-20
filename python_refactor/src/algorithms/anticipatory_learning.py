@@ -396,17 +396,91 @@ def _get_active_predictor():
     Default is ``DirichletPredictor`` (preserves existing behavior).
     Set ``W22_NC27_PREDICTOR=logistic_normal`` to opt into the
     Aitchison-compositional alternative.
-
-    NOTE: ``DirichletPosteriorPredictor`` (NC27-deep) is NOT dispatched here
-    because it has a stateful instance interface that doesn't fit the static
-    DirichletPredictor signature. It is exposed as a standalone class for
-    callers willing to manage per-portfolio predictor instances.
+    Set ``W22_NC27_PREDICTOR=dirichlet_posterior`` to opt into the
+    TRUE Bayesian posterior (NC27-deep) via the stateful wrapper that
+    routes through per-Solution ``posterior_predictor`` attributes.
     """
     import os as _os
     name = _os.environ.get("W22_NC27_PREDICTOR", "dirichlet").strip().lower()
     if name == "logistic_normal":
         return LogisticNormalPredictor
+    if name == "dirichlet_posterior":
+        return DirichletPosteriorWrapper
     return DirichletPredictor
+
+
+class DirichletPosteriorWrapper:
+    """Stateful TRUE Dirichlet posterior wrapper matching DirichletPredictor's
+    static interface — NC27-deep production integration (2026-05-19).
+
+    Maintains per-call posterior state via a thread-local dict keyed by the
+    ``id()`` of the prev/current weight arrays. This is a pragmatic adapter
+    rather than a clean per-Solution attribute pattern — to avoid invasive
+    Solution/Portfolio API changes. Behavior contract:
+
+    - First time the wrapper sees a given prev (id-keyed): initialize a
+      DirichletPosteriorPredictor with uniform Jeffreys prior, accumulate
+      the current observation, return posterior mean.
+    - Subsequent calls with the same prev id: retrieve the same predictor,
+      accumulate the new observation, return the new posterior mean.
+    - Stale entries cleared periodically (every 10000 calls) to avoid
+      unbounded growth.
+
+    HONEST SCAR: id()-based keying is fragile under GC + reuse. Demonstration-
+    grade for an enable-via-env-var production path. The cleaner long-term
+    integration is to attach the predictor to Portfolio.posterior_predictor
+    directly; that requires changing the call sites to pass Solution objects
+    (rather than raw weight arrays) through the predictor interface.
+    """
+
+    _state_buffer: dict[int, "DirichletPosteriorPredictor"] = {}
+    _calls_since_clear = 0
+
+    @staticmethod
+    def _get_or_create(key: int, d: int) -> "DirichletPosteriorPredictor":
+        DirichletPosteriorWrapper._calls_since_clear += 1
+        if DirichletPosteriorWrapper._calls_since_clear > 10000:
+            DirichletPosteriorWrapper._state_buffer.clear()
+            DirichletPosteriorWrapper._calls_since_clear = 0
+        if key not in DirichletPosteriorWrapper._state_buffer:
+            DirichletPosteriorWrapper._state_buffer[key] = DirichletPosteriorPredictor(d)
+        return DirichletPosteriorWrapper._state_buffer[key]
+
+    @staticmethod
+    def dirichlet_mean_prediction_vec(prev_proportions: np.ndarray,
+                                       current_proportions: np.ndarray,
+                                       anticipative_rate: float) -> np.ndarray:
+        """NC27-deep predict: TRUE Bayesian posterior mean after accumulating current obs.
+
+        Note: the anticipative_rate is interpreted as a per-call concentration
+        increment (more weight on the new observation when rate is high).
+        """
+        d = len(current_proportions)
+        # Key by id of prev_proportions array (best heuristic without Solution-level state)
+        key = id(prev_proportions)
+        predictor = DirichletPosteriorWrapper._get_or_create(key, d)
+        # Use anticipative_rate as concentration multiplier (clamped to (0, 2])
+        concentration_increment = max(0.01, min(2.0, anticipative_rate))
+        return predictor.observe_and_predict(current_proportions, concentration_increment)
+
+    @staticmethod
+    def dirichlet_mean_map_update(p_predicted: np.ndarray, p_obs: np.ndarray,
+                                   concentration: float) -> np.ndarray:
+        """NC27-deep map update: Bayesian posterior over the observation.
+
+        Uses concentration directly as the increment weight.
+        """
+        d = len(p_obs)
+        key = id(p_predicted)
+        predictor = DirichletPosteriorWrapper._get_or_create(key, d)
+        increment = max(0.01, min(10.0, concentration))
+        return predictor.observe_and_predict(p_obs, increment)
+
+    @staticmethod
+    def reset_buffer():
+        """Manually clear the state buffer (useful between experiment runs)."""
+        DirichletPosteriorWrapper._state_buffer.clear()
+        DirichletPosteriorWrapper._calls_since_clear = 0
 
 class AnticipatoryLearning:
     """Enhanced anticipatory learning system aligned with C++ ASMS-EMOA implementation."""

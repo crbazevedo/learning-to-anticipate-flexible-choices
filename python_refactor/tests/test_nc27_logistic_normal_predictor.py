@@ -118,6 +118,50 @@ def test_dispatcher_env_var_switches(monkeypatch):
     assert _get_active_predictor() is LogisticNormalPredictor
 
 
+def test_dispatcher_routes_to_dirichlet_posterior_wrapper(monkeypatch):
+    """W22_NC27_PREDICTOR=dirichlet_posterior switches to the stateful wrapper."""
+    monkeypatch.setenv("W22_NC27_PREDICTOR", "dirichlet_posterior")
+    from src.algorithms.anticipatory_learning import DirichletPosteriorWrapper
+    assert _get_active_predictor() is DirichletPosteriorWrapper
+
+
+def test_dirichlet_posterior_wrapper_predict_vec_returns_simplex(monkeypatch):
+    """Wrapper's predict_vec returns simplex output."""
+    from src.algorithms.anticipatory_learning import DirichletPosteriorWrapper
+    DirichletPosteriorWrapper.reset_buffer()
+    prev = np.array([0.3, 0.3, 0.4])
+    current = np.array([0.4, 0.3, 0.3])
+    out = DirichletPosteriorWrapper.dirichlet_mean_prediction_vec(
+        prev, current, anticipative_rate=1.0
+    )
+    np.testing.assert_allclose(np.sum(out), 1.0, atol=1e-10)
+    assert np.all(out >= 0.0)
+
+
+def test_dirichlet_posterior_wrapper_accumulates_across_calls(monkeypatch):
+    """Multiple calls with the SAME prev id should accumulate (concentrate posterior)."""
+    from src.algorithms.anticipatory_learning import DirichletPosteriorWrapper
+    DirichletPosteriorWrapper.reset_buffer()
+    prev = np.array([0.5, 0.3, 0.2])  # stays as same array (same id)
+    obs_repeated = np.array([0.8, 0.1, 0.1])  # the "true" mean we're observing toward
+    # First call: posterior should move toward obs from uniform prior
+    out_1 = DirichletPosteriorWrapper.dirichlet_mean_prediction_vec(
+        prev, obs_repeated, anticipative_rate=1.0
+    )
+    # Many more calls: posterior should CONVERGE to obs_repeated mean
+    for _ in range(100):
+        out_n = DirichletPosteriorWrapper.dirichlet_mean_prediction_vec(
+            prev, obs_repeated, anticipative_rate=1.0
+        )
+    # The final posterior should be CLOSER to obs_repeated than the first call's was
+    err_1 = np.linalg.norm(out_1 - obs_repeated)
+    err_n = np.linalg.norm(out_n - obs_repeated)
+    assert err_n < err_1, (
+        f"Posterior should converge: first call err={err_1:.4f}, "
+        f"after 100 calls err={err_n:.4f}"
+    )
+
+
 def test_dispatcher_unknown_value_falls_back(monkeypatch):
     """Unknown env values fall back to DirichletPredictor (safe default)."""
     monkeypatch.setenv("W22_NC27_PREDICTOR", "some_unknown_predictor")

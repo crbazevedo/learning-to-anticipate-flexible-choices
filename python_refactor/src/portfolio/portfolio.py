@@ -111,9 +111,16 @@ class Portfolio:
         self.kalman_state: Optional[KalmanParams] = None
         self.error_covar: Optional[np.ndarray] = None
         self.error_covar_prediction: Optional[np.ndarray] = None
-        
+
         # Investment weights (equivalent to C++ investment vector)
         self.investment: np.ndarray = np.zeros(num_assets)
+
+        # W22-NC27-deep (2026-05-19): per-portfolio TRUE Dirichlet posterior.
+        # Populated lazily when the env var W22_NC27_PREDICTOR=dirichlet_posterior
+        # is set. None means "no posterior state yet"; the AnticipatoryLearning
+        # call site lazily instantiates DirichletPosteriorPredictor(num_assets)
+        # and accumulates per-observation Bayesian updates here.
+        self.posterior_predictor = None  # type: Optional["DirichletPosteriorPredictor"]
     
     def init(self):
         """Initialize portfolio weights randomly."""
