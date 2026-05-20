@@ -231,3 +231,133 @@ def test_dispatcher_wires_hv_dm_amfc():
         {'horizon': 1, 'n_mc': 50, 'R1': 0.0, 'R2': 0.02, 'seed': 0},
     )
     assert result in front
+
+
+# =============================================================================
+# NC30 b: data-derived z_ref tests
+# =============================================================================
+
+def test_derive_zref_from_population_basic():
+    """R1 = min ROI; R2 = max risk (no margin)."""
+    from src.algorithms.amfc_selector import derive_zref_from_population
+    front = _make_front([0.001, 0.003, 0.005], [0.01, 0.007, 0.004])
+    R1, R2 = derive_zref_from_population(front, margin=0.0)
+    assert R1 == 0.001
+    assert R2 == 0.01
+
+
+def test_derive_zref_with_margin():
+    """margin=0.1 widens both ends by 10% of observed range."""
+    from src.algorithms.amfc_selector import derive_zref_from_population
+    front = _make_front([0.001, 0.005], [0.005, 0.001])
+    R1, R2 = derive_zref_from_population(front, margin=0.1)
+    # ROI range = 0.005 - 0.001 = 0.004; R1 = 0.001 - 0.1*0.004 = 0.0006
+    # Risk range = 0.005 - 0.001 = 0.004; R2 = 0.005 + 0.1*0.004 = 0.0054
+    np.testing.assert_allclose(R1, 0.0006, atol=1e-10)
+    np.testing.assert_allclose(R2, 0.0054, atol=1e-10)
+
+
+def test_derive_zref_empty_population():
+    """Empty population: fallback to (0.0, 0.05)."""
+    from src.algorithms.amfc_selector import derive_zref_from_population
+    R1, R2 = derive_zref_from_population([])
+    assert R1 == 0.0 and R2 == 0.05
+
+
+def test_select_amfc_derive_zref_overrides_default():
+    """When R1/R2 are None and derive_zref=True, the selector uses derived values."""
+    front = _make_front([0.001, 0.002, 0.003, 0.004, 0.005],
+                         [0.015, 0.012, 0.009, 0.007, 0.005],
+                         sigma_scale=1e-7)
+    rng = np.random.default_rng(0)
+    # No R1/R2 supplied + derive_zref=True
+    pick_derived = select_amfc(
+        front, horizon=1, n_mc=50,
+        R1=None, R2=None, derive_zref=True, rng=rng,
+    )
+    assert pick_derived in front
+
+
+def test_select_amfc_explicit_R1_overrides_derivation():
+    """If R1 is explicitly given, it takes precedence over derivation."""
+    front = _make_front([0.001, 0.002, 0.003], [0.01, 0.007, 0.004], sigma_scale=1e-7)
+    rng = np.random.default_rng(0)
+    # R1 explicit; R2 derived (max risk = 0.01)
+    pick = select_amfc(
+        front, horizon=1, n_mc=50,
+        R1=-1.0, R2=None, derive_zref=True, rng=rng,
+    )
+    assert pick in front
+
+
+# =============================================================================
+# NC30 d: tie-break by forecast variance tests
+# =============================================================================
+
+def test_tie_break_picks_lower_variance_when_ties():
+    """When two candidates have near-equal E[Δ_S] but different forecast
+    variances, tie_break_by_variance picks the lower-variance one.
+
+    Construct: 2 candidates with IDENTICAL means but very different Σ.
+    Without tie-break, MC noise would pick randomly.
+    With tie-break, the lower-Σ candidate wins.
+    """
+    # Two candidates at the same (ROI, risk) — identical means
+    # but different forecast variances.
+    x_low = np.array([0.003, 0.008, 0.0, 0.0])
+    P_low = 1e-10 * np.eye(4)  # near-zero variance
+    kf_low = _FakeKalmanState(x_low, P_low)
+    sol_low_var = _FakeSolution(0.003, 0.008, kalman_state=kf_low)
+
+    x_high = np.array([0.003, 0.008, 0.0, 0.0])
+    P_high = 1e-4 * np.eye(4)  # much higher variance
+    kf_high = _FakeKalmanState(x_high, P_high)
+    sol_high_var = _FakeSolution(0.003, 0.008, kalman_state=kf_high)
+
+    front = [sol_low_var, sol_high_var]
+    rng = np.random.default_rng(0)
+    pick = select_amfc(
+        front, horizon=1, n_mc=200, R1=0.0, R2=0.02, rng=rng,
+        tie_break_by_variance=True, tie_epsilon=0.5,  # generous tie window
+    )
+    assert pick is sol_low_var, (
+        f"Tie-break by variance should pick low-Σ candidate; got high-Σ"
+    )
+
+
+def test_no_tie_break_default_behavior_preserved():
+    """With tie_break_by_variance=False (default), behavior is unchanged."""
+    front = _make_front([0.001, 0.002, 0.003], [0.01, 0.007, 0.004], sigma_scale=1e-7)
+    rng = np.random.default_rng(0)
+    pick = select_amfc(
+        front, horizon=1, n_mc=50, R1=0.0, R2=0.02, rng=rng,
+        tie_break_by_variance=False,
+    )
+    assert pick in front
+
+
+def test_tie_break_only_fires_when_within_epsilon():
+    """If top-1 and top-2 are NOT within tie_epsilon, tie-break is skipped.
+
+    HONEST SCAR captured by this test's design history: high forecast variance
+    can DEGRADE a candidate's expected contribution (MC samples disperse
+    across positions in the sorted front), so 'high ROI mean' doesn't
+    automatically mean 'high E[Δ_S]'. Using uniform low variance below
+    isolates the no-tie behavior cleanly.
+    """
+    # All uniformly LOW variance — the high-ROI solution dominates cleanly.
+    rois = [0.001, 0.002, 0.010]
+    risks = [0.012, 0.009, 0.005]
+    front = []
+    for r, rk in zip(rois, risks):
+        x = np.array([r, rk, 0.0, 0.0])
+        P = 1e-10 * np.eye(4)  # uniformly low variance
+        kf = _FakeKalmanState(x, P)
+        front.append(_FakeSolution(r, rk, kalman_state=kf))
+    rng = np.random.default_rng(0)
+    pick = select_amfc(
+        front, horizon=1, n_mc=50, R1=0.0, R2=0.02, rng=rng,
+        tie_break_by_variance=True, tie_epsilon=0.01,  # tight: no tie expected
+    )
+    # The high-ROI solution dominates HV contribution by a large margin
+    assert pick is front[2], "Tight tie_epsilon shouldn't trigger tie-break"

@@ -114,14 +114,49 @@ def _front_contribution(idx: int, sorted_front: np.ndarray, R1: float, R2: float
     return float((roi_i - sorted_front[idx + 1, 0]) * (sorted_front[idx - 1, 1] - risk_i))
 
 
+def derive_zref_from_population(population: List, margin: float = 0.0) -> tuple[float, float]:
+    """W22-NC30 b: data-derive z_ref from the current population's extremes.
+
+    Per W22 Inspection 6 honest scar — the hard-coded z_ref defaults
+    (sms_emoa.py: (0.0, 0.2); main.py: (-1.0, 10.0)) DISAGREE and flip
+    AMFC's argmax. This helper computes z_ref from the population so the
+    forecast-HV comparison is comparable across periods.
+
+    Args:
+        population: list of solutions with .P.ROI and .P.risk
+        margin: relative margin to apply outside the observed extremes
+            (e.g., 0.1 = R1 ten percent below min ROI, R2 ten percent above
+            max risk; default 0.0 = exact extremes)
+
+    Returns:
+        (R1, R2) tuple where R1 ≤ min ROI and R2 ≥ max risk
+    """
+    if not population:
+        return (0.0, 0.05)
+    rois = np.array([s.P.ROI for s in population])
+    risks = np.array([s.P.risk for s in population])
+    R1 = float(np.min(rois))
+    R2 = float(np.max(risks))
+    if margin > 0.0:
+        roi_range = float(np.max(rois) - np.min(rois))
+        risk_range = float(np.max(risks) - np.min(risks))
+        R1 -= margin * roi_range
+        R2 += margin * risk_range
+    return R1, R2
+
+
 def select_amfc(
     population: List,
     horizon: int = 1,
     n_mc: int = 200,
-    R1: float = 0.0,
-    R2: float = 0.05,
+    R1: float | None = None,
+    R2: float | None = None,
     pareto_only: bool = True,
     rng: np.random.Generator | None = None,
+    derive_zref: bool = False,
+    zref_margin: float = 0.0,
+    tie_break_by_variance: bool = False,
+    tie_epsilon: float = 0.05,
 ):
     """Select the AMFC solution from the population.
 
@@ -129,9 +164,20 @@ def select_amfc(
         population: list of Solution objects with .P.ROI, .P.risk, .P.kalman_state, .Pareto_rank
         horizon: forecast horizon h ≥ 1
         n_mc: Monte Carlo samples for the forecast frontier
-        R1, R2: reference point components (must be the same as used for HV scoring)
+        R1, R2: reference point components (must be the same as used for HV scoring).
+            If None and ``derive_zref=True``, derived from population extremes.
+            If None and ``derive_zref=False``, defaults to (0.0, 0.05).
         pareto_only: restrict to current-front (Pareto_rank == 0) candidates
         rng: optional numpy Generator (for reproducibility)
+        derive_zref: NC30 b — if True, derive R1/R2 from population (overrides
+            R1/R2 args when they are None). When R1 or R2 is explicitly given,
+            that value takes precedence over the derivation.
+        zref_margin: NC30 b — relative margin for the derivation (default 0.0)
+        tie_break_by_variance: NC30 d — if True, break ties (top-1 within
+            ``tie_epsilon`` of top-2) by picking the candidate with the LOWEST
+            forecast variance trace (most certain forecast wins).
+        tie_epsilon: NC30 d — relative threshold for tie detection. A tie is
+            declared if (top1 − top2) / max(|top1|, 1e-12) < tie_epsilon.
 
     Returns:
         Selected Solution object. If population is empty, returns None.
@@ -140,11 +186,10 @@ def select_amfc(
 
     Behavior contract (per W22-NC30-CONTRACT.md):
         - Identity at H=1, Σ→0: AMFC ≡ Hv-DM
-          (with zero forecast variance, the MC collapses to a deterministic
-          single sample = mean forecast = current state for the identity F,
-          and the contributions equal the deterministic Δ_S.)
-        - MC stability: with n_mc≥200, argmax is stable across calls
+        - MC stability: with n_mc≥200 + small σ, argmax is stable across calls
         - All returned solutions are FROM the input population (no synthesis)
+        - With derive_zref=True: AMFC pick is invariant under uniform shifts
+          of the population's ROI/risk values (because z_ref shifts with them)
     """
     if rng is None:
         rng = np.random.default_rng()
@@ -162,6 +207,20 @@ def select_amfc(
     n = len(candidates)
     if n == 1:
         return candidates[0]
+
+    # Resolve z_ref (NC30 b: data-derived if requested and not explicitly given).
+    if R1 is None or R2 is None:
+        if derive_zref:
+            derived_R1, derived_R2 = derive_zref_from_population(candidates, zref_margin)
+            if R1 is None:
+                R1 = derived_R1
+            if R2 is None:
+                R2 = derived_R2
+        else:
+            if R1 is None:
+                R1 = 0.0
+            if R2 is None:
+                R2 = 0.05
 
     # Forecast each candidate's (μ_h, Σ_h).
     mus = np.zeros((n, 2))
@@ -199,5 +258,23 @@ def select_amfc(
 
     # Expected contribution per candidate.
     expected_contributions = contributions.mean(axis=1)
+
+    # NC30 d: tie-break by lowest forecast variance trace.
+    if tie_break_by_variance and n >= 2:
+        sorted_idx = np.argsort(-expected_contributions)  # descending
+        top1, top2 = sorted_idx[0], sorted_idx[1]
+        top1_val, top2_val = expected_contributions[top1], expected_contributions[top2]
+        denom = max(abs(top1_val), 1e-12)
+        is_tie = (top1_val - top2_val) / denom < tie_epsilon
+        if is_tie:
+            # Among all candidates within tie_epsilon of top-1, pick lowest trace(Σ_h)
+            tie_set = [
+                i for i in range(n)
+                if (top1_val - expected_contributions[i]) / denom < tie_epsilon
+            ]
+            variances = np.array([np.trace(sigmas[i]) for i in tie_set])
+            best_in_tie = tie_set[int(np.argmin(variances))]
+            return candidates[best_in_tie]
+
     best_idx = int(np.argmax(expected_contributions))
     return candidates[best_idx]

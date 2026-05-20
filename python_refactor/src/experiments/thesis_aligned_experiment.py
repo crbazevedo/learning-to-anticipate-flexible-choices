@@ -218,25 +218,39 @@ class ThesisAlignedExperiment:
             # W22-NC30: operator-correct AMFC (Anticipative Maximal Flexible Choice).
             # argmax_{s in P_t}  E[ HV-contribution(s_{t+h} in forecast F_{t+h}) ]
             # See docs/W22-NC30-CONTRACT.md and src/algorithms/amfc_selector.py.
+            #
+            # NC30 v1 (Option A): independent KF forecasts per candidate.
+            # NC30 b (optional via dm_config['derive_zref']=True): data-derive
+            #   z_ref from population extremes (closes Inspection-6 z_ref
+            #   ambiguity).
+            # NC30 d (optional via dm_config['tie_break_by_variance']=True):
+            #   when top-1/top-2 expected contributions are within
+            #   ``tie_epsilon`` (default 5%), pick the candidate with the
+            #   lowest forecast-variance trace (most certain forecast wins).
             from ..algorithms.amfc_selector import select_amfc
             horizon = int(dm_config.get('horizon', 1))
             n_mc = int(dm_config.get('n_mc', 200))
-            # z_ref: caller-supplied via dm_config, else attempt sliding-window
-            # derivation, else use the SMS-EMOA default (0.0, 0.05). The
-            # ambiguity here is the same one Inspection 6 flagged — z_ref
-            # should ideally be data-derived; this is the v1 placeholder.
-            R1 = float(dm_config.get('R1', 0.0))
-            R2 = float(dm_config.get('R2', 0.05))
+            # If R1/R2 omitted AND derive_zref=True, the selector derives them.
+            R1 = dm_config.get('R1', None)
+            R2 = dm_config.get('R2', None)
+            derive_zref = bool(dm_config.get('derive_zref', False))
+            zref_margin = float(dm_config.get('zref_margin', 0.0))
+            tie_break = bool(dm_config.get('tie_break_by_variance', False))
+            tie_epsilon = float(dm_config.get('tie_epsilon', 0.05))
             seed = dm_config.get('seed', None)
             rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
             return select_amfc(
                 population,
                 horizon=horizon,
                 n_mc=n_mc,
-                R1=R1,
-                R2=R2,
+                R1=float(R1) if R1 is not None else None,
+                R2=float(R2) if R2 is not None else None,
                 pareto_only=True,
                 rng=rng,
+                derive_zref=derive_zref,
+                zref_margin=zref_margin,
+                tie_break_by_variance=tie_break,
+                tie_epsilon=tie_epsilon,
             )
 
         elif dm_type == 'R-DM':
