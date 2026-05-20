@@ -11,7 +11,7 @@ n=10, paired p=0.003) was validated.
 | # | Decision Point | Verdict | Action |
 |---|---|---|---|
 | 1 | Probe AD: Δ_S rectangle bug at sms_emoa.py:723 | 🟡 LOW IMPACT empirically | Optional fix in NC30+ PR |
-| 2 | Probe Z empirical: legacy vs v2 stability factor | ⏳ Running 5-seed FTSE smoke | Verdict pending (~30 min ETA) |
+| 2 | Probe Z empirical: legacy vs v2 stability factor | 🟡 NEUTRAL: Δ=−2.29% n=5 p=0.485 NS | Keep v2 in production |
 | 3 | Probe AI/AI-2: AMFC boundary bias + NC30 b z_ref | 🔴 STRUCTURAL: don't ratify NC30 b | Document, no code change |
 | 4 | Probe AC+AF: KF instrumentation | 🟡 risk MIS-TUNED (lag1≈0.5); no Q in production | Future Probe AG empirical validation on FTSE |
 | 5 | Probe V: full 16-way ablation | ⏸️ DEFERRED (27 hrs serial) | Recommend single-fix Δ ablation as compromise |
@@ -57,15 +57,28 @@ SMS behavior in the breakthrough stack for reproducibility of the +7.50% number.
 On real FTSE Pareto fronts, does this argmax disagreement translate to a measurable
 realized HV difference?
 
-**Test:** 5-seed FTSE walk-forward comparing `ASMS_mHDM_K3_v2rate` (default = legacy
-stability) against `ASMS_mHDM_K3_v2both` (= v2 stability) and SMS baseline. Same
-production stack (NC7 + NC8b + NC8c-v2 + NC8d + NC13a + transaction cost).
+**Test:** 5-seed FTSE walk-forward comparing `ASMS_mHDM_K3_v2rate` (legacy stability)
+against `ASMS_mHDM_K3_v2both` (= v2 stability = current production) and SMS baseline.
+Same production stack (NC7 + NC8b + NC8c-v2 + NC8d + NC13a + transaction cost).
 
-**Status:** ⏳ Running in background. ETA ~30 min. Verdict will be appended to this doc.
+**Result** (paired by seed, n=5):
+- Legacy mean: 0.000456; v2 mean: 0.000466
+- Δ (legacy − v2) = −2.29% (legacy slightly worse)
+- Paired t-test: t = −0.768, **p = 0.485 (NOT significant)**
+- Wilcoxon: W = 5.0, **p = 0.625 (NOT significant)**
+- Legacy wins 2 of 5 seeds; v2 wins 3 of 5
 
-**Receipts (when done):**
-- `experiments/results/w22-probe-z-empirical-5seed/`
-- Updated `docs/W22-CANONICAL.md` with verdict
+**🟡 Verdict: NEUTRAL** — the theoretical 50%+ argmax disagreement does NOT translate to
+a measurable realized HV difference on real FTSE. Production's v2 choice is empirically
+sound; no need to change.
+
+**Bonus**: this smoke also REPLICATED the breakthrough at n=5: ASMS_v2both vs SMS Δ =
+**+12.05%**, paired p=**0.016**, 5/5 seeds positive. Independent confirmation that the
+cached n=10 (+7.50% p=0.003) result is real, not a fluke.
+
+**Receipts:**
+- `experiments/results/w22-probe-z-empirical-5seed/` (per_seed.json + raw + predictions.jsonl)
+- `docs/W22-PROBE-Z-EMPIRICAL-VERDICT.md` — full per-seed table + statistical tests
 
 ## Decision point #3 — Probe AI/AI-2 (AMFC boundary bias)
 
