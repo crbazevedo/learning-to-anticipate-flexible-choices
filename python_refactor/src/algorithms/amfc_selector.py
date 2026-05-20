@@ -33,7 +33,15 @@ DESIGN NOTES (from W22-NC30-CONTRACT.md):
   this layer (same plumbing as NC26-deep)
 - Option C (joint Bayesian): out of scope; research-grade
 
-REGRESSION TESTS: tests/test_nc30_amfc_selector.py
+W22-NC35 EXTENSION (operator directive 2026-05-20):
+  Multi-period accumulated future Δ_S — see ``horizon_accumulated`` kwarg
+  on ``select_amfc``. At H=1 (default) byte-identical to pre-NC35. At H>1:
+      Q^A(s) = Σ_{h=1}^H γ^h · E[Δ_S^(s)_{t+h}]
+  where γ is read from env var ``W22_NC29A_GAMMA`` (default 0.9, shared
+  with NC29a). See docs/W22-NC35-ACCUMULATED-FUTURE.md.
+
+REGRESSION TESTS: tests/test_nc30_amfc_selector.py (single-period),
+                  tests/test_nc35_accumulated_future_delta_s.py (NC35)
 """
 from __future__ import annotations
 
@@ -64,6 +72,7 @@ import numpy as np
 #   - mean_forecast_variance: average trace(Σ_h) across candidates
 #   - amfc_pick_forecast_variance: trace(Σ_h) of the AMFC pick
 #   - tie_break_fired: bool (NC30 d telemetry)
+#   - horizon_accumulated: int (W22-NC35; 1 = single-period)
 _AMFC_TELEMETRY: List[dict] = []
 
 
@@ -180,6 +189,56 @@ def derive_zref_from_population(population: List, margin: float = 0.0) -> tuple[
     return R1, R2
 
 
+def _compute_expected_contributions_analytical(mus: np.ndarray, R1: float, R2: float) -> np.ndarray:
+    """W22-NC35 helper: analytical per-candidate E[Δ_S] given forecast means.
+
+    Factored from select_amfc's analytical branch so the NC35 multi-period
+    path (horizon_accumulated > 1) can call it once per horizon h ∈ {1..H}.
+    Behavior MUST be byte-identical to the inline analytical block to
+    preserve the NC30 regression invariants.
+
+    Args:
+        mus: shape (n, 2) — per-candidate forecast means (ROI, risk)
+        R1, R2: reference point components (already resolved)
+
+    Returns:
+        expected_contributions: shape (n,) — deterministic per-candidate
+        contribution at mean-sorted positions, with tied-mean group averaging
+        (NC30-v2 symmetry guarantee).
+    """
+    n = mus.shape[0]
+    order = np.argsort(mus[:, 0])  # sort by mean ROI
+    sorted_mus = mus[order]
+    inv_order = np.argsort(order)
+    expected_contributions = np.zeros(n)
+    for i in range(n):
+        pos = int(inv_order[i])
+        expected_contributions[i] = _front_contribution(pos, sorted_mus, R1, R2)
+
+    # Tied-mean group averaging (NC30-v2 symmetry fix; preserved verbatim).
+    roi_sorted = sorted_mus[:, 0]
+    tie_tolerance = 1e-12
+    group_start = 0
+    while group_start < n:
+        group_end = group_start
+        while group_end + 1 < n and abs(
+            roi_sorted[group_end + 1] - roi_sorted[group_start]
+        ) < tie_tolerance:
+            group_end += 1
+        if group_end > group_start:
+            tied_positions = list(range(group_start, group_end + 1))
+            contrib_at_tied_positions = [
+                _front_contribution(p, sorted_mus, R1, R2) for p in tied_positions
+            ]
+            avg_contrib = float(np.mean(contrib_at_tied_positions))
+            for orig_i in range(n):
+                if int(inv_order[orig_i]) in tied_positions:
+                    expected_contributions[orig_i] = avg_contrib
+        group_start = group_end + 1
+
+    return expected_contributions
+
+
 def select_amfc(
     population: List,
     horizon: int = 1,
@@ -195,6 +254,7 @@ def select_amfc(
     collect_telemetry: bool = False,
     analytical: bool = True,  # NC30-v2 STRUCTURAL: deterministic E[contrib] at mean positions
     variance_penalty: float = 0.0,  # NC30 c: continuous variance-aware discount
+    horizon_accumulated: int = 1,  # W22-NC35: accumulated future Δ_S over H periods
 ):
     """Select the AMFC solution from the population.
 
@@ -216,18 +276,32 @@ def select_amfc(
             forecast variance trace (most certain forecast wins).
         tie_epsilon: NC30 d — relative threshold for tie detection. A tie is
             declared if (top1 − top2) / max(|top1|, 1e-12) < tie_epsilon.
+        horizon_accumulated: W22-NC35 — accumulated future Δ_S over H periods.
+            Default 1 = single-period (byte-identical pre-NC35 behavior).
+            When > 1, per-candidate score becomes
+                Q^A(s) = Σ_{h=1}^H γ^h · E[Δ_S^(s)_{t+h}]
+            where γ is from env var ``W22_NC29A_GAMMA`` (default 0.9, same
+            source as NC29a). For each h ∈ {1..H}, ALL candidates are
+            re-forecast via KF F^h-projection, sorted by mean ROI, and the
+            analytical per-candidate contribution at the resulting fixed
+            positions is computed. The H accumulated scores then feed the
+            existing NC30 c (variance_penalty) / NC30 d (tie-break) logic
+            unchanged. Cost is O(|P| · H · |P|).
 
     Returns:
         Selected Solution object. If population is empty, returns None.
         If pareto_only=True and no solution has Pareto_rank == 0, falls back
         to the full population.
 
-    Behavior contract (per W22-NC30-CONTRACT.md):
+    Behavior contract (per W22-NC30-CONTRACT.md + W22-NC35):
         - Identity at H=1, Σ→0: AMFC ≡ Hv-DM
         - MC stability: with n_mc≥200 + small σ, argmax is stable across calls
         - All returned solutions are FROM the input population (no synthesis)
         - With derive_zref=True: AMFC pick is invariant under uniform shifts
           of the population's ROI/risk values (because z_ref shifts with them)
+        - NC35 H=1 identity: ``horizon_accumulated=1`` is byte-identical to
+          the single-period path. Verified by
+          tests/test_nc35_accumulated_future_delta_s.py.
     """
     if rng is None:
         rng = np.random.default_rng()
@@ -260,6 +334,102 @@ def select_amfc(
             if R2 is None:
                 R2 = 0.05
 
+    # W22-NC35: multi-period accumulated mode (horizon_accumulated > 1).
+    # When enabled, accumulate γ^h-discounted contributions over h=1..H.
+    # The deepest-horizon (mus, sigmas) are retained for telemetry +
+    # variance_penalty + tie-break — letting the operator reason about the
+    # farthest-out forecast uncertainty.
+    #
+    # H=1 (default) skips this block entirely and runs the original
+    # single-period path below (byte-identical pre-NC35 behavior).
+    if horizon_accumulated > 1:
+        import os as _os
+        try:
+            gamma = float(_os.environ.get("W22_NC29A_GAMMA", "0.9"))
+        except ValueError:
+            gamma = 0.9
+        gamma = max(0.0, min(0.999, gamma))  # γ ∈ [0, 1)
+
+        accumulated_contributions = np.zeros(n)
+        # Track deepest-horizon (mus, sigmas) for downstream telemetry +
+        # variance penalty + tie-break.
+        mus = np.zeros((n, 2))
+        sigmas = np.zeros((n, 2, 2))
+        for h_iter in range(1, horizon_accumulated + 1):
+            mus_h = np.zeros((n, 2))
+            sigmas_h = np.zeros((n, 2, 2))
+            for i, sol in enumerate(candidates):
+                mu_h, Sigma_h = _forecast_solution_at_horizon(sol, h_iter)
+                mus_h[i] = mu_h
+                sigmas_h[i] = Sigma_h
+            # Use analytical per-candidate contribution at this horizon
+            # (deterministic; identical to the single-period analytical
+            # block when called with h=horizon and analytical=True).
+            contrib_h = _compute_expected_contributions_analytical(mus_h, R1, R2)
+            accumulated_contributions += (gamma ** h_iter) * contrib_h
+            # Retain deepest horizon for telemetry / penalty / tie-break.
+            mus = mus_h
+            sigmas = sigmas_h
+
+        expected_contributions = accumulated_contributions
+        # NC30 c: variance penalty (applied to accumulated score using
+        # deepest-horizon variance — uncertainty grows with h so this is
+        # the strictest penalty).
+        effective_contributions = expected_contributions.copy()
+        if variance_penalty > 0.0:
+            variance_traces = np.array([np.trace(sigmas[i]) for i in range(n)])
+            effective_contributions = expected_contributions - variance_penalty * variance_traces
+
+        # NC30 d: tie-break by lowest forecast variance trace.
+        tie_fired = False
+        selected_idx = int(np.argmax(effective_contributions))
+        if tie_break_by_variance and n >= 2:
+            sorted_idx = np.argsort(-effective_contributions)
+            top1, top2 = sorted_idx[0], sorted_idx[1]
+            top1_val, top2_val = effective_contributions[top1], effective_contributions[top2]
+            denom = max(abs(top1_val), 1e-12)
+            is_tie = (top1_val - top2_val) / denom < tie_epsilon
+            if is_tie:
+                tie_fired = True
+                tie_set = [
+                    i for i in range(n)
+                    if (top1_val - effective_contributions[i]) / denom < tie_epsilon
+                ]
+                variances = np.array([np.trace(sigmas[i]) for i in tie_set])
+                selected_idx = tie_set[int(np.argmin(variances))]
+
+        if collect_telemetry:
+            def _hv_dm_score(s):
+                ds = getattr(s, "Delta_S", None)
+                if ds is None or ds == 0.0:
+                    return (s.P.ROI - R1) * (R2 - s.P.risk)
+                return float(ds)
+
+            hv_dm_idx = int(np.argmax([_hv_dm_score(s) for s in candidates]))
+            _AMFC_TELEMETRY.append({
+                "amfc_idx": selected_idx,
+                "hv_dm_idx": hv_dm_idx,
+                "amfc_agrees_with_hv_dm": selected_idx == hv_dm_idx,
+                "amfc_pick_roi": float(candidates[selected_idx].P.ROI),
+                "amfc_pick_risk": float(candidates[selected_idx].P.risk),
+                "hv_dm_pick_roi": float(candidates[hv_dm_idx].P.ROI),
+                "hv_dm_pick_risk": float(candidates[hv_dm_idx].P.risk),
+                "n_candidates": n,
+                "horizon": horizon,
+                "n_mc": n_mc,
+                "top1_expected_contrib": float(expected_contributions[selected_idx]),
+                "mean_forecast_variance": float(np.mean([np.trace(s) for s in sigmas])),
+                "amfc_pick_forecast_variance": float(np.trace(sigmas[selected_idx])),
+                "tie_break_fired": tie_fired,
+                "R1": R1,
+                "R2": R2,
+                "horizon_accumulated": horizon_accumulated,  # W22-NC35
+            })
+
+        return candidates[selected_idx]
+
+    # Single-period path (horizon_accumulated == 1). Byte-identical to
+    # pre-NC35 behavior — preserves the NC30 regression invariants.
     # Forecast each candidate's (μ_h, Σ_h).
     mus = np.zeros((n, 2))
     sigmas = np.zeros((n, 2, 2))
@@ -419,6 +589,7 @@ def select_amfc(
             "tie_break_fired": tie_fired,
             "R1": R1,
             "R2": R2,
+            "horizon_accumulated": horizon_accumulated,  # W22-NC35
         })
 
     return candidates[selected_idx]

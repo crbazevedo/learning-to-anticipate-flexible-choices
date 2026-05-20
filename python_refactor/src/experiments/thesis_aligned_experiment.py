@@ -243,6 +243,11 @@ class ThesisAlignedExperiment:
             collect_telemetry = bool(dm_config.get('collect_telemetry', False))
             # W22-NC30 c: continuous variance-aware contribution discount.
             variance_penalty = float(dm_config.get('variance_penalty', 0.0))
+            # W22-NC35: accumulated future Δ_S over H periods. Default 1 =
+            # single-period (current NC30-v1 behavior). When > 1, the selector
+            # accumulates γ^h-discounted contributions over h=1..H (γ from
+            # env var W22_NC29A_GAMMA, default 0.9).
+            horizon_accumulated = int(dm_config.get('horizon_accumulated', 1))
             seed = dm_config.get('seed', None)
             rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
             return select_amfc(
@@ -259,6 +264,7 @@ class ThesisAlignedExperiment:
                 tie_epsilon=tie_epsilon,
                 collect_telemetry=collect_telemetry,
                 variance_penalty=variance_penalty,
+                horizon_accumulated=horizon_accumulated,
             )
 
         elif dm_type == 'R-DM':
