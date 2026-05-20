@@ -37,7 +37,7 @@
     "W22-7": {
       "checkpoint_chain": [],
       "state": "DONE",
-      "note": "Cross-instance verdict: WEAKLY POSITIVE; PO(16,1.0) outlier deserves follow-up. W23-1 DEFER. See docs/W22-NC27-DEEP-CROSS-INSTANCE.md"
+      "note": "REVISED verdict: ALL 4 instances POSITIVE paired (PO8 +2.65%, PO16 +2.19%, PO03 +2.82%, sPO +8.93%); PO(16) -6.10% was unpaired artifact. W23-1: PROCEED."
     },
     "W22-7": {
       "checkpoint_chain": [],

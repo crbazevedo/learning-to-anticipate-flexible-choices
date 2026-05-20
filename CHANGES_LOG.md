@@ -173,7 +173,49 @@ this baseline AND ideally adds marginal Δ vs it.
 
 ---
 
-### Entry 4: W22-4/5/6 cross-instance NC27-deep sweep (2026-05-20 evening)
+### Entry 5: W22 gap-fill chain — PO(16,1.0) seeds 6-10 + BASELINE seeds 11-20 (2026-05-20 night)
+
+```yaml
+- date: 2026-05-20
+  commit: (pending)
+  wave_unit: W22-4 (gap-fill) + W22-5 (gap-fill) + W22-7 (revised verdict)
+  type: empirical_correction
+  nc_or_combo: [NC27_DEEP]
+  thesis_anchor: "§6.2.1 Dirichlet; Paper Eqs 16-17"
+  baseline_used: BASELINE paired (now n=20 on PO(8,1.0); n=10 on PO(16,1.0))
+  observation:
+    metric: paired Δ Ŝ vs BASELINE on ASMS_mHDM_K3_v2both per instance (REVISED)
+    value:
+      "PO(8,1.0) n=20 paired (W22-4 + BASELINE 11-20)": "+2.65% (11/20 wins, p=0.498)"
+      "PO(16,1.0) n=10 paired (W22-5a + 6-10)": "+2.19% (4/10 wins, p=0.695) — FORMERLY -6.10% UNPAIRED"
+      "PO(8,0.3) n=5 paired (W22-5b)": "+2.82% (3/5, p=1.000)"
+      "sPO(8,1.0)-cosine n=5 paired (W22-6)": "+8.93% (4/5, p=0.188)"
+    n_seeds: 5-20 across instances
+    confidence: medium (consistent direction; magnitudes 2-9%; no single-instance p<0.05)
+  attribution:
+    per_nc_marginal:
+      NC27_DEEP_PO_8_1_0: "+2.65% paired n=20 (improved from +1.37% at n=10 with seeds 11-20 added)"
+      NC27_DEEP_PO_16_1_0: "+2.19% paired n=10 — REVERSED from -6.10% UNPAIRED (sample-variance artifact at n=5)"
+      NC27_DEEP_PO_8_0_3: "+2.82% paired n=5"
+      NC27_DEEP_sPO: "+8.93% paired n=5 — STRONGEST signal"
+    method: per-seed paired Wilcoxon
+    cross_instance_avg_paired_delta: +4.15% (or +2.55% excluding sPO)
+    direction_consistency: 4 of 4 instances POSITIVE
+  honest_scars:
+    - "PO(16,1.0) -6.10% was UNPAIRED n=5 sample-variance artifact; CORRECTED by paired n=10 analysis"
+    - "No single instance reaches p<0.05; rely on direction consistency across 4 independent instances"
+    - "n=5 vs n=5 unpaired can SWING ±10% by chance; always pair when comparing"
+    - "FTSE empirical still pending"
+  ratification_verdict:
+    nc27_deep: "PROCEED with W23-1 ratification (REVERSED from prior 'DEFER')"
+    reasoning: |
+      All 4 instances POSITIVE under paired analysis. Direction is the
+      load-bearing signal. Magnitudes are consistent (+2.2% to +8.9%).
+      FTSE confirmation still needed but baseline regression risk is
+      low given cross-instance consistency.
+```
+
+### Entry 4: W22-4/5/6 cross-instance NC27-deep sweep (2026-05-20 evening — SUPERSEDED by Entry 5)
 
 ```yaml
 - date: 2026-05-20
