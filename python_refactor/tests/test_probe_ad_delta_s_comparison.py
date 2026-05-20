@@ -20,7 +20,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.probes.probe_ad_delta_s_comparison import (
     compare_methods,
+    compare_methods_with_eq636,
     deterministic_delta_s,
+    deterministic_eq636_delta_s,
     mc_ground_truth_delta_s,
     stochastic_delta_s,
 )
@@ -303,4 +305,80 @@ def test_compare_methods_returns_all_keys():
     # Per stochastic_delta_s spec: stoch = det - covs.
     np.testing.assert_allclose(
         out["stochastic"], out["deterministic"] - covs
+    )
+
+
+# ---------------------------------------------------------------------------
+# W22 Probe AD empirical extension (2026-05-20) — eq636 rectangle tests
+# ---------------------------------------------------------------------------
+
+
+def test_deterministic_eq636_uses_left_roi_right_risk_rectangle():
+    """For a 3-solution sorted-ROI-ASC front:
+       Δ_S^eq636[i=1] = (ROI_1 - ROI_0) × (risk_2 - risk_1)
+    """
+    rois = np.array([0.10, 0.15, 0.20])
+    risks = np.array([0.05, 0.10, 0.18])
+    R1, R2 = 0.0, 0.2
+    out = deterministic_eq636_delta_s(rois, risks, R1, R2)
+    assert out.shape == (3,)
+    # i=1 middle: (0.15 - 0.10) * (0.18 - 0.10) = 0.05 * 0.08 = 0.004
+    np.testing.assert_allclose(out[1], 0.004, rtol=1e-9)
+    # i=0 left: (0.10 - 0.0) * (0.10 - 0.05) = 0.10 * 0.05 = 0.005
+    np.testing.assert_allclose(out[0], 0.005, rtol=1e-9)
+    # i=2 right: (0.20 - 0.15) * (0.2 - 0.18) = 0.05 * 0.02 = 0.001
+    np.testing.assert_allclose(out[2], 0.001, rtol=1e-9)
+
+
+def test_deterministic_eq636_differs_from_python_buggy_on_non_uniform_front():
+    """The two formulas should disagree on a non-uniform front.
+
+    Python deterministic (buggy):
+      Δ_S[i=1] = (ROI_1 - ROI_2) * (risk_0 - risk_1) = -0.05 * -0.05 = 0.0025
+    Eq 6.36 deterministic:
+      Δ_S[i=1] = (ROI_1 - ROI_0) * (risk_2 - risk_1) = 0.05 * 0.08 = 0.004
+    """
+    rois = np.array([0.10, 0.15, 0.20])
+    risks = np.array([0.05, 0.10, 0.18])  # non-uniform risk spacing
+    R1, R2 = 0.0, 0.2
+    det_py = deterministic_delta_s(rois, risks, R1, R2)
+    det_eq636 = deterministic_eq636_delta_s(rois, risks, R1, R2)
+    # Middle position should differ: 0.0025 (python) vs 0.004 (eq636)
+    assert not np.isclose(det_py[1], det_eq636[1])
+    np.testing.assert_allclose(det_py[1], 0.0025, rtol=1e-9)
+    np.testing.assert_allclose(det_eq636[1], 0.004, rtol=1e-9)
+
+
+def test_compare_methods_with_eq636_returns_all_keys():
+    """compare_methods_with_eq636 must include the new eq636 + MC_eq636 fields."""
+    rois = np.array([0.10, 0.15, 0.20])
+    risks = np.array([0.30, 0.25, 0.20])
+    covs = np.array([0.001, 0.002, 0.001])
+    rng = np.random.default_rng(42)
+    out = compare_methods_with_eq636(rois, risks, covs, R1=0.05, R2=0.40,
+                                       n_mc=500, rng=rng)
+    expected_keys = {
+        "deterministic", "stochastic", "mc", "l1_det_vs_mc", "l1_stoch_vs_mc",
+        "deterministic_eq636", "l1_eq636_vs_mc",
+        "mc_eq636", "l1_det_vs_mc_eq636", "l1_eq636_vs_mc_eq636",
+        "l1_stoch_vs_mc_eq636",
+    }
+    assert set(out.keys()) == expected_keys
+    assert out["deterministic_eq636"].shape == (3,)
+    assert out["mc_eq636"].shape == (3,)
+
+
+def test_eq636_matches_mc_eq636_in_expectation_at_zero_cov():
+    """When covs are zero, MC_eq636 converges to deterministic_eq636
+    because the rectangle is linear in the sampled means and E[N(μ, 0)] = μ."""
+    rois = np.array([0.10, 0.15, 0.20])
+    risks = np.array([0.05, 0.10, 0.18])
+    covs = np.array([0.0, 0.0, 0.0])
+    rng = np.random.default_rng(123)
+    out = compare_methods_with_eq636(rois, risks, covs, R1=0.0, R2=0.2,
+                                       n_mc=10000, rng=rng)
+    # With covs=0, MC samples have tiny var_floor jitter (1e-6); MC_eq636
+    # should converge close to deterministic_eq636.
+    np.testing.assert_allclose(
+        out["mc_eq636"], out["deterministic_eq636"], rtol=0.1
     )
