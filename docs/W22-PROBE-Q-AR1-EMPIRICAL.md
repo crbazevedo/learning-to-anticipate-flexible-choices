@@ -16,24 +16,44 @@ next-day returns on FTSE?
 
 ## Results — window-size sweep
 
-| window | n_steps | AR(1) MSE | no-change MSE | Δ % | AR(1) better % |
-|---|---|---|---|---|---|
-| 20 | 1545 | 2.2634e-03 | 6.2689e-03 | +63.89% | 82.3% |
-| 60 | 1505 | 2.0957e-03 | 6.0109e-03 | +65.13% | 84.9% |
-| 120 | 1445 | 1.9235e-03 | 5.5259e-03 | +65.19% | 85.2% |
-| 250 | 1315 | 1.4493e-03 | 4.0353e-03 | +64.08% | 86.2% |
-| 378 | 1187 | 9.2326e-04 | 2.1227e-03 | +56.51% | 87.7% |
+Two baseline comparisons: predict-no-change (r_{t+1}=r_t) which is the original
+hypothesis, AND predict-mean (r_{t+1}=window_mean) which is a STRONGER baseline that
+controls for the trivial "daily returns oscillate around their mean" effect.
+
+| window | n_steps | AR(1) MSE | no-change MSE | predict-mean MSE | AR(1) vs no-change | AR(1) vs predict-mean |
+|---|---|---|---|---|---|---|
+| 20 | 1545 | 2.2634e-03 | 6.2689e-03 | 2.4985e-03 | +63.89% | +9.41% |
+| 60 | 1505 | 2.0957e-03 | 6.0109e-03 | 2.3401e-03 | +65.13% | +10.44% |
+| 120 | 1445 | 1.9235e-03 | 5.5259e-03 | 2.1578e-03 | +65.19% | +10.86% |
+| 250 | 1315 | 1.4493e-03 | 4.0353e-03 | 1.6163e-03 | +64.08% | +10.33% |
+| 378 | 1187 | 9.2326e-04 | 2.1227e-03 | 9.5777e-04 | +56.51% | +3.60% |
 
 ## Interpretation
 
-- Best window: 120 → AR(1) MSE reduction = +65.19%
+- vs no-change baseline: best window=120, MSE reduction = +65.19%
+- vs predict-mean baseline: best window=120, MSE reduction = +10.86%
 
-🟢 **AR(1) meaningfully beats no-change** on FTSE (MSE reduction > 5%). Per-asset
-AR(1) is a candidate signal source for the optimizer. Future work (Q-H2): wire AR(1)
-predictions into ASMS as an alternative expected-return input and run a 5-seed smoke.
+🟢 **AR(1) meaningfully beats predict-mean** on FTSE — true autocorrelation signal exists.
+Wire AR(1) predictions into ASMS as alternative expected-return inputs (Q-H2 follow-up).
 
-## Caveat
+## Important caveat — baseline comparison
+
+The 50%+ MSE reduction is partly an ARTIFACT of the WEAK no-change baseline:
+
+- For zero-mean independent daily returns: MSE(predict 0) = variance,
+  MSE(predict r_t) ≈ 2·variance → 50% improvement from "predict mean" alone
+- The ~10-15% extra reduction beyond 50% comes from small positive autocorrelation
+  (mean-reversion / momentum) that AR(1) captures
+
+**Stronger baseline comparison would be:** AR(1) vs predict-mean (which would isolate
+only the autocorrelation contribution). The current no-change baseline is biased in
+AR(1)'s favor.
+
+## Operational caveat — optimizer integration
 
 Probe Q-v1 measures per-asset predictive accuracy in isolation. It does NOT model how
 AR(1) predictions would interact with the SMS/ASMS optimizer (Q-H2). A marginal MSE
 reduction at the per-asset level may not translate to portfolio-level HV improvement.
+
+Recommendation: re-run with predict-mean baseline to isolate the true AR(1) signal.
+Then if signal > a few %, wire into ASMS expected-return inputs and run FTSE smoke.

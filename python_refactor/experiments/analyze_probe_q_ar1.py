@@ -29,12 +29,13 @@ def load_returns():
 
 
 def evaluate(returns_matrix: np.ndarray, window_size: int) -> dict:
-    """Walk through returns_matrix; predict next-step with AR(1) and no-change."""
+    """Walk through returns_matrix; predict next-step with AR(1), no-change, and zero."""
     T, K = returns_matrix.shape
     predictor = AR1AssetPredictor(d=K, window_size=window_size)
 
     ar1_errors_sq = []
     nochange_errors_sq = []
+    predmean_errors_sq = []  # baseline: predict the rolling-window mean
     # Warm up first `window_size` steps with observe-only
     for t in range(window_size):
         predictor.observe(returns_matrix[t])
@@ -43,24 +44,36 @@ def evaluate(returns_matrix: np.ndarray, window_size: int) -> dict:
         predictor.observe(returns_matrix[t])
         ar1_pred = predictor.predict_next()
         nochange_pred = predictor.predict_no_change()
+        # Predict-mean baseline = rolling window mean per asset
+        window_slice = returns_matrix[t - window_size + 1: t + 1]
+        with np.errstate(invalid="ignore"):
+            mean_pred = np.nanmean(window_slice, axis=0)
+        mean_pred = np.nan_to_num(mean_pred, nan=0.0)
         actual = returns_matrix[t + 1]
-        mask = np.isfinite(actual) & np.isfinite(ar1_pred) & np.isfinite(nochange_pred)
+        mask = (np.isfinite(actual) & np.isfinite(ar1_pred)
+                & np.isfinite(nochange_pred) & np.isfinite(mean_pred))
         if not np.any(mask):
             continue
         ar1_errors_sq.append(float(np.mean((ar1_pred[mask] - actual[mask]) ** 2)))
         nochange_errors_sq.append(float(np.mean((nochange_pred[mask] - actual[mask]) ** 2)))
+        predmean_errors_sq.append(float(np.mean((mean_pred[mask] - actual[mask]) ** 2)))
 
     ar1_mse = float(np.mean(ar1_errors_sq))
     nochange_mse = float(np.mean(nochange_errors_sq))
+    predmean_mse = float(np.mean(predmean_errors_sq))
     ar1_arr = np.array(ar1_errors_sq)
     nc_arr = np.array(nochange_errors_sq)
+    pm_arr = np.array(predmean_errors_sq)
     return {
         "window_size": window_size,
         "n_steps_evaluated": len(ar1_errors_sq),
         "ar1_mse": ar1_mse,
         "nochange_mse": nochange_mse,
-        "ar1_better_pct": 100.0 * float(np.mean(ar1_arr < nc_arr)),
-        "mse_reduction_pct": 100.0 * (nochange_mse - ar1_mse) / nochange_mse if nochange_mse > 0 else 0.0,
+        "predmean_mse": predmean_mse,
+        "ar1_better_than_nochange_pct": 100.0 * float(np.mean(ar1_arr < nc_arr)),
+        "ar1_better_than_predmean_pct": 100.0 * float(np.mean(ar1_arr < pm_arr)),
+        "mse_reduction_vs_nochange_pct": 100.0 * (nochange_mse - ar1_mse) / nochange_mse if nochange_mse > 0 else 0.0,
+        "mse_reduction_vs_predmean_pct": 100.0 * (predmean_mse - ar1_mse) / predmean_mse if predmean_mse > 0 else 0.0,
     }
 
 
@@ -84,37 +97,59 @@ def format_report(results: list[dict]) -> str:
     lines.append("")
     lines.append("## Results — window-size sweep")
     lines.append("")
-    lines.append("| window | n_steps | AR(1) MSE | no-change MSE | Δ % | AR(1) better % |")
-    lines.append("|---|---|---|---|---|---|")
+    lines.append("Two baseline comparisons: predict-no-change (r_{t+1}=r_t) which is the original")
+    lines.append("hypothesis, AND predict-mean (r_{t+1}=window_mean) which is a STRONGER baseline that")
+    lines.append("controls for the trivial \"daily returns oscillate around their mean\" effect.")
+    lines.append("")
+    lines.append("| window | n_steps | AR(1) MSE | no-change MSE | predict-mean MSE | AR(1) vs no-change | AR(1) vs predict-mean |")
+    lines.append("|---|---|---|---|---|---|---|")
     for r in results:
         lines.append(
             f"| {r['window_size']} | {r['n_steps_evaluated']} "
-            f"| {r['ar1_mse']:.4e} | {r['nochange_mse']:.4e} "
-            f"| {r['mse_reduction_pct']:+.2f}% "
-            f"| {r['ar1_better_pct']:.1f}% |"
+            f"| {r['ar1_mse']:.4e} | {r['nochange_mse']:.4e} | {r['predmean_mse']:.4e} "
+            f"| {r['mse_reduction_vs_nochange_pct']:+.2f}% "
+            f"| {r['mse_reduction_vs_predmean_pct']:+.2f}% |"
         )
     lines.append("")
-    best = max(results, key=lambda r: r["mse_reduction_pct"])
+    best = max(results, key=lambda r: r["mse_reduction_vs_predmean_pct"])
     lines.append("## Interpretation")
     lines.append("")
-    lines.append(f"- Best window: {best['window_size']} → AR(1) MSE reduction = {best['mse_reduction_pct']:+.2f}%")
+    lines.append(f"- vs no-change baseline: best window={best['window_size']}, MSE reduction = {best['mse_reduction_vs_nochange_pct']:+.2f}%")
+    lines.append(f"- vs predict-mean baseline: best window={best['window_size']}, MSE reduction = {best['mse_reduction_vs_predmean_pct']:+.2f}%")
     lines.append("")
-    if best["mse_reduction_pct"] > 5:
-        lines.append("🟢 **AR(1) meaningfully beats no-change** on FTSE (MSE reduction > 5%). Per-asset")
-        lines.append("AR(1) is a candidate signal source for the optimizer. Future work (Q-H2): wire AR(1)")
-        lines.append("predictions into ASMS as an alternative expected-return input and run a 5-seed smoke.")
-    elif best["mse_reduction_pct"] > 0:
-        lines.append(f"🟡 **AR(1) marginally beats no-change** ({best['mse_reduction_pct']:+.2f}% MSE reduction).")
-        lines.append("Borderline signal; would need full optimizer-integration smoke to confirm downstream value.")
+    # Real signal is vs predict-mean (controls for the trivial mean-of-zero effect)
+    if best["mse_reduction_vs_predmean_pct"] > 5:
+        lines.append("🟢 **AR(1) meaningfully beats predict-mean** on FTSE — true autocorrelation signal exists.")
+        lines.append("Wire AR(1) predictions into ASMS as alternative expected-return inputs (Q-H2 follow-up).")
+    elif best["mse_reduction_vs_predmean_pct"] > 0:
+        lines.append(f"🟡 **AR(1) marginally beats predict-mean** ({best['mse_reduction_vs_predmean_pct']:+.2f}% MSE reduction)")
+        lines.append("— modest autocorrelation signal. Borderline value for optimizer integration.")
     else:
-        lines.append("🔴 **AR(1) does NOT beat no-change** on FTSE. Per-asset return dynamics are essentially")
-        lines.append("random-walk on daily returns. AR(1) is not a productive signal direction.")
+        lines.append("🔴 **AR(1) does NOT beat predict-mean** — FTSE daily returns have negligible autocorrelation")
+        lines.append("beyond what predict-mean captures. The earlier \"AR(1) beats no-change\" result is")
+        lines.append("driven entirely by the trivial \"oscillate around mean\" effect, NOT by true autocorrelation.")
     lines.append("")
-    lines.append("## Caveat")
+    lines.append("## Important caveat — baseline comparison")
+    lines.append("")
+    lines.append("The 50%+ MSE reduction is partly an ARTIFACT of the WEAK no-change baseline:")
+    lines.append("")
+    lines.append("- For zero-mean independent daily returns: MSE(predict 0) = variance,")
+    lines.append("  MSE(predict r_t) ≈ 2·variance → 50% improvement from \"predict mean\" alone")
+    lines.append("- The ~10-15% extra reduction beyond 50% comes from small positive autocorrelation")
+    lines.append("  (mean-reversion / momentum) that AR(1) captures")
+    lines.append("")
+    lines.append("**Stronger baseline comparison would be:** AR(1) vs predict-mean (which would isolate")
+    lines.append("only the autocorrelation contribution). The current no-change baseline is biased in")
+    lines.append("AR(1)'s favor.")
+    lines.append("")
+    lines.append("## Operational caveat — optimizer integration")
     lines.append("")
     lines.append("Probe Q-v1 measures per-asset predictive accuracy in isolation. It does NOT model how")
     lines.append("AR(1) predictions would interact with the SMS/ASMS optimizer (Q-H2). A marginal MSE")
     lines.append("reduction at the per-asset level may not translate to portfolio-level HV improvement.")
+    lines.append("")
+    lines.append("Recommendation: re-run with predict-mean baseline to isolate the true AR(1) signal.")
+    lines.append("Then if signal > a few %, wire into ASMS expected-return inputs and run FTSE smoke.")
     lines.append("")
     return "\n".join(lines)
 
@@ -135,7 +170,9 @@ def main(argv=None):
         r = evaluate(returns_matrix, w)
         results.append(r)
         print(f"[probe-q-ar1] window={w}  AR1 MSE={r['ar1_mse']:.4e}  "
-              f"no-change MSE={r['nochange_mse']:.4e}  Δ={r['mse_reduction_pct']:+.2f}%",
+              f"no-change MSE={r['nochange_mse']:.4e}  predict-mean MSE={r['predmean_mse']:.4e}  "
+              f"Δ vs no-change={r['mse_reduction_vs_nochange_pct']:+.2f}%  "
+              f"Δ vs predict-mean={r['mse_reduction_vs_predmean_pct']:+.2f}%",
               file=sys.stderr)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
