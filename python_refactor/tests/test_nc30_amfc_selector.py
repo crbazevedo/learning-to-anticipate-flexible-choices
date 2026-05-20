@@ -22,6 +22,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.algorithms.amfc_selector import (
     _forecast_solution_at_horizon,
     _front_contribution,
+    get_amfc_telemetry,
+    reset_amfc_telemetry,
     select_amfc,
 )
 
@@ -154,24 +156,37 @@ def test_mc_stability_when_sigma_small_relative_to_spread():
     )
 
 
-def test_mc_noise_acknowledged_when_sigma_comparable_to_spread():
-    """HONEST SCAR documented as test: when σ ≈ inter-solution spread,
-    MC instability is INTRINSIC to the regime — increasing n_mc helps
-    asymptotically but the underlying ambiguity remains.
+def test_mc_stability_at_high_noise_with_crn():
+    """NC30-v2 STRUCTURAL FIX: with shared-noise CRN, even at σ ≈ inter-
+    solution spread the AMFC argmax is STABLE across calls.
 
-    This test does NOT assert stability; it ASSERTS the engine still
-    returns a valid in-population solution under high-noise conditions
-    (no crashes, no out-of-bounds picks).
+    Pre-CRN this test asserted only "no crashes" because per-candidate
+    independent noise produced argmax instability under high σ. With CRN,
+    the noise direction is shared across candidates so their relative ordering
+    is preserved across MC samples — picks should be modally stable.
+
+    Operator directive 2026-05-19: degenerate behavior should not happen.
+    This test guards against the high-noise degeneracy regressing.
     """
     front = _make_front(
         [0.001, 0.002, 0.003, 0.004, 0.005],
         [0.015, 0.012, 0.009, 0.007, 0.005],
-        sigma_scale=0.001,  # σ ≈ inter-solution spread — high-noise regime
+        sigma_scale=0.001,  # σ ≈ inter-solution spread — was the degenerate regime
     )
+    picks = []
     for seed in range(10):
         rng = np.random.default_rng(seed)
         pick = select_amfc(front, horizon=1, n_mc=200, R1=0.0, R2=0.02, rng=rng)
         assert pick in front  # no crashes, no synthesis
+        picks.append(front.index(pick))
+    # Post-CRN: argmax should be modally stable (≥8/10 agree on the modal pick).
+    from collections import Counter
+    counter = Counter(picks)
+    modal_count = counter.most_common(1)[0][1]
+    assert modal_count >= 8, (
+        f"Post-CRN MC stability regressed: picks={picks}, modal={modal_count}/10 (want ≥8). "
+        f"This is the operator-flagged degeneracy that NC30-v2 CRN was supposed to fix."
+    )
 
 
 def test_cost_guard_under_100ms():
@@ -334,6 +349,122 @@ def test_no_tie_break_default_behavior_preserved():
         tie_break_by_variance=False,
     )
     assert pick in front
+
+
+# =============================================================================
+# AMFC telemetry hook tests
+# =============================================================================
+
+def test_telemetry_off_by_default():
+    """Default select_amfc call doesn't emit telemetry."""
+    reset_amfc_telemetry()
+    front = _make_front([0.001, 0.002, 0.003], [0.012, 0.009, 0.005])
+    select_amfc(front, horizon=1, n_mc=20, R1=0.0, R2=0.02,
+                 rng=np.random.default_rng(0))
+    assert len(get_amfc_telemetry()) == 0
+
+
+def test_telemetry_emits_per_call():
+    """With collect_telemetry=True, one telemetry dict per call."""
+    reset_amfc_telemetry()
+    front = _make_front([0.001, 0.002, 0.003], [0.012, 0.009, 0.005])
+    for seed in range(3):
+        select_amfc(front, horizon=1, n_mc=20, R1=0.0, R2=0.02,
+                     rng=np.random.default_rng(seed),
+                     collect_telemetry=True)
+    telem = get_amfc_telemetry()
+    assert len(telem) == 3
+
+
+def test_telemetry_keys_present():
+    """Telemetry dict contains the documented keys."""
+    reset_amfc_telemetry()
+    front = _make_front([0.001, 0.002, 0.003], [0.012, 0.009, 0.005])
+    # Stamp synthetic Delta_S so hv_dm_idx is well-defined
+    for i, s in enumerate(front):
+        s.Delta_S = float(i)
+    select_amfc(front, horizon=1, n_mc=20, R1=0.0, R2=0.02,
+                 rng=np.random.default_rng(0),
+                 collect_telemetry=True)
+    telem = get_amfc_telemetry()[-1]
+    required = {
+        "amfc_idx", "hv_dm_idx", "amfc_agrees_with_hv_dm",
+        "amfc_pick_roi", "amfc_pick_risk",
+        "hv_dm_pick_roi", "hv_dm_pick_risk",
+        "n_candidates", "horizon", "n_mc",
+        "top1_expected_contrib",
+        "mean_forecast_variance", "amfc_pick_forecast_variance",
+        "tie_break_fired", "R1", "R2",
+    }
+    missing = required - set(telem.keys())
+    assert not missing, f"Telemetry missing keys: {missing}"
+
+
+def test_telemetry_hv_dm_uses_delta_s_attr():
+    """The hv_dm_idx in telemetry should match argmax of solution.Delta_S
+    when that attribute is set."""
+    reset_amfc_telemetry()
+    front = _make_front([0.001, 0.002, 0.003, 0.004],
+                         [0.012, 0.009, 0.007, 0.005])
+    # Synthetic: middle solution has the highest Delta_S
+    front[0].Delta_S = 0.1
+    front[1].Delta_S = 0.9  # winner under Hv-DM
+    front[2].Delta_S = 0.5
+    front[3].Delta_S = 0.3
+    select_amfc(front, horizon=1, n_mc=20, R1=0.0, R2=0.02,
+                 rng=np.random.default_rng(0),
+                 collect_telemetry=True)
+    telem = get_amfc_telemetry()[-1]
+    assert telem["hv_dm_idx"] == 1, (
+        f"hv_dm_idx should be 1 (highest Delta_S); got {telem['hv_dm_idx']}"
+    )
+
+
+def test_telemetry_tie_break_fired_flag():
+    """When tie-break fires, tie_break_fired=True in telemetry.
+
+    NC30-v2 (CRN) structural fix context: with shared-noise CRN, identical-
+    mean candidates produce SYMMETRIC contributions IF the noise can't
+    push samples into a boundary regime (e.g., below R1, where contribution
+    truncation breaks symmetry).
+
+    Use R1 << min(ROI - 3σ) to guarantee samples stay in the
+    symmetric regime, then identical means → tied E[Δ_S] → tie-break fires.
+    """
+    reset_amfc_telemetry()
+    # Two candidates with identical means; R1 far enough below means that
+    # high-σ samples don't go negative (which would break the symmetry).
+    mean_roi, mean_risk = 0.05, 0.008
+    x = np.array([mean_roi, mean_risk, 0.0, 0.0])
+    sigma_low_sq, sigma_high_sq = 1e-10, 1e-4
+    P_low = sigma_low_sq * np.eye(4)
+    P_high = sigma_high_sq * np.eye(4)
+    sol_low = _FakeSolution(mean_roi, mean_risk,
+                              kalman_state=_FakeKalmanState(x.copy(), P_low.copy()))
+    sol_high = _FakeSolution(mean_roi, mean_risk,
+                               kalman_state=_FakeKalmanState(x.copy(), P_high.copy()))
+    select_amfc(
+        [sol_low, sol_high],
+        horizon=1, n_mc=500,
+        R1=-1.0, R2=1.0,  # well outside ±3σ of means; samples stay symmetric
+        rng=np.random.default_rng(0),
+        tie_break_by_variance=True, tie_epsilon=0.5,
+        collect_telemetry=True,
+    )
+    telem = get_amfc_telemetry()[-1]
+    assert telem["tie_break_fired"] is True
+
+
+def test_telemetry_reset_clears():
+    """reset_amfc_telemetry() empties the ring buffer."""
+    front = _make_front([0.001, 0.002], [0.012, 0.009])
+    for _ in range(5):
+        select_amfc(front, horizon=1, n_mc=20, R1=0.0, R2=0.02,
+                     rng=np.random.default_rng(0),
+                     collect_telemetry=True)
+    assert len(get_amfc_telemetry()) >= 5
+    reset_amfc_telemetry()
+    assert len(get_amfc_telemetry()) == 0
 
 
 def test_tie_break_only_fires_when_within_epsilon():

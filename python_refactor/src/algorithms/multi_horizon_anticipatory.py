@@ -138,28 +138,51 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
         """
         if len(predicted_states) != len(lambda_rates):
             raise ValueError("Number of predicted states must match number of lambda rates")
-        
+
         if len(predicted_states) == 0:
             return current_state.copy()
-        
-        # Calculate sum of lambda rates
+
+        # W22-NC29 STRUCTURAL FIX (operator directive 2026-05-19): preserve a
+        # MINIMUM weight on the current observation z_t.
+        #
+        # Pre-fix: when Σλ > 1.0, the soft normalization set every λ_h to
+        # λ_h / Σλ, making w_0 = 1 - Σλ → 0. This is the "runaway
+        # anticipation" degeneracy from W22 Inspection 5: the current
+        # observation gets ZERO weight and the anticipatory state becomes
+        # pure prediction. The operator flagged degeneracies should not
+        # happen — this fix enforces w_0 ≥ W22_NC29_MIN_W0 (default 0.2)
+        # so the current observation always contributes meaningfully.
+        #
+        # Mechanism: enforce Σλ ≤ (1 - MIN_W0); if Σλ exceeds that cap, scale
+        # all λ_h by (1 - MIN_W0) / Σλ. Result: w_0 = MIN_W0 regardless of
+        # how aggressive the λ_h's wanted to be.
+        import os as _os
+        try:
+            min_w0 = float(_os.environ.get("W22_NC29_MIN_W0", "0.2"))
+        except ValueError:
+            min_w0 = 0.2
+        min_w0 = max(0.0, min(0.99, min_w0))  # safety: keep min_w0 in (0, 1)
+        max_lambda_sum = 1.0 - min_w0
+
         lambda_sum = sum(lambda_rates)
-        
-        # Ensure lambda_sum doesn't exceed 1.0
-        if lambda_sum > 1.0:
-            logger.warning(f"Lambda sum {lambda_sum} > 1.0, normalizing")
-            lambda_rates = [rate / lambda_sum for rate in lambda_rates]
-            lambda_sum = 1.0
-        
-        # First term: (1 - Σλ) z_t
+        if lambda_sum > max_lambda_sum:
+            logger.debug(
+                f"NC29: capping Σλ={lambda_sum:.4f} to {max_lambda_sum:.4f} "
+                f"(preserving w_0 ≥ {min_w0:.2f})"
+            )
+            scale = max_lambda_sum / lambda_sum
+            lambda_rates = [rate * scale for rate in lambda_rates]
+            lambda_sum = max_lambda_sum
+
+        # First term: (1 - Σλ) z_t — guaranteed ≥ min_w0 after the cap above
         anticipatory_state = (1 - lambda_sum) * current_state
-        
+
         # Second term: Σλ ẑ_{t+h}
         for predicted_state, lambda_h in zip(predicted_states, lambda_rates):
             anticipatory_state += lambda_h * predicted_state
-        
-        logger.debug(f"Applied anticipatory learning rule: lambda_sum={lambda_sum:.4f}")
-        
+
+        logger.debug(f"Applied anticipatory learning rule: lambda_sum={lambda_sum:.4f}, w_0={1-lambda_sum:.4f}")
+
         return anticipatory_state
     
     def calculate_multi_horizon_lambda_rates(self, solution: Solution,

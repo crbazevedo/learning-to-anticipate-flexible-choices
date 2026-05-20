@@ -41,6 +41,41 @@ from typing import List
 
 import numpy as np
 
+# W22-NC30 telemetry: a module-level ring buffer that callers can flush
+# (e.g., once per period) to compare AMFC picks against Hv-DM picks in
+# production without running parallel experiments. Default usage:
+#
+#   from src.algorithms.amfc_selector import (
+#       select_amfc, get_amfc_telemetry, reset_amfc_telemetry,
+#   )
+#   reset_amfc_telemetry()
+#   for period in periods:
+#       pick = select_amfc(population, ..., collect_telemetry=True)
+#       ... run rebalance with pick ...
+#   telem = get_amfc_telemetry()  # list of per-call telemetry dicts
+#
+# Each telemetry dict contains:
+#   - amfc_idx: index of the AMFC pick in the candidate list
+#   - hv_dm_idx: index of the Hv-DM pick (argmax of solution.Delta_S)
+#   - amfc_agrees_with_hv_dm: bool
+#   - amfc_pick_roi, hv_dm_pick_roi: ROI of each pick
+#   - n_candidates: |P_t|
+#   - top1_expected_contrib: E[Δ_S] of the AMFC pick
+#   - mean_forecast_variance: average trace(Σ_h) across candidates
+#   - amfc_pick_forecast_variance: trace(Σ_h) of the AMFC pick
+#   - tie_break_fired: bool (NC30 d telemetry)
+_AMFC_TELEMETRY: List[dict] = []
+
+
+def get_amfc_telemetry() -> List[dict]:
+    """Return a copy of the AMFC telemetry ring buffer."""
+    return list(_AMFC_TELEMETRY)
+
+
+def reset_amfc_telemetry() -> None:
+    """Clear the AMFC telemetry ring buffer."""
+    _AMFC_TELEMETRY.clear()
+
 
 def _forecast_solution_at_horizon(solution, horizon: int):
     """Return (μ_h, Σ_h) bivariate Gaussian forecast for solution at horizon h.
@@ -153,10 +188,12 @@ def select_amfc(
     R2: float | None = None,
     pareto_only: bool = True,
     rng: np.random.Generator | None = None,
-    derive_zref: bool = False,
+    derive_zref: bool = True,  # NC30-v2 STRUCTURAL: default True (was False) per operator directive
     zref_margin: float = 0.0,
     tie_break_by_variance: bool = False,
     tie_epsilon: float = 0.05,
+    collect_telemetry: bool = False,
+    analytical: bool = True,  # NC30-v2 STRUCTURAL: deterministic E[contrib] at mean positions
 ):
     """Select the AMFC solution from the population.
 
@@ -230,36 +267,93 @@ def select_amfc(
         mus[i] = mu_h
         sigmas[i] = Sigma_h
 
-    # Per-candidate Cholesky for sampling. Degenerate Σ → zero matrix → exact mean.
-    cholesky = np.zeros_like(sigmas)
-    for i in range(n):
-        try:
-            cholesky[i] = np.linalg.cholesky(sigmas[i] + 1e-12 * np.eye(2))
-        except np.linalg.LinAlgError:
-            # Σ not PSD — fall back to eigendecomposition with non-negative eigenvalues.
-            w, v = np.linalg.eigh(sigmas[i])
-            w_pos = np.maximum(w, 0.0)
-            cholesky[i] = v @ np.diag(np.sqrt(w_pos))
-
-    # MC: sample n_mc forecast frontiers; compute per-candidate contributions.
-    contributions = np.zeros((n, n_mc))
-    for j in range(n_mc):
-        # Independent draws per candidate (no shared market noise — matches Option A).
-        eps = rng.standard_normal(size=(n, 2))
-        samples = mus + np.einsum("ijk,ik->ij", cholesky, eps)  # shape (n, 2)
-        # Sort by ROI ascending (matches sms_emoa.py)
-        order = np.argsort(samples[:, 0])
-        sorted_front = samples[order]
-        # Inverse permutation: position of original candidate i in sorted_front
+    # NC30-v2 STRUCTURAL FIX (operator directive 2026-05-19): default to
+    # ANALYTICAL E[contribution] computed at the deterministic mean-sorted
+    # positions. Pre-fix used per-iter MC sort-order which produced degenerate
+    # behavior in two regimes:
+    #   (a) identical means + different variances → different E[Δ_S] from
+    #       independent-candidate noise (CRN partially fixed, but boundary
+    #       ties still chaotic)
+    #   (b) σ ≈ inter-solution spread → modal pick flips across seeds because
+    #       boundary contributions overlap statistically
+    #
+    # ANALYTICAL mode (default): sort candidates by mean ROI ONCE; compute
+    # deterministic contribution at the resulting fixed positions using mean
+    # forecast values. This eliminates MC sort-order noise entirely. The
+    # forecast variance signal is retained via NC30 d tie-break.
+    #
+    # MC mode (analytical=False) is kept for backward compatibility and
+    # research; uses shared-noise CRN to minimize per-iter noise but cannot
+    # eliminate boundary-tie chaos.
+    if analytical:
+        order = np.argsort(mus[:, 0])  # sort by mean ROI
+        sorted_mus = mus[order]
         inv_order = np.argsort(order)
+        # Per-candidate deterministic contribution at fixed mean position.
+        expected_contributions = np.zeros(n)
         for i in range(n):
             pos = int(inv_order[i])
-            contributions[i, j] = _front_contribution(pos, sorted_front, R1, R2)
+            expected_contributions[i] = _front_contribution(pos, sorted_mus, R1, R2)
 
-    # Expected contribution per candidate.
-    expected_contributions = contributions.mean(axis=1)
+        # NC30-v2 STRUCTURAL FIX: tie-handling for equal/near-equal mean ROIs.
+        # Without this, two candidates at identical means get DIFFERENT
+        # contributions because the sort-tiebreak (numpy argsort stable) puts
+        # them at adjacent positions with asymmetric contribution formulas
+        # (position 0 uses R1-floor, position 1 uses prev-neighbor).
+        #
+        # Fix: detect tied-mean groups; assign the AVERAGE contribution across
+        # the group's contiguous positions to every member of the group. This
+        # is the rigorous expectation under uniform permutation of tied
+        # candidates and restores the symmetry the operator's directive
+        # (2026-05-19) demands.
+        roi_sorted = sorted_mus[:, 0]
+        tie_tolerance = 1e-12  # numerical-precision ties only
+        # Group consecutive equal-mean-ROI positions.
+        group_start = 0
+        while group_start < n:
+            group_end = group_start
+            while group_end + 1 < n and abs(roi_sorted[group_end + 1] - roi_sorted[group_start]) < tie_tolerance:
+                group_end += 1
+            if group_end > group_start:
+                # Multiple positions tied; average their contributions.
+                tied_positions = list(range(group_start, group_end + 1))
+                contrib_at_tied_positions = [
+                    _front_contribution(p, sorted_mus, R1, R2) for p in tied_positions
+                ]
+                avg_contrib = float(np.mean(contrib_at_tied_positions))
+                # Assign to every original candidate whose sorted position falls in the tied group.
+                for orig_i in range(n):
+                    if int(inv_order[orig_i]) in tied_positions:
+                        expected_contributions[orig_i] = avg_contrib
+            group_start = group_end + 1
+    else:
+        # Per-candidate Cholesky for sampling. Degenerate Σ → zero matrix → exact mean.
+        cholesky = np.zeros((n, 2, 2))
+        for i in range(n):
+            try:
+                cholesky[i] = np.linalg.cholesky(sigmas[i] + 1e-12 * np.eye(2))
+            except np.linalg.LinAlgError:
+                # Σ not PSD — eigendecomp fallback.
+                w, v = np.linalg.eigh(sigmas[i])
+                w_pos = np.maximum(w, 0.0)
+                cholesky[i] = v @ np.diag(np.sqrt(w_pos))
+
+        contributions = np.zeros((n, n_mc))
+        for j in range(n_mc):
+            # Shared-noise CRN: one direction per iter, scaled per-candidate by Cholesky.
+            eps_shared = rng.standard_normal(size=2)
+            samples = mus + np.einsum("ijk,k->ij", cholesky, eps_shared)
+            order_j = np.argsort(samples[:, 0])
+            sorted_front_j = samples[order_j]
+            inv_order_j = np.argsort(order_j)
+            for i in range(n):
+                pos = int(inv_order_j[i])
+                contributions[i, j] = _front_contribution(pos, sorted_front_j, R1, R2)
+        expected_contributions = contributions.mean(axis=1)
 
     # NC30 d: tie-break by lowest forecast variance trace.
+    tie_fired = False
+    selected_idx = int(np.argmax(expected_contributions))
     if tie_break_by_variance and n >= 2:
         sorted_idx = np.argsort(-expected_contributions)  # descending
         top1, top2 = sorted_idx[0], sorted_idx[1]
@@ -267,14 +361,44 @@ def select_amfc(
         denom = max(abs(top1_val), 1e-12)
         is_tie = (top1_val - top2_val) / denom < tie_epsilon
         if is_tie:
-            # Among all candidates within tie_epsilon of top-1, pick lowest trace(Σ_h)
+            tie_fired = True
             tie_set = [
                 i for i in range(n)
                 if (top1_val - expected_contributions[i]) / denom < tie_epsilon
             ]
             variances = np.array([np.trace(sigmas[i]) for i in tie_set])
-            best_in_tie = tie_set[int(np.argmin(variances))]
-            return candidates[best_in_tie]
+            selected_idx = tie_set[int(np.argmin(variances))]
 
-    best_idx = int(np.argmax(expected_contributions))
-    return candidates[best_idx]
+    # NC30 telemetry: compare against the Hv-DM pick (argmax of Delta_S).
+    if collect_telemetry:
+        # Hv-DM equivalent: argmax of the candidate's Delta_S attribute.
+        # If no Delta_S attribute, falls back to current-period rectangle
+        # using the resolved R1/R2.
+        def _hv_dm_score(s):
+            ds = getattr(s, "Delta_S", None)
+            if ds is None or ds == 0.0:
+                # Fallback: deterministic single-solution rectangle
+                return (s.P.ROI - R1) * (R2 - s.P.risk)
+            return float(ds)
+
+        hv_dm_idx = int(np.argmax([_hv_dm_score(s) for s in candidates]))
+        _AMFC_TELEMETRY.append({
+            "amfc_idx": selected_idx,
+            "hv_dm_idx": hv_dm_idx,
+            "amfc_agrees_with_hv_dm": selected_idx == hv_dm_idx,
+            "amfc_pick_roi": float(candidates[selected_idx].P.ROI),
+            "amfc_pick_risk": float(candidates[selected_idx].P.risk),
+            "hv_dm_pick_roi": float(candidates[hv_dm_idx].P.ROI),
+            "hv_dm_pick_risk": float(candidates[hv_dm_idx].P.risk),
+            "n_candidates": n,
+            "horizon": horizon,
+            "n_mc": n_mc,
+            "top1_expected_contrib": float(expected_contributions[selected_idx]),
+            "mean_forecast_variance": float(np.mean([np.trace(s) for s in sigmas])),
+            "amfc_pick_forecast_variance": float(np.trace(sigmas[selected_idx])),
+            "tie_break_fired": tie_fired,
+            "R1": R1,
+            "R2": R2,
+        })
+
+    return candidates[selected_idx]

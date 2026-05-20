@@ -233,10 +233,14 @@ class ThesisAlignedExperiment:
             # If R1/R2 omitted AND derive_zref=True, the selector derives them.
             R1 = dm_config.get('R1', None)
             R2 = dm_config.get('R2', None)
-            derive_zref = bool(dm_config.get('derive_zref', False))
+            # W22-NC30 b STRUCTURAL FIX (operator directive 2026-05-19):
+            # default derive_zref=True. Pre-fix used hard-coded (0.0, 0.05),
+            # which created the z_ref ambiguity flagged by Inspection 6.
+            derive_zref = bool(dm_config.get('derive_zref', True))
             zref_margin = float(dm_config.get('zref_margin', 0.0))
             tie_break = bool(dm_config.get('tie_break_by_variance', False))
             tie_epsilon = float(dm_config.get('tie_epsilon', 0.05))
+            collect_telemetry = bool(dm_config.get('collect_telemetry', False))
             seed = dm_config.get('seed', None)
             rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
             return select_amfc(
@@ -251,6 +255,7 @@ class ThesisAlignedExperiment:
                 zref_margin=zref_margin,
                 tie_break_by_variance=tie_break,
                 tie_epsilon=tie_epsilon,
+                collect_telemetry=collect_telemetry,
             )
 
         elif dm_type == 'R-DM':
