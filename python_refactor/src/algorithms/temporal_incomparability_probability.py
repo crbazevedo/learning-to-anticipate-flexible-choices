@@ -12,6 +12,9 @@ import numpy as np
 from typing import Tuple, Optional
 import logging
 
+# W22-NC36 (2026-05-20): scipy.stats for analytical bivariate Gaussian TIP
+from scipy import stats as scipy_stats
+
 # ---------------------------------------------------------------------------
 # W3-4 (closes W1-4-CARRY-2): heuristic placeholders for the
 # `_calculate_tip_simple` fallback path (used when KF covariance is
@@ -141,16 +144,99 @@ class TemporalIncomparabilityCalculator:
         
         return tip
     
+    def _calculate_tip_analytical_conditional(self, current_roi: float, current_risk: float,
+                                                predicted_roi: float, predicted_risk: float,
+                                                predicted_cov: np.ndarray) -> float:
+        """W22-NC36 analytical closed-form TIP under bivariate Gaussian forecast.
+
+        Per Defn 6.1: TIP = Pr[ẑ_t ‖ ẑ_{t+h} | ẑ_t]. With current = (c_ROI, c_risk)
+        OBSERVED (fixed) and predicted ~ N(μ, Σ), the dominance probabilities are
+        closed-form via the bivariate Normal CDF.
+
+        Math:
+          z1 = (c_ROI - μ_ROI) / σ_ROI
+          z2 = (c_risk - μ_risk) / σ_risk
+          ρ  = Σ_{12} / (σ_ROI · σ_risk)
+          Let Φ_2(z1, z2; ρ) = bivariate normal CDF (scipy.stats.multivariate_normal.cdf)
+          P[current dominates predicted] = P[P_ROI < c_ROI ∧ P_risk > c_risk]
+                                          = Φ(z1) − Φ_2(z1, z2; ρ)
+          P[predicted dominates current] = P[P_ROI > c_ROI ∧ P_risk < c_risk]
+                                          = Φ(z2) − Φ_2(z1, z2; ρ)
+          TIP = 1 − P[c dom] − P[p dom]
+
+        Benefit (vs MC): deterministic (no MC variance); ~10× faster than
+        monte_carlo_samples=1000; closed-form so analytically tractable.
+
+        Opt-in via env var W22_NC36_TIP_ANALYTICAL=1 (default OFF for backward
+        compat). Implicitly uses Defn-6.1 conditional semantics (current FIXED).
+
+        Honest scars:
+        - Requires predicted_cov to be PSD (KF guarantees this)
+        - ρ = ±1 degenerates the bivariate Normal; epsilon clamps ρ
+        - σ_ROI = 0 or σ_risk = 0 degenerates standardization;
+          falls back to deterministic (point-vs-point dominance)
+        """
+        sigma_roi = float(np.sqrt(predicted_cov[0, 0]))
+        sigma_risk = float(np.sqrt(predicted_cov[1, 1]))
+        if sigma_roi < 1e-12 or sigma_risk < 1e-12:
+            # Degenerate predicted variance → point-vs-point dominance
+            current_dominates = (current_roi > predicted_roi) and (current_risk < predicted_risk)
+            predicted_dominates = (predicted_roi > current_roi) and (predicted_risk < current_risk)
+            if current_dominates or predicted_dominates:
+                return self._clamp_tip(0.0)
+            return self._clamp_tip(1.0)
+
+        rho_raw = predicted_cov[0, 1] / (sigma_roi * sigma_risk)
+        rho = float(max(-0.999999, min(0.999999, rho_raw)))  # clamp to avoid ±1
+
+        z1 = (current_roi - predicted_roi) / sigma_roi
+        z2 = (current_risk - predicted_risk) / sigma_risk
+
+        Phi_z1 = float(scipy_stats.norm.cdf(z1))
+        Phi_z2 = float(scipy_stats.norm.cdf(z2))
+        # Bivariate normal CDF via scipy.stats.multivariate_normal
+        bvn = scipy_stats.multivariate_normal(
+            mean=[0.0, 0.0], cov=[[1.0, rho], [rho, 1.0]]
+        )
+        Phi2_z1z2 = float(bvn.cdf([z1, z2]))
+
+        # P[c dominates p] = P[P_ROI < c_ROI ∧ P_risk > c_risk]
+        #                  = Φ(z1) − Φ_2(z1, z2; ρ)
+        p_c_dominates = Phi_z1 - Phi2_z1z2
+        # P[p dominates c] = P[P_ROI > c_ROI ∧ P_risk < c_risk]
+        #                  = Φ(z2) − Φ_2(z1, z2; ρ)
+        p_p_dominates = Phi_z2 - Phi2_z1z2
+
+        # Numerical guard: tiny negatives from float arithmetic
+        p_c_dominates = max(0.0, p_c_dominates)
+        p_p_dominates = max(0.0, p_p_dominates)
+
+        tip = 1.0 - p_c_dominates - p_p_dominates
+        # Numerical guard: tip should be in [0, 1] analytically
+        tip = max(0.0, min(1.0, tip))
+
+        return self._clamp_tip(tip)
+
     def _calculate_tip_with_covariance(self, current_roi: float, current_risk: float,
                                      current_cov: np.ndarray,
                                      predicted_roi: float, predicted_risk: float,
                                      predicted_cov: np.ndarray) -> float:
         """
         Calculate TIP using proper covariance matrices from Kalman filter.
-        
+
         This is the most accurate method as it uses the actual uncertainty
         estimates from the Kalman filter state.
         """
+        # W22-NC36 ANALYTICAL TIP (operator directive 2026-05-20): closed-form
+        # under bivariate Gaussian, eliminates MC noise. Opt-in via env var.
+        import os as _os
+        analytical_mode = _os.environ.get("W22_NC36_TIP_ANALYTICAL", "0").strip() == "1"
+        if analytical_mode:
+            return self._calculate_tip_analytical_conditional(
+                current_roi, current_risk,
+                predicted_roi, predicted_risk, predicted_cov,
+            )
+
         # W22-NC31 STRUCTURAL FIX (operator directive 2026-05-19): per Defn 6.1,
         # TIP = Pr[ẑ_t || ẑ_{t+h} | ẑ_t] — the conditional `| ẑ_t` means
         # current is OBSERVED (fixed), only predicted is sampled.
@@ -163,7 +249,6 @@ class TemporalIncomparabilityCalculator:
         # backward compat). When enabled, current is treated as observed
         # (no sampling) and only predicted is sampled — matching Defn 6.1
         # exactly.
-        import os as _os
         conditional_mode = _os.environ.get("W22_NC31_TIP_CONDITIONAL", "0").strip() == "1"
 
         try:
