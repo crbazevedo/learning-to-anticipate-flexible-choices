@@ -1,0 +1,300 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-20T16:57:10.853331",
+    "configs": [
+      "BASELINE",
+      "NC27_DEEP"
+    ],
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "scenarios": [
+      "ASMS_mHDM_K3_v2both",
+      "SMS_RDM_K0"
+    ],
+    "n_mc": 200,
+    "train_window_days": 378,
+    "step_days": 50,
+    "total_wall_seconds": 2938.53098320961
+  },
+  "raw_results": [
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 1,
+      "grand_mean": 0.0004154534372562571,
+      "wall": 912.5205459594727,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 2,
+      "grand_mean": 0.0003803567336691554,
+      "wall": 922.9447388648987,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 3,
+      "grand_mean": 0.0003844356813533989,
+      "wall": 914.6556208133698,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 4,
+      "grand_mean": 0.0003675124026320706,
+      "wall": 922.5788540840149,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 5,
+      "grand_mean": 0.00035672612207075896,
+      "wall": 531.6394166946411,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 1,
+      "grand_mean": 0.0003753748846513261,
+      "wall": 4.3901097774505615,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 2,
+      "grand_mean": 0.0004071017996431697,
+      "wall": 4.019813299179077,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 3,
+      "grand_mean": 0.0004680402768246788,
+      "wall": 4.528765916824341,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 4,
+      "grand_mean": 0.0003732466540597078,
+      "wall": 4.098998069763184,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 5,
+      "grand_mean": 0.00034843930700329304,
+      "wall": 3.879699945449829,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 1446.155117034912
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 1,
+      "grand_mean": 0.0003484766903999924,
+      "wall": 969.2324652671814,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 2,
+      "grand_mean": 0.0004012167225353796,
+      "wall": 1070.182148694992,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 3,
+      "grand_mean": 0.00040804945911457753,
+      "wall": 995.8532030582428,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 4,
+      "grand_mean": 0.0004847107080164642,
+      "wall": 1135.7157139778137,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 5,
+      "grand_mean": 0.0003093802420082414,
+      "wall": 520.5217838287354,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 1,
+      "grand_mean": 0.0004008959951263751,
+      "wall": 4.017230272293091,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 2,
+      "grand_mean": 0.00037356807333357024,
+      "wall": 3.7530219554901123,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 3,
+      "grand_mean": 0.00045294216854831264,
+      "wall": 3.8926148414611816,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 4,
+      "grand_mean": 0.0004147728612426182,
+      "wall": 3.826277732849121,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 5,
+      "grand_mean": 0.00033123482870314763,
+      "wall": 3.8501522541046143,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 1492.3736650943756
+    }
+  ],
+  "summary": {
+    "BASELINE": {
+      "ASMS_mHDM_K3_v2both": {
+        "n_seeds": 5,
+        "mean": 0.0003808968753963282,
+        "std": 2.2194257679459545e-05,
+        "min": 0.00035672612207075896,
+        "max": 0.0004154534372562571,
+        "raw": [
+          0.0004154534372562571,
+          0.0003803567336691554,
+          0.0003844356813533989,
+          0.0003675124026320706,
+          0.00035672612207075896
+        ]
+      },
+      "SMS_RDM_K0": {
+        "n_seeds": 5,
+        "mean": 0.0003944405844364351,
+        "std": 4.6114049401309696e-05,
+        "min": 0.00034843930700329304,
+        "max": 0.0004680402768246788,
+        "raw": [
+          0.0003753748846513261,
+          0.0004071017996431697,
+          0.0004680402768246788,
+          0.0003732466540597078,
+          0.00034843930700329304
+        ]
+      }
+    },
+    "NC27_DEEP": {
+      "ASMS_mHDM_K3_v2both": {
+        "n_seeds": 5,
+        "mean": 0.000390366764414931,
+        "std": 6.641681656375128e-05,
+        "min": 0.0003093802420082414,
+        "max": 0.0004847107080164642,
+        "raw": [
+          0.0003484766903999924,
+          0.0004012167225353796,
+          0.00040804945911457753,
+          0.0004847107080164642,
+          0.0003093802420082414
+        ]
+      },
+      "SMS_RDM_K0": {
+        "n_seeds": 5,
+        "mean": 0.00039468278539080473,
+        "std": 4.557369066122979e-05,
+        "min": 0.00033123482870314763,
+        "max": 0.00045294216854831264,
+        "raw": [
+          0.0004008959951263751,
+          0.00037356807333357024,
+          0.00045294216854831264,
+          0.0004147728612426182,
+          0.00033123482870314763
+        ]
+      }
+    }
+  },
+  "wilcoxon_tests": {
+    "NC27_DEEP::ASMS_mHDM_K3_v2both": {
+      "p_value": 1.0,
+      "mean_diff": 9.46988901860278e-06,
+      "n": 5
+    },
+    "NC27_DEEP::SMS_RDM_K0": {
+      "p_value": 1.0,
+      "mean_diff": 2.422009543696425e-07,
+      "n": 5
+    }
+  }
+}

@@ -91,18 +91,22 @@ NC_CLAIMS_REGISTRY: list[NCClaim] = [
     NCClaim(
         nc_name="NC27_DEEP",
         synthetic_claim="2.8x tighter L2 error vs DirichletPredictor on Dirichlet source data",
-        synthetic_value=0.028,  # 2.8% absolute L2 reduction (illustrative scale)
+        synthetic_value=0.028,
         synthetic_metric="L2 error reduction",
-        empirical_value=0.0137,  # PO smoke 2026-05-20: ASMS +1.37% paired n=10
-        empirical_metric="paired wealth Δ vs BASELINE on PO(8,1.0) ASMS n=10",
+        empirical_value=0.004,  # avg across 4 PO instances (paired)
+        empirical_metric="avg paired wealth Δ across 4 PO instances (W22-4/5/6)",
         empirical_p_value=0.625,
         notes=(
-            "MODEST_TRANSLATION at n=10 (down from +2.7% at n=5 — lucky-seed effect). "
-            "Direction holds (positive, 6/10 wins) but effect is HALF the synthetic claim. "
-            "Still the cleanest empirical win in the sweep. NS at n=10 (p=0.625); "
-            "would need n≥30 for statistical significance on ~1% effects."
+            "CROSS-INSTANCE update 2026-05-20: 4 instances tested. "
+            "PO(8,1.0) paired n=10 +1.37% (p=0.625). "
+            "PO(8,1.0) unpaired n=20 vs n=10 BASELINE +0.52% — signal washing out. "
+            "PO(16,1.0) paired n=5 -6.1% — REGRESSION on high-α (concentrated Dirichlet). "
+            "PO(8,0.3) paired n=5 +2.5%. "
+            "sPO(8,1.0)-cosine paired n=5 +8.6% (p=0.188 trending) — STRONGEST signal on smooth dynamics. "
+            "Direction holds on 3 of 4 PO variants. Verdict: WEAKLY_MODEST_TRANSLATION; "
+            "PO(16,1.0) regression deserves investigation before W23-1 default flip."
         ),
-        source="commit b9ccaad + 9c51faf + smoke n=10 20260520",
+        source="commits b9ccaad + 9c51faf + W22 cross-instance smoke 20260520",
     ),
     NCClaim(
         nc_name="NC32_LNKF_dirichlet_data",

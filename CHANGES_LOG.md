@@ -173,6 +173,50 @@ this baseline AND ideally adds marginal Δ vs it.
 
 ---
 
+### Entry 4: W22-4/5/6 cross-instance NC27-deep sweep (2026-05-20 evening)
+
+```yaml
+- date: 2026-05-20
+  commit: (post-0683dd0; pending W22-7 commit)
+  wave_unit: W22-4, W22-5, W22-6
+  type: empirical
+  nc_or_combo: [NC27_DEEP]
+  thesis_anchor: "§6.2.1 Dirichlet concentration sensitivity; Paper Eqs 16-17"
+  baseline_used: BASELINE per-instance paired
+  observation:
+    metric: paired Δ wealth Ŝ vs BASELINE on ASMS_mHDM_K3_v2both per instance
+    value:
+      "PO(8,1.0) n=10 paired (prior)": "+1.37% (6/10 wins, p=0.625)"
+      "PO(8,1.0) n=20 unpaired (W22-4 added seeds 11-20)": "+0.52% (signal washing out)"
+      "PO(16,1.0) n=5 paired (W22-5a)": "-6.1% (p=0.625) — OUTLIER"
+      "PO(8,0.3) n=5 paired (W22-5b)": "+2.5% (p=1.000)"
+      "sPO(8,1.0)-cosine n=5 paired (W22-6)": "+8.6% (p=0.188 — TRENDING)"
+    n_seeds: 5-20 across instances
+    confidence: low (n=5 instances), low-medium (PO(8,1.0) n=10/20)
+  attribution:
+    per_nc_marginal:
+      NC27_DEEP_PO_8_1_0: "+1.37% paired n=10; +0.52% unpaired n=20 vs n=10 BASELINE"
+      NC27_DEEP_PO_16_1_0: "−6.1% paired n=5 — REGRESSION on high-α concentration regime"
+      NC27_DEEP_PO_8_0_3: "+2.5% paired n=5"
+      NC27_DEEP_sPO_8_1_0: "+8.6% paired n=5 — STRONGEST signal; smooth dynamics favor Bayesian posterior"
+    method: per-instance paired Wilcoxon; cross-instance synthesis
+    direction_summary: "3 of 4 PO variants positive; PO(16,1.0) negative outlier"
+  honest_scars:
+    - "PO(16,1.0) regression unexpected; hypothesis: high α=16 → more concentrated Dirichlet → NC27-deep's aggressive Bayesian updates may over-trust noisy posteriors when ground-truth is already concentrated"
+    - "sPO +8.6% with p=0.188 is borderline; could be n=5 noise OR could be that smooth dynamics is NC27-deep's natural regime (its posterior tracks the slow-changing weight distribution well)"
+    - "n=5 per instance underpowered for sub-5% effects"
+    - "BASELINE for PO(8,1.0) seeds 11-20 NOT run; n=20 paired comparison impossible without additional BASELINE batch (would cost +1hr wall)"
+  ratification_verdict:
+    nc27_deep: "WEAKLY POSITIVE — keep as OPT-IN; do NOT flip default in W23-1 yet"
+    reasoning: |
+      Direction holds on 3 of 4 PO instances (avg +0.4% across paired n).
+      The PO(16,1.0) -6.1% regression is a real concern; deserves
+      investigation before defaulting. The synthetic +2.8% L2 claim
+      ranges from -6.1% to +8.6% in empirical wealth — high variance.
+      Recommended next: run PO(16,1.0) at n=10 to confirm/refute the
+      regression sign; if it persists at n=10, FTSE test is risky.
+```
+
 ## Accumulated delta vs pre-W22 baseline (as of 2026-05-20)
 
 | Config | Wealth Δ vs PO(8,1.0) BASELINE | Wealth Δ vs FTSE 2015 NC8c-v2 baseline |

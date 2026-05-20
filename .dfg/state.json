@@ -21,18 +21,23 @@
     },
     "W22-4": {
       "checkpoint_chain": [],
-      "state": "PLANNED",
-      "note": "NC27-deep n=20 paired confirmation on PO(8,1.0)"
+      "state": "DONE",
+      "note": "NC27-deep n=20 unpaired vs n=10 BASELINE: +0.52% (signal washing out vs paired n=10 +1.37%)"
     },
     "W22-5": {
       "checkpoint_chain": [],
-      "state": "PLANNED",
-      "note": "NC27-deep cross-instance PO(16,1.0) + PO(8,0.3)"
+      "state": "DONE",
+      "note": "PO(16,1.0) -6.10% REGRESSION; PO(8,0.3) +2.51% positive"
     },
     "W22-6": {
       "checkpoint_chain": [],
-      "state": "PLANNED",
-      "note": "NC27-deep on sPO(8,1.0)-cosine"
+      "state": "DONE",
+      "note": "sPO(8,1.0)-cosine +8.59% (p=0.188 TRENDING) — strongest signal of W22"
+    },
+    "W22-7": {
+      "checkpoint_chain": [],
+      "state": "DONE",
+      "note": "Cross-instance verdict: WEAKLY POSITIVE; PO(16,1.0) outlier deserves follow-up. W23-1 DEFER. See docs/W22-NC27-DEEP-CROSS-INSTANCE.md"
     },
     "W22-7": {
       "checkpoint_chain": [],
