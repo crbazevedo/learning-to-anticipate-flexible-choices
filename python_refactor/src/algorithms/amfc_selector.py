@@ -194,6 +194,7 @@ def select_amfc(
     tie_epsilon: float = 0.05,
     collect_telemetry: bool = False,
     analytical: bool = True,  # NC30-v2 STRUCTURAL: deterministic E[contrib] at mean positions
+    variance_penalty: float = 0.0,  # NC30 c: continuous variance-aware discount
 ):
     """Select the AMFC solution from the population.
 
@@ -351,20 +352,39 @@ def select_amfc(
                 contributions[i, j] = _front_contribution(pos, sorted_front_j, R1, R2)
         expected_contributions = contributions.mean(axis=1)
 
+    # NC30 c STRUCTURAL FIX (operator directive 2026-05-19): continuous
+    # variance-aware contribution. Replaces tie-break-only treatment of
+    # forecast variance with a smooth penalty applied to every candidate:
+    #
+    #   effective_contribution[i] = expected_contribution[i] - α · trace(Σ_h[i])
+    #
+    # Where α is the variance_penalty kwarg (default 0.0 = no penalty,
+    # backward compatible). This is the "uncertain forecasts get downweighted"
+    # principle that the legacy stability_factor implemented for current-period
+    # Δ_S, lifted to the AMFC forward-forecast.
+    #
+    # When variance_penalty > 0, the argmax favors candidates with both high
+    # expected contribution AND low forecast uncertainty — exactly the
+    # behavior the operator's "low variance wins" intuition wanted.
+    effective_contributions = expected_contributions.copy()
+    if variance_penalty > 0.0:
+        variance_traces = np.array([np.trace(sigmas[i]) for i in range(n)])
+        effective_contributions = expected_contributions - variance_penalty * variance_traces
+
     # NC30 d: tie-break by lowest forecast variance trace.
     tie_fired = False
-    selected_idx = int(np.argmax(expected_contributions))
+    selected_idx = int(np.argmax(effective_contributions))
     if tie_break_by_variance and n >= 2:
-        sorted_idx = np.argsort(-expected_contributions)  # descending
+        sorted_idx = np.argsort(-effective_contributions)  # descending
         top1, top2 = sorted_idx[0], sorted_idx[1]
-        top1_val, top2_val = expected_contributions[top1], expected_contributions[top2]
+        top1_val, top2_val = effective_contributions[top1], effective_contributions[top2]
         denom = max(abs(top1_val), 1e-12)
         is_tie = (top1_val - top2_val) / denom < tie_epsilon
         if is_tie:
             tie_fired = True
             tie_set = [
                 i for i in range(n)
-                if (top1_val - expected_contributions[i]) / denom < tie_epsilon
+                if (top1_val - effective_contributions[i]) / denom < tie_epsilon
             ]
             variances = np.array([np.trace(sigmas[i]) for i in tie_set])
             selected_idx = tie_set[int(np.argmin(variances))]

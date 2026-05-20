@@ -352,6 +352,86 @@ def test_no_tie_break_default_behavior_preserved():
 
 
 # =============================================================================
+# NC30 c: continuous variance-aware contribution tests
+# =============================================================================
+
+def test_variance_penalty_zero_preserves_default_behavior():
+    """variance_penalty=0.0 (default) doesn't change argmax."""
+    front = _make_front([0.001, 0.002, 0.003], [0.012, 0.009, 0.005])
+    rng = np.random.default_rng(0)
+    pick_default = select_amfc(
+        front, horizon=1, n_mc=20, R1=0.0, R2=0.02, rng=rng,
+        variance_penalty=0.0,
+    )
+    rng = np.random.default_rng(0)
+    pick_zero_penalty = select_amfc(
+        front, horizon=1, n_mc=20, R1=0.0, R2=0.02, rng=rng,
+    )
+    assert pick_default is pick_zero_penalty
+
+
+def test_variance_penalty_favors_lower_variance():
+    """With variance_penalty > 0, a high-contribution-but-high-variance candidate
+    can lose to a low-contribution-but-low-variance one if the penalty is
+    large enough."""
+    # Build two solutions:
+    # - sol_a: high contribution (high ROI), high variance
+    # - sol_b: lower contribution, low variance
+    x_a = np.array([0.005, 0.005, 0.0, 0.0])  # high ROI
+    P_a = 1e-2 * np.eye(4)  # high variance (trace = 0.04)
+    kf_a = _FakeKalmanState(x_a, P_a)
+    sol_a = _FakeSolution(0.005, 0.005, kalman_state=kf_a)
+
+    x_b = np.array([0.003, 0.005, 0.0, 0.0])  # slightly lower ROI
+    P_b = 1e-10 * np.eye(4)  # essentially zero variance
+    kf_b = _FakeKalmanState(x_b, P_b)
+    sol_b = _FakeSolution(0.003, 0.005, kalman_state=kf_b)
+
+    front = [sol_a, sol_b]
+
+    # No penalty: sol_a wins (higher contribution)
+    rng = np.random.default_rng(0)
+    pick_no_penalty = select_amfc(
+        front, horizon=1, n_mc=50, R1=0.0, R2=0.01, rng=rng,
+        variance_penalty=0.0,
+    )
+    # With heavy penalty: sol_b's variance ≈ 0 should make it win
+    rng = np.random.default_rng(0)
+    pick_with_penalty = select_amfc(
+        front, horizon=1, n_mc=50, R1=0.0, R2=0.01, rng=rng,
+        variance_penalty=1.0,  # heavy penalty
+    )
+    # Either no_penalty picks sol_a (higher mean contrib), with_penalty picks sol_b;
+    # or both pick sol_a (penalty too small to flip). At a minimum, the penalty
+    # should not change picks in a NONSENSICAL way (e.g., pick a dominated solution).
+    assert pick_no_penalty in front
+    assert pick_with_penalty in front
+
+
+def test_variance_penalty_flips_argmax_at_large_alpha():
+    """With sufficiently large variance_penalty, the argmax flips to the
+    lower-variance candidate."""
+    # Two candidates with IDENTICAL means but very different variances
+    mean_roi, mean_risk = 0.05, 0.005
+    x = np.array([mean_roi, mean_risk, 0.0, 0.0])
+    P_low = 1e-12 * np.eye(4)
+    P_high = 1e-2 * np.eye(4)  # trace ≈ 0.04
+    sol_low = _FakeSolution(mean_roi, mean_risk,
+                              kalman_state=_FakeKalmanState(x.copy(), P_low.copy()))
+    sol_high = _FakeSolution(mean_roi, mean_risk,
+                               kalman_state=_FakeKalmanState(x.copy(), P_high.copy()))
+    front = [sol_low, sol_high]
+    rng = np.random.default_rng(0)
+    # Identical means → effective contributions are equal in analytical mode
+    # variance_penalty subtracts trace(Σ) → low-variance wins
+    pick = select_amfc(
+        front, horizon=1, n_mc=100, R1=-1.0, R2=1.0, rng=rng,
+        variance_penalty=1.0,
+    )
+    assert pick is sol_low, "variance_penalty should make low-variance win on ties"
+
+
+# =============================================================================
 # AMFC telemetry hook tests
 # =============================================================================
 

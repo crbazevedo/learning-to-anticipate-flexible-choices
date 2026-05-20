@@ -241,6 +241,8 @@ class ThesisAlignedExperiment:
             tie_break = bool(dm_config.get('tie_break_by_variance', False))
             tie_epsilon = float(dm_config.get('tie_epsilon', 0.05))
             collect_telemetry = bool(dm_config.get('collect_telemetry', False))
+            # W22-NC30 c: continuous variance-aware contribution discount.
+            variance_penalty = float(dm_config.get('variance_penalty', 0.0))
             seed = dm_config.get('seed', None)
             rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
             return select_amfc(
@@ -256,6 +258,7 @@ class ThesisAlignedExperiment:
                 tie_break_by_variance=tie_break,
                 tie_epsilon=tie_epsilon,
                 collect_telemetry=collect_telemetry,
+                variance_penalty=variance_penalty,
             )
 
         elif dm_type == 'R-DM':
