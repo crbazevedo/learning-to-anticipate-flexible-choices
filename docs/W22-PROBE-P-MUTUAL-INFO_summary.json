@@ -1,0 +1,36 @@
+{
+  "n_records": 2666,
+  "n_scenarios": 2,
+  "n_seeds": 5,
+  "n_periods": 23,
+  "kraskov_k": 3,
+  "n_period_buckets": 184,
+  "per_scenario": {
+    "ASMS_mHDM_K3_v2both": {
+      "n_periods": 101,
+      "mi_kf_roi_mean": 0.045049685970856276,
+      "mi_persistence_roi_mean": 0.021527911137181634,
+      "diff_roi_mean": 0.02352177483367463,
+      "wilcoxon_roi_p": 0.010256413854233476,
+      "kf_beats_persistence_roi": true,
+      "mi_kf_risk_mean": 0.03971428395634205,
+      "mi_persistence_risk_mean": 0.005992621234694294,
+      "diff_risk_mean": 0.033721662721647755,
+      "wilcoxon_risk_p": 6.681639230177222e-05,
+      "kf_beats_persistence_risk": true
+    },
+    "SMS_RDM_K0": {
+      "n_periods": 83,
+      "mi_kf_roi_mean": 0.08017595635065511,
+      "mi_persistence_roi_mean": 0.0869285433442062,
+      "diff_roi_mean": -0.006752586993551105,
+      "wilcoxon_roi_p": 0.5980049841690147,
+      "kf_beats_persistence_roi": false,
+      "mi_kf_risk_mean": 0.061578869033688255,
+      "mi_persistence_risk_mean": 0.0029270038306182383,
+      "diff_risk_mean": 0.05865186520307001,
+      "wilcoxon_risk_p": 3.1112486082496265e-07,
+      "kf_beats_persistence_risk": true
+    }
+  }
+}
