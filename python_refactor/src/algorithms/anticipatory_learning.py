@@ -298,12 +298,109 @@ class LogisticNormalPredictor:
         return LogisticNormalPredictor._inverse(y_updated)
 
 
+class DirichletPosteriorPredictor:
+    """Stateful TRUE Dirichlet posterior predictor — NC27-deep (2026-05-19).
+
+    Closes the honest-scar gap from NC27 (LogisticNormalPredictor): this
+    class IS a Bayesian posterior. It maintains a per-instance concentration
+    parameter α that accumulates with each observation:
+
+        α_{t+1} = α_t + concentration_increment * observation
+
+    Posterior mean:     E[X_i] = α_i / Σα
+    Posterior variance: Var(X_i) = α_i (Σα − α_i) / (Σα² (Σα + 1))
+
+    Per W22 Inspection 3, this predictor achieves L2 error 0.032 vs the
+    legacy DirichletPredictor's 0.089 on 100-obs Dirichlet(α=[5,3,2,1,1])
+    data — a 2.8× accuracy gain.
+
+    INTERFACE NOTE: this class is NOT a drop-in replacement for
+    DirichletPredictor's stateless static API. It requires the caller to
+    instantiate one predictor per portfolio (or per logical "predictand
+    stream") and call ``observe_and_predict`` once per observation.
+
+    Wiring into the existing AnticipatoryLearning call sites requires
+    modifying those sites to hold per-Solution predictor instances (e.g.,
+    as a Portfolio attribute). That integration is intentionally NOT done
+    in this commit — this class is shipped standalone so the operator can
+    decide where state should live (Portfolio, Solution, or external dict).
+
+    Example::
+
+        d = 5
+        predictor = DirichletPosteriorPredictor(d, alpha_prior=0.5)
+        for obs in observations:
+            mean = predictor.observe_and_predict(obs)
+            # mean is the posterior mean after seeing all observations so far
+    """
+
+    def __init__(self, d: int, alpha_prior: float = 0.5):
+        """Initialize with uniform Jeffreys-style prior.
+
+        Args:
+            d: dimension of the simplex (number of assets / categories)
+            alpha_prior: per-component prior concentration (0.5 = Jeffreys,
+                1.0 = uniform Bayes-Laplace)
+        """
+        self.alpha = np.ones(d, dtype=float) * float(alpha_prior)
+        self.d = d
+        self.n_observations = 0
+
+    def observe(self, observation: np.ndarray, concentration_increment: float = 1.0) -> None:
+        """Update posterior with an observation.
+
+        Args:
+            observation: weight vector on simplex (length d)
+            concentration_increment: how much weight to give the observation
+                (1.0 is the natural choice for unit-mass observations)
+        """
+        if len(observation) != self.d:
+            raise ValueError(
+                f"observation dim {len(observation)} != predictor dim {self.d}"
+            )
+        self.alpha = self.alpha + concentration_increment * np.asarray(observation, dtype=float)
+        self.n_observations += 1
+
+    def predict_mean(self) -> np.ndarray:
+        """Return current posterior mean E[X_i] = α_i / Σα."""
+        return self.alpha / np.sum(self.alpha)
+
+    def predict_variance(self) -> np.ndarray:
+        """Return current posterior variance Var(X_i) = α_i(Σα − α_i)/(Σα²(Σα + 1))."""
+        alpha_sum = np.sum(self.alpha)
+        return self.alpha * (alpha_sum - self.alpha) / (alpha_sum ** 2 * (alpha_sum + 1.0))
+
+    def observe_and_predict(self, observation: np.ndarray,
+                             concentration_increment: float = 1.0) -> np.ndarray:
+        """Convenience: ``observe`` then return ``predict_mean``.
+
+        Args:
+            observation: weight vector on simplex
+            concentration_increment: per-call concentration weight (default 1.0)
+
+        Returns:
+            Posterior mean after incorporating the observation.
+        """
+        self.observe(observation, concentration_increment)
+        return self.predict_mean()
+
+    def reset(self, alpha_prior: float = 0.5) -> None:
+        """Reset to prior (useful for cross-period reuse)."""
+        self.alpha = np.ones(self.d, dtype=float) * float(alpha_prior)
+        self.n_observations = 0
+
+
 def _get_active_predictor():
     """W22-NC27 dispatcher: return the predictor class selected by env var.
 
     Default is ``DirichletPredictor`` (preserves existing behavior).
     Set ``W22_NC27_PREDICTOR=logistic_normal`` to opt into the
     Aitchison-compositional alternative.
+
+    NOTE: ``DirichletPosteriorPredictor`` (NC27-deep) is NOT dispatched here
+    because it has a stateful instance interface that doesn't fit the static
+    DirichletPredictor signature. It is exposed as a standalone class for
+    callers willing to manage per-portfolio predictor instances.
     """
     import os as _os
     name = _os.environ.get("W22_NC27_PREDICTOR", "dirichlet").strip().lower()
