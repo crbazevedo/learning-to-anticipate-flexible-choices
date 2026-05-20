@@ -706,22 +706,33 @@ class SMSEMOA:
         # Sort by ROI (ascending)
         solutions.sort(key=lambda s: s.P.ROI)
         
-        # Compute contributions
+        # W22-NC-AD-fix (2026-05-20): realign middle-branch rectangle to Eq 6.41.
+        # Per W22 Probe AD finding (commit `881d0f2`): the legacy formula
+        #   middle = (ROI_i − ROI_{i+1}) · (risk_{i−1} − risk_i)
+        # disagrees with Eq 6.41's
+        #   middle = (ROI_i − ROI_{i−1}) · (risk_{i+1} − risk_i)
+        # Both produce positive values on a sorted-by-ROI Pareto front with
+        # risk descending, but they are DIFFERENT rectangles. The stochastic
+        # Δ_S formula (Eq 6.41) subtracts within-solution Cov(ROI, risk)
+        # against the Eq 6.41 rectangle — so applying that correction to the
+        # legacy rectangle OVERSHOOTS (Probe AD: SCAR-pinned regression test).
+        # Realigning the deterministic to Eq 6.41 ensures the stochastic
+        # correction is consistent.
         for i, solution in enumerate(solutions):
             if i == 0:
-                # First solution
-                next_solution = solutions[i + 1]
+                # First solution: (ROI − R1) · (R2 − risk)
                 solution.hypervolume_contribution = (solution.P.ROI - self.R1) * (self.R2 - solution.P.risk)
             elif i == len(solutions) - 1:
-                # Last solution
+                # Last solution: (ROI − ROI_prev) · (R2 − risk)
                 prev_solution = solutions[i - 1]
                 solution.hypervolume_contribution = (solution.P.ROI - prev_solution.P.ROI) * (self.R2 - solution.P.risk)
             else:
-                # Middle solution
+                # Middle solution per Eq 6.41:
+                #   (ROI_i − ROI_{i−1}) · (risk_{i+1} − risk_i)
                 prev_solution = solutions[i - 1]
                 next_solution = solutions[i + 1]
-                solution.hypervolume_contribution = (solution.P.ROI - next_solution.P.ROI) * (prev_solution.P.risk - solution.P.risk)
-            
+                solution.hypervolume_contribution = (solution.P.ROI - prev_solution.P.ROI) * (next_solution.P.risk - solution.P.risk)
+
             # Apply stability factor (W21-1 INVERTED Reading-F: when
             # use_v2_stability_weighting=True, treat stability as the v2
             # effective no-op 1.0 instead of Python's depressing < 1.0
@@ -769,16 +780,17 @@ class SMSEMOA:
         state ROI↔risk covariance ``P[0,1]`` (matching how the C++ uses
         ``w_1->P.S.covar`` for the self-product term).
 
-        DETERMINISTIC-VS-STOCHASTIC RECTANGLE NOTE: the deterministic
-        ``_compute_hypervolume_contributions_class`` middle branch uses
-        rectangle ``(ROI_i − ROI_{i+1})(risk_{i−1} − risk_i)`` (legacy
-        Python convention, same as C++ deterministic). Eq 6.36/6.41
-        specify rectangle ``(ROI_i − ROI_{i−1})(risk_{i+1} − risk_i)``.
-        Both yield POSITIVE values on a sorted-by-ROI Pareto front (with
-        risk DESC), but they are different rectangles. We implement
-        Eq 6.41 LITERALLY (prev-on-ROI, next-on-risk) because that is
-        the equation the operator's audit cited. Operator may decide
-        whether the deterministic version should be re-aligned.
+        DETERMINISTIC-VS-STOCHASTIC RECTANGLE NOTE: as of W22-NC-AD-fix
+        (2026-05-20), the deterministic ``_compute_hypervolume_contributions_class``
+        middle branch has been REALIGNED to Eq 6.41:
+            middle = (ROI_i − ROI_{i−1}) · (risk_{i+1} − risk_i)
+        Pre-NC-AD-fix the deterministic used the legacy rectangle
+        ``(ROI_i − ROI_{i+1})(risk_{i−1} − risk_i)`` while the stochastic
+        used the Eq 6.41 rectangle. The mismatch caused the stochastic
+        ``- Cov`` correction to OVERSHOOT when subtracted from the legacy
+        rectangle (W22 Probe AD finding, commit ``881d0f2``, SCAR-pinned
+        regression test). Post-fix, both branches use the SAME rectangle
+        and the stochastic correction is mathematically consistent.
 
         Edge cases (|C| ∈ {1, 2}) use deterministic-style fallbacks since
         Eq 6.41 is undefined without both neighbors:
