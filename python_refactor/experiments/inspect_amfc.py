@@ -2,8 +2,18 @@
 
 Per W22-RESEARCH-PROGRAM.md Area VIII (AMFC).
 
-OPERATOR FLAGGED: examine AMFC concept/implementation/soundness — how to
-increase its signal?
+OPERATOR DEFINITION (corrected 2026-05-19):
+    AMFC = Anticipative Maximal Flexible Choice
+         = argmax over current Pareto frontier of
+           PREDICTED EXPECTED FUTURE HYPERVOLUME given that choice
+
+    s* = argmax_{s ∈ P_t}  E[ HV( F_{t+h} | choose s at t ) ]
+
+That is: for each candidate s on the CURRENT Pareto frontier P_t, forecast
+the future Pareto frontier F_{t+h} conditioning on having chosen s, compute
+the expected hypervolume of that future frontier, and pick the s that
+maximizes it. "Flexible" = the choice rule is re-evaluated each period
+under updated predictions.
 
 CURRENT CODE (thesis_aligned_experiment.py:215, Hv-DM branch):
     return max(population, key=lambda s: s.Delta_S)
@@ -13,15 +23,20 @@ Where Delta_S comes from:
 - SMS-EMOA._compute_stochastic_hypervolume_contributions_class (Eq 6.41)
 - Then multiplied by stability_factor (in v2 mode = 1.0 always)
 
-The "AMFC" name claims this is "Anticipatory Maximal Future Contribution":
-- "Anticipatory" — does the metric anticipate? It uses current (and possibly
-  anticipated via Eq 14 / Eq 7.16) ẑ_t but Delta_S itself is CURRENT-period
-  HV contribution, not E[future HV].
-- "Maximal" — yes, argmax.
-- "Future Contribution" — DEBATABLE. Delta_S is the CURRENT contribution
-  to the current Pareto frontier; if predictions have been applied in-place
-  (NC8 family), it's an anticipated-state HV but still NOT a multi-period
-  expected HV.
+GAP between operator-defined AMFC and current implementation:
+- AMFC (correct):  argmax_s  E[ HV( F_{t+h} | s ) ]    ← per-candidate forward forecast
+- Current code:   argmax_s  Δ_S(s) at time t           ← per-candidate current contribution
+
+The "Anticipative" part of the name comes ONLY from Eq 14 / Eq 7.16 having
+mutated ẑ_t IN-PLACE before Δ_S is computed — but that bakes anticipation
+into the STATE of each candidate, not into a FUTURE-conditional forecast.
+If the same anticipation rule applies to every candidate equally, the
+ranking by current Δ_S is approximately the ranking under "mean-anticipated
+Δ_S" — but not under "E[ future HV | this candidate chosen ]" because:
+  (a) future HV depends on which OTHER solutions enter the future frontier
+  (b) the chosen-then-realized return path affects what F_{t+h} looks like
+  (c) Eq 14 anticipation is the SAME rule applied to every s, so it doesn't
+      DIFFERENTIATE candidates as a flexible-choice forecast would.
 
 ALGEBRAIC CONCERNS:
 1. z_ref inconsistency: default in sms_emoa.py is (0.0, 0.2); main.py uses
@@ -112,8 +127,14 @@ def main():
     print("W22 INSPECTION 6: AMFC soundness — z_ref, signal quality, naming")
     print("=" * 80)
     print()
-    print("AMFC = argmax(Delta_S) where Delta_S = per-solution HV contribution.")
-    print("Selection happens in thesis_aligned_experiment.py:215 (Hv-DM branch).")
+    print("AMFC (Anticipative Maximal Flexible Choice) per operator definition:")
+    print("  s* = argmax_{s in P_t}  E[ HV( F_{t+h} | choose s at t ) ]")
+    print()
+    print("CURRENT implementation (thesis_aligned_experiment.py:215, Hv-DM branch):")
+    print("  s* = max(population, key=lambda s: s.Delta_S)        # current-period Δ_S")
+    print()
+    print("These are NOT the same metric. Δ_S is current contribution; the AMFC target")
+    print("is the EXPECTED FUTURE hypervolume conditional on which candidate is chosen.")
     print()
 
     # =========================================================================
@@ -297,18 +318,110 @@ def main():
     print()
 
     # =========================================================================
+    # TEST 6: TRUE AMFC vs current-Δ_S — empirical disagreement
+    # =========================================================================
+    print("=" * 80)
+    print("TEST 6: TRUE AMFC (operator-defined) vs current-Δ_S implementation")
+    print("=" * 80)
+    print()
+    print("Simulate operator's AMFC definition with a forward-prediction surrogate.")
+    print("For each candidate s on the current Pareto frontier:")
+    print("  1. Forecast the future frontier conditional on choosing s")
+    print("     (here: noisy KF-style drift of s plus its neighbors)")
+    print("  2. Compute E[ HV(F_{t+h}) | s ] by MC over future-frontier samples")
+    print("  3. argmax over s")
+    print("Compare with the current implementation's argmax(current Δ_S).")
+    print()
+
+    def expected_future_hv_given_choice(rois: np.ndarray, risks: np.ndarray,
+                                          chosen_idx: int, R1: float, R2: float,
+                                          horizon: int = 3, n_mc: int = 200,
+                                          drift_scale: float = 0.0003,
+                                          rng: np.random.Generator = RNG) -> float:
+        """Surrogate for E[ HV(F_{t+h}) | choose chosen_idx ].
+
+        Each MC draw: every solution drifts by per-period noise; the chosen
+        solution gets an extra 'momentum' nudge along its ROI direction
+        (more aggressive at higher-ROI choices); compute hypervolume of
+        the resulting front at horizon h; average over MC draws.
+        """
+        hvs = []
+        n = len(rois)
+        for _ in range(n_mc):
+            roi_h = rois.copy()
+            risk_h = risks.copy()
+            # Per-period drift accumulated over h
+            for _ in range(horizon):
+                roi_h = roi_h + rng.normal(0, drift_scale, size=n)
+                risk_h = risk_h + rng.normal(0, drift_scale * 2, size=n)
+                # Momentum: chosen solution biases the whole front
+                # toward its ROI direction
+                bias = (rois[chosen_idx] - rois.mean()) * 0.05
+                roi_h = roi_h + bias
+            # Re-sort to enforce front structure (rois ascending)
+            idx = np.argsort(roi_h)
+            roi_h = roi_h[idx]; risk_h = risk_h[idx]
+            ds_h = compute_delta_s_for_front(roi_h, risk_h, R1, R2)
+            hvs.append(float(np.sum(np.maximum(ds_h, 0.0))))
+        return float(np.mean(hvs))
+
+    n_runs = 200
+    n_front = 7
+    R1, R2 = 0.0, 0.05
+    disagree = 0
+    rank_diffs = []
+    for _ in range(n_runs):
+        rois, risks = gen_pareto_front(n_front, RNG)
+        ds = compute_delta_s_for_front(rois, risks, R1, R2)
+        amfc_current = int(np.argmax(ds))
+
+        # TRUE AMFC: per-candidate forward forecast
+        future_hvs = np.array([
+            expected_future_hv_given_choice(rois, risks, i, R1, R2,
+                                              horizon=3, n_mc=80, rng=RNG)
+            for i in range(n_front)
+        ])
+        amfc_true = int(np.argmax(future_hvs))
+
+        if amfc_current != amfc_true:
+            disagree += 1
+        # Rank of current-pick under future-HV ranking
+        rank_of_current = int(np.argsort(-future_hvs).tolist().index(amfc_current))
+        rank_diffs.append(rank_of_current)
+
+    print(f"  Synthetic runs: {n_runs}, front size: {n_front}, horizon: 3, MC: 80")
+    print(f"  Current-Δ_S pick != TRUE-AMFC pick: {disagree}/{n_runs} ({disagree/n_runs:.2%})")
+    print(f"  Mean rank of current pick under TRUE-AMFC ordering: {np.mean(rank_diffs):.2f}")
+    print(f"  (0 = perfectly aligned; n_front-1 = worst possible)")
+    print()
+    print("Interpretation:")
+    print("  - If current pick is rank-0 under TRUE AMFC most of the time, Δ_S is a")
+    print("    decent SURROGATE for predicted future HV and the gap is mostly cosmetic.")
+    print("  - If current pick is mid-rank, current-Δ_S is leaving forward-prediction")
+    print("    signal on the table — operator's TRUE AMFC formulation has real upside.")
+    print()
+    print("CAVEAT: this is a TOY forward model. A production AMFC would use the actual")
+    print("KF / Dirichlet predictor chain (or any of the alt-signal probes Q/R/S) to")
+    print("forecast the per-candidate future frontier. The disagreement rate here is")
+    print("an order-of-magnitude hint, not a calibrated estimate.")
+    print()
+
+    # =========================================================================
     # Final summary
     # =========================================================================
     print("=" * 80)
     print("INSPECTION 6 CONCLUSIONS")
     print("=" * 80)
     print()
-    print("1. NAMING vs IMPLEMENTATION mismatch.")
-    print("   'AMFC' suggests Anticipatory Maximal Future Contribution.")
-    print("   Implementation = argmax(current-period Δ_S). The 'future' part comes")
-    print("   ONLY from Eq 14 / Eq 7.16 having already mutated ẑ_t in-place.")
-    print("   If those rules give w_0 = 1 (full weight on current), AMFC is")
-    print("   indistinguishable from non-anticipatory Hv-DM.")
+    print("1. THE IMPLEMENTATION IS NOT THE OPERATOR-DEFINED AMFC.")
+    print("   AMFC (correct) = argmax_s  E[ HV( F_{t+h} | choose s ) ]")
+    print("   Code         = argmax_s  Δ_S(s) at time t")
+    print("   The 'Anticipative' in the name comes only from Eq 14 / Eq 7.16 having")
+    print("   mutated ẑ_t in-place uniformly for every candidate — which DOES NOT")
+    print("   differentiate candidates by their per-choice forward prospects.")
+    print("   The 'Flexible' part (re-evaluate the choice rule each period under")
+    print("   updated predictions) IS present — the rule does re-pick each period.")
+    print("   The 'Maximal' part is the argmax — but over the WRONG objective.")
     print()
     print("2. z_ref CHOICE matters but has no data-driven default.")
     print("   - sms_emoa.py default: (0.0, 0.2)")
@@ -321,28 +434,38 @@ def main():
     print("   In v2 mode: Δ_S *= 1.0 — uncertainty IGNORED.")
     print("   Probe-level RCA needed: did Reading-F's improvement come DESPITE")
     print("   losing this signal, or was the signal actually noise in the Python port?")
+    print("   (Restoring uncertainty-weighting would be doubly important under the")
+    print("    operator-correct AMFC: forward-HV forecasts INHERIT predictor uncertainty.)")
     print()
-    print("4. AMFC SIGNAL is structurally 'least crowded solution' on Pareto front.")
-    print("   This is the same criterion SMS-EMOA uses for survival — so AMFC")
-    print("   doesn't add information beyond 'pick what SMS-EMOA already promoted'.")
+    print("4. CURRENT-Δ_S SIGNAL is structurally 'least crowded solution' on Pareto front.")
+    print("   This is the same criterion SMS-EMOA uses for survival — so the current")
+    print("   AMFC proxy adds little information beyond 'pick what SMS-EMOA promoted'.")
+    print("   The OPERATOR-CORRECT AMFC would differentiate candidates by their")
+    print("   forward HV forecasts, which is orthogonal to current-front crowding.")
     print()
-    print("5. NC30 CANDIDATES (increasing AMFC signal):")
-    print("   a. Make AMFC = argmax(E[Δ_S over h horizons]) — TRULY future, not")
-    print("      current. Requires multi-period Δ_S forecasting (NC26 + NC29).")
-    print("   b. Data-derive z_ref from historical (worst_ROI, worst_risk) over a")
-    print("      sliding window — eliminate config-dependent z_ref ambiguity.")
-    print("   c. Restore stability_factor (or replace with calibrated KF NIS gate)")
-    print("      so AMFC differentiates by uncertainty, not just by Pareto gap.")
-    print("   d. AMFC tie-breaker: when top-1 and top-2 Δ_S are within ε, pick by")
-    print("      lowest trace(P) (most certain). Currently arbitrary on ties.")
+    print("5. NC30 CANDIDATES (implementing the operator-correct AMFC):")
+    print("   a. CORE: per-candidate forward forecast loop")
+    print("      For each s in current Pareto frontier:")
+    print("        Forecast future frontier F_{t+h} conditional on s")
+    print("        Compute E[HV(F_{t+h})] via MC (n_mc ≈ 100–500)")
+    print("        Cache the conditional forecast for the chosen s")
+    print("      Pick s* = argmax over s.")
+    print("      Cost scales O(|P_t| * H * n_mc) — for |P_t|=20, H=3, n_mc=200,")
+    print("      that's 12,000 forecasts per period. Optimization needed but tractable.")
+    print("   b. Data-derive z_ref from sliding-window (worst_ROI, worst_risk) so")
+    print("      the future-HV forecast is comparable across periods.")
+    print("   c. Restore stability_factor (or NIS-gated equivalent) for per-candidate")
+    print("      uncertainty discounting in the forward forecast.")
+    print("   d. AMFC tie-breaker: when top-1 / top-2 E[HV] within ε, pick by lowest")
+    print("      forecast variance (most certain forecast wins).")
     print()
-    print("6. OPERATOR'S 'how to increase its signal?' QUESTION:")
-    print("   - Switch from current-Δ_S to expected-future-Δ_S (a, above).")
-    print("   - Restore down-weighting by uncertainty (c, above).")
-    print("   - Calibrate z_ref to data, not config (b, above).")
-    print("   - Tie-break by certainty (d, above).")
-    print("   All four can be enabled independently. None require breaking the")
-    print("   existing Hv-DM API; they shift what 'Δ_S' means.")
+    print("6. OPERATOR'S 'how to increase its signal?' QUESTION (corrected framing):")
+    print("   The current implementation is using the WRONG objective. Switching to")
+    print("   the operator-defined AMFC (per-candidate forward HV forecast) IS the")
+    print("   structural signal-increasing change. Items (b)/(c)/(d) above are then")
+    print("   complementary refinements of WHICH forecast goes into the argmax.")
+    print("   This is a substantial implementation (NC30 candidate) but it's also")
+    print("   the only way to align the algorithm with what the AMFC name promises.")
 
 
 if __name__ == "__main__":
