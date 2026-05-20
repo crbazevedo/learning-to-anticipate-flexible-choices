@@ -235,12 +235,32 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
             current_time=current_time,
         )
 
+        # W22-NC29a STRUCTURAL FIX (operator directive 2026-05-19): geometric
+        # discount γ^h replaces the flat (1/(H-1)) prefactor.
+        # Pre-fix: λ^H_h = (1/(H-1)) · (1 − entropy(TIP_h)) — SAME prefactor
+        #   for every horizon h. The only h-variation came from TIP_h, which
+        #   itself is clamped to [0.05, 0.95] and often saturated. Net: in
+        #   saturated regimes, every horizon got the same weight ("no real
+        #   discount" — W22 Inspection 5 degeneracy).
+        # Post-fix: λ^H_h = γ^h · (1 − entropy(TIP_h)) — explicit h-decay
+        #   that puts more weight on near-term predictions (where the KF
+        #   is most reliable; covariance lower; linear-quadratic approximation
+        #   tighter). γ default = 0.9; tunable via W22_NC29A_GAMMA env var.
+        # Both pre-fix and post-fix preserve the clamp to [0, 0.5] per λ^H.
+        import os as _os
+        try:
+            gamma = float(_os.environ.get("W22_NC29A_GAMMA", "0.9"))
+        except ValueError:
+            gamma = 0.9
+        gamma = max(0.01, min(0.999, gamma))  # safety: γ in (0, 1)
+
         lambda_rates = []
         for h in range(1, prediction_horizon):
-            # λ^H per Eq 6.6: TIP-entropy across horizon h
+            # λ^H per Eq 6.6 with NC29a geometric prefactor:
+            #   λ^H_h = γ^h · (1 − entropy(TIP_h))
             tip = self._calculate_tip_for_horizon(solution, h)
             entropy = self.tip_calculator.binary_entropy(tip)
-            lambda_h = (1.0 / (prediction_horizon - 1)) * (1.0 - entropy)
+            lambda_h = (gamma ** h) * (1.0 - entropy)
             lambda_h = max(0.0, min(0.5, lambda_h))
 
             # W17-5-CARRY-1: combine per Eq 7.16 verbatim
