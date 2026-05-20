@@ -1,9 +1,54 @@
 {
-  "active_wave": "W19",
+  "active_wave": "W22",
   "events_source": ".dfg/events.jsonl",
-  "last_updated": "2026-05-17T21:10:21Z",
+  "last_updated": "2026-05-20T10:30:00Z",
   "schema_version": "2",
   "units": {
+    "W22-1": {
+      "checkpoint_chain": [],
+      "state": "DONE",
+      "note": "Backfill: inspections + 8 NCs + 14 probes (commits 7689ab9..7d51709)"
+    },
+    "W22-2": {
+      "checkpoint_chain": [],
+      "state": "DONE",
+      "note": "Backfill: PO empirical sweep + drift registry (commits e126410, 180c850, fa048d1)"
+    },
+    "W22-3": {
+      "checkpoint_chain": [],
+      "state": "IN_PROGRESS",
+      "note": "dfg re-engagement: plan.yaml + CHANGES_LOG + THESIS_CITATIONS authored"
+    },
+    "W22-4": {
+      "checkpoint_chain": [],
+      "state": "PLANNED",
+      "note": "NC27-deep n=20 paired confirmation on PO(8,1.0)"
+    },
+    "W22-5": {
+      "checkpoint_chain": [],
+      "state": "PLANNED",
+      "note": "NC27-deep cross-instance PO(16,1.0) + PO(8,0.3)"
+    },
+    "W22-6": {
+      "checkpoint_chain": [],
+      "state": "PLANNED",
+      "note": "NC27-deep on sPO(8,1.0)-cosine"
+    },
+    "W22-7": {
+      "checkpoint_chain": [],
+      "state": "BLOCKED",
+      "note": "Cross-instance aggregation; depends on W22-4/5/6"
+    },
+    "W22-8": {
+      "checkpoint_chain": [],
+      "state": "BLOCKED",
+      "note": "NC36 MC-noise investigation"
+    },
+    "W23-1": {"checkpoint_chain": [], "state": "BLOCKED"},
+    "W23-2": {"checkpoint_chain": [], "state": "BLOCKED"},
+    "W23-3": {"checkpoint_chain": [], "state": "BLOCKED"},
+    "W24-1": {"checkpoint_chain": [], "state": "BLOCKED"},
+    "W24-2": {"checkpoint_chain": [], "state": "BLOCKED"},
     "W1-1": {
       "checkpoint_chain": [],
       "state": "DRAFT"

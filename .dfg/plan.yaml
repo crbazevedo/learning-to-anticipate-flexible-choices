@@ -1803,3 +1803,272 @@ waves:
         - "W21-6 surfaces publication-track decision menu"
         - "Retros at .dfg/retrospectives/W21/W21-N.md with ADR-004 keys"
       checkpoint_file: .dfg/checkpoints/W21-gate.md
+
+  # =========================================================================
+  # W22 — Inspection-driven empirical validation (LANE A)
+  #
+  # Operator directive 2026-05-20: "Use dfg-harness diligently to plan...
+  # Track integrations, combinations, accumulated delta with attribution
+  # estimation. Run more problem instances at low computation cost. Always
+  # reference the thesis."
+  #
+  # W22 BACKFILL: 2026-05-18..20 work shipped ad-hoc OUTSIDE this discipline.
+  # Units W22-0a..W22-0c register that prior work as DONE; new units
+  # W22-1..W22-5 are forward-looking Lane A (empirical validation).
+  #
+  # Lanes B (integration) and C (theory) are split into W23/W24.
+  # Lane D (tracking-meta) is continuous infra registered as W22-1.
+
+  # =========================================================================
+  # W22 — Inspection-driven empirical validation + dfg re-engagement
+  # Per operator directive 2026-05-20: structured dfg governance for the
+  # 2026-05-18..20 ad-hoc work + forward-looking empirical validation.
+  # See CHANGES_LOG.md (Lane A/B/C/D taxonomy) + THESIS_CITATIONS.md
+  # (per-NC paper Eq mapping).
+  # =========================================================================
+  - id: W22
+    name: "Inspection-driven empirical validation + dfg re-engagement"
+    state: EXECUTING
+    units:
+
+      - id: W22-1
+        slug: backfill-inspections-and-structural-fixes
+        name: "BACKFILL: register 2026-05-18..20 inspections + 8 NCs + 14 probes"
+        purpose: "Audit-trail: 6 inspections, 8 structural NCs, 14 probes shipped ad-hoc 2026-05-18..20 (commits 7689ab9..7d51709). See THESIS_CITATIONS.md."
+        files:
+          - docs/W22-INSPECTIONS-SYNTHESIS.md
+          - docs/W22-STRUCTURAL-FIXES.md
+          - docs/W22-PROBES-SYNTHESIS.md
+          - docs/W22-NC-PUSH-SYNTHESIS.md
+        depends_on: []
+        size: S
+        acceptance_criteria:
+          - "Commit chain documented (7689ab9 inspection-1 → 7d51709 NC-synthesis)"
+          - "All 6 inspections + 14 probes + 8 NCs cross-indexed in THESIS_CITATIONS.md"
+
+      - id: W22-2
+        slug: backfill-empirical-smoke
+        name: "BACKFILL: PO(8,1.0) n=5 sweep + paired n=10 NC27-deep"
+        purpose: "Provenance: 2.5hr empirical compute 2026-05-20. NC27-deep +1.37% paired n=10 (NS p=0.625). See CHANGES_LOG.md Entries 1-3."
+        files:
+          - docs/W22-NC-SMOKE-EMPIRICAL-FINAL.md
+          - python_refactor/scripts/nc_smoke_runner.py
+          - python_refactor/src/probes/probe_drift_synthetic_vs_empirical.py
+          - results/nc_smoke_full_20260520_0649.json
+        depends_on: [W22-1]
+        size: S
+        acceptance_criteria:
+          - "All n=5 + n=10 results in drift registry"
+          - "CHANGES_LOG.md schema established with 3 backfill entries"
+
+      - id: W22-3
+        slug: backfill-dfg-re-engagement
+        name: "BACKFILL: plan.yaml + CHANGES_LOG + THESIS_CITATIONS authored"
+        purpose: "dfg re-engagement: W22+W23+W24 plan; CHANGES_LOG attribution schema; THESIS_CITATIONS per-NC index. active_wave → W22."
+        files:
+          - .dfg/plan.yaml
+          - .dfg/state.json
+          - THESIS_CITATIONS.md
+        depends_on: [W22-1, W22-2]
+        size: S
+        acceptance_criteria:
+          - "W22+W23+W24 added to plan.yaml with valid schema (passes dfg validate)"
+          - "CHANGES_LOG.md attribution schema + 3 backfill entries"
+          - "THESIS_CITATIONS.md per-NC paper+thesis Eq index"
+          - "state.json active_wave → W22; W22-1/2/3 registered"
+
+      - id: W22-4
+        slug: nc27deep-n20-confirmation
+        name: "NC27-deep n=20 paired confirmation on PO(8,1.0)"
+        purpose: "Tighten paired +1.37% n=10 via seeds 11-20. Thesis §6.2 Eq 6.7 / Paper Eq 16-17 Dirichlet posterior mean. Decides W23-1."
+        files:
+          - results/nc_smoke_nc27deep_seeds11_20.json
+        depends_on: [W22-3]
+        size: S
+        acceptance_criteria:
+          - "Smoke completes; per-seed Wilcoxon at n=20 computed"
+          - "CHANGES_LOG attribution entry added"
+          - "Drift registry NC27_DEEP empirical_value updated"
+
+      - id: W22-5
+        slug: nc27deep-cross-instance-po
+        name: "NC27-deep cross-instance: PO(16,1.0) + PO(8,0.3) n=5 each"
+        purpose: "Validate NC27-deep direction across PO α regimes. Thesis §6.2.1 Dirichlet concentration sensitivity."
+        files:
+          - results/nc_smoke_nc27deep_po16.json
+          - results/nc_smoke_nc27deep_po03.json
+        depends_on: [W22-3]
+        size: S
+        acceptance_criteria:
+          - "Both smokes complete"
+          - "Per-instance %Δ vs BASELINE recorded"
+          - "Direction consistency check across PO variants"
+
+      - id: W22-6
+        slug: nc27deep-spo-revisit
+        name: "NC27-deep on sPO(8,1.0)-cosine n=5 (smooth dynamics)"
+        purpose: "Prior session sPO bench gave ASMS -0.27% n=10 (FLAT). Test if NC27-deep rescues ASMS on smooth regime. Thesis §7.2."
+        files:
+          - results/nc_smoke_nc27deep_spo.json
+        depends_on: [W22-3]
+        size: S
+        acceptance_criteria:
+          - "Smoke completes"
+          - "%Δ NC27-deep vs BASELINE on sPO recorded"
+          - "Compare with prior pooled-n=10 FLAT result"
+
+      - id: W22-7
+        slug: cross-instance-aggregation
+        name: "Cross-instance NC27-deep aggregation + verdict"
+        purpose: "Aggregate W22-4/5/6: per-instance + pooled stats. Thesis §7.3 cross-instance discipline. Decides W23-1 ratification."
+        files:
+          - docs/W22-NC27-DEEP-CROSS-INSTANCE.md
+          - python_refactor/src/probes/probe_drift_synthetic_vs_empirical.py
+        depends_on: [W22-4, W22-5, W22-6]
+        size: S
+        acceptance_criteria:
+          - "Markdown verdict doc with per-instance + pooled stats"
+          - "Drift registry multi-instance summary"
+          - "Retro emitted at .dfg/retrospectives/W22/W22-7.md"
+
+      - id: W22-8
+        slug: nc36-mc-noise-investigation
+        name: "NC36 -6.13% mystery: λ^H trace under MC vs analytical"
+        purpose: "Test MC-noise-as-exploration hypothesis. Per-period λ^H trace both modes; variance characterized; wealth correlation. Paper Eq 12."
+        files:
+          - docs/W22-NC36-MC-NOISE-INVESTIGATION.md
+          - python_refactor/src/diagnostics/lambda_h_trace_logger.py
+          - results/nc36_lambda_h_trace.csv
+        depends_on: [W22-7]
+        size: M
+        acceptance_criteria:
+          - "Per-period λ^H trace dumped under both modes"
+          - "Per-mode variance characterized"
+          - "Wealth-vs-trace-variance correlation reported"
+          - "Verdict: MC-noise-as-exploration confirmed/refuted"
+
+    parallel_groups:
+      - [W22-1]
+      - [W22-2]
+      - [W22-3]
+      - [W22-4, W22-5, W22-6]
+      - [W22-7]
+      - [W22-8]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "Backfills W22-1/2/3 registered as DONE"
+        - "W22-4/5/6/7 cross-instance NC27-deep verdict shipped"
+        - "Drift registry updated with multi-instance attribution"
+        - "CHANGES_LOG attribution model captures per-NC marginal Δ"
+        - "Retro at .dfg/retrospectives/W22/W22-N.md with ADR-004 keys"
+      checkpoint_file: .dfg/checkpoints/W22-gate.md
+
+  # =========================================================================
+  # W23 — Integration of standalone NCs into SMSEMOA (Lane B)
+  # BLOCKED on W22-7 verdict
+  # =========================================================================
+  - id: W23
+    name: "Integration: wire standalone NCs into SMSEMOA evolutionary loop"
+    state: PLANNED
+    units:
+      - id: W23-1
+        slug: nc27deep-default-flip
+        name: "Flip W22_NC27_PREDICTOR default to 'dirichlet_posterior'"
+        purpose: "If W22-7 POSITIVE: flip default; add regression test. Else CANCEL. Paper Eq 16-17 / Thesis §6.2 Eq 6.7."
+        files:
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/tests/test_nc27_logistic_normal_predictor.py
+        depends_on: [W22-7]
+        size: S
+        acceptance_criteria:
+          - "If NC27-deep CONFIRMED: default flipped, regression test added"
+          - "If NC27-deep NOT CONFIRMED: unit CANCELLED with explicit comment"
+
+      - id: W23-2
+        slug: nc34-mutation-wiring
+        name: "Wire NC34 anticipatory mutation scorer into SMSEMOA._mutation"
+        purpose: "Replace mutation step with NC34 scorer (commit c392756). A/B against pre-integration baseline. Thesis §7.2.3 EMOA operators."
+        files:
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/src/algorithms/anticipatory_mutation_scorer.py
+          - python_refactor/tests/test_nc34_smsemoa_integration.py
+        depends_on: [W22-7]
+        size: M
+        acceptance_criteria:
+          - "SMSEMOA._mutation routes through NC34 scorer when env var set"
+          - "A/B smoke: ON vs OFF on PO(8,1.0) n=5"
+          - "Existing test_sms_emoa.py preserved on default-OFF"
+
+      - id: W23-3
+        slug: nc39-cardinality-wiring
+        name: "Wire NC39 anticipatory cardinality into SMSEMOA"
+        purpose: "Replace top-K projection with NC39 (commit c204d18). predicted_growth from Probe Q-v1 AR(1). Thesis §7.2.3."
+        files:
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/src/algorithms/anticipatory_cardinality_handler.py
+          - python_refactor/tests/test_nc39_smsemoa_integration.py
+        depends_on: [W23-2]
+        size: M
+        acceptance_criteria:
+          - "SMSEMOA cardinality enforcement routes through NC39 when env var set"
+          - "A/B smoke: ON vs OFF on PO(8,1.0) n=5"
+
+    parallel_groups:
+      - [W23-1]
+      - [W23-2]
+      - [W23-3]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "W23-1 decision (flip or cancel) made with evidence"
+        - "W23-2 + W23-3 integrations have A/B receipts"
+        - "Drift registry updated with post-integration empirical values"
+
+  # =========================================================================
+  # W24 — Theory extension (Lane C) — LOW PRIORITY
+  # =========================================================================
+  - id: W24
+    name: "Theory extension: NC26-deep + NC32 LNKF integration"
+    state: PLANNED
+    units:
+      - id: W24-1
+        slug: nc32-lnkf-wiring
+        name: "Wire NC32 LogisticNormalKF as alternative to DirichletPredictor"
+        purpose: "LNKF regime-dependent (3x WORSE Dirichlet, +2x BETTER lognormal). Wire only after empirical instance favors LNKF. Thesis §6.2.1."
+        files:
+          - python_refactor/src/algorithms/anticipatory_learning.py
+          - python_refactor/src/algorithms/logistic_normal_kf.py
+          - python_refactor/tests/test_nc32_smsemoa_integration.py
+        depends_on: [W23-1]
+        size: M
+        acceptance_criteria:
+          - "Env var W22_NC32_USE_LNKF=1 routes weight prediction through LNKF"
+          - "A/B smoke result reported on at least 1 problem instance"
+
+      - id: W24-2
+        slug: nc26-deep-market-sigma-plumbing
+        name: "NC26-deep: pipe market-Σ into SMSEMOA for shared-noise CRN"
+        purpose: "Inspection 2: Eq 6.41 under-estimates 75%. True fix needs market-Σ. Large refactor. Thesis Eq 6.41 / Paper Eq 15."
+        files:
+          - python_refactor/src/algorithms/sms_emoa.py
+          - python_refactor/src/algorithms/market_covariance.py
+        depends_on: [W24-1]
+        size: L
+        acceptance_criteria:
+          - "Market-Σ propagated from data layer to SMSEMOA"
+          - "Per-solution MC samples with shared market noise"
+          - "Eq 6.41 cross-Cov terms recovered from samples"
+          - "Probe Inspection 2 synthetic 75% gap closes to < 10%"
+
+    parallel_groups:
+      - [W24-1]
+      - [W24-2]
+
+    gate:
+      gate_type: wave-gate
+      criteria:
+        - "Theory extension waves have empirical A/B receipts"
+        - "Drift registry NC26-deep + NC32 entries updated"
