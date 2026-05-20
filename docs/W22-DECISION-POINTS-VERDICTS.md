@@ -21,6 +21,8 @@ Bonus discoveries during these probes:
 - Probe AG (synthetic Q-velocity): cuts MSE 26-93% at moderate-high drift; whitens innovations
 - Probe AB (per-portfolio λ^K): NEGLIGIBLE discrimination even at synthetic h=2.0 →
   shared-window λ^K is fine; differentiation comes from NC8c-v2 position carry
+- Probe S (FTSE centrality): HOMOGENEOUS dense network (Gini=0.13); hub-tilt has limited headroom
+- Probe Q-v1 (AR(1) on FTSE): beats predict-mean by 3-11% MSE (modest autocorrelation signal exists)
 
 ## Decision point #1 — Probe AD (Δ_S rectangle bug)
 
@@ -215,3 +217,7 @@ The session moved from "characterizing the breakthrough" (W22 main session) to
    requiring careful smoke battery)
 4. **Probe AD fix PR** (rectangle alignment — low priority, separate from breakthrough)
 5. **Paper writeup** (with §6.4 caveat on AMFC boundary degeneration per Probe AI)
+6. **Probe Q-v1 wire-in** (Q-H2): use AR(1) per-asset predictions as ASMS expected-return
+   input on a 5-seed FTSE smoke to test if 10% per-asset MSE reduction translates to HV gain
+7. **Probe S structural** (Sv1-tilt): if hub-tilt portfolio scoring is desired despite the
+   homogeneous Gini, integrate it as an opt-in NC33 and run a 3-seed sanity check
