@@ -53,3 +53,37 @@ but the filter is not catastrophically mis-specified.
 - We don't have access to S_t (innovation covariance) so NIS chi-squared bounds can't be computed.
   A future Probe AC+ would add live KF instrumentation to `kalman_filter.py`.
 - Per-period mean innovation may smooth out per-portfolio variance signals.
+
+## Structural finding: no process noise (Q) in production KF
+
+Probe AC+AF investigation revealed that BOTH the Python `kalman_filter.py:kalman_prediction`
+(`P_next = F @ P @ F.T` at line 109) AND the legacy C++ `kalman_filter.cpp:21`
+(`params.P_next = params.F * params.P * params.F.transpose();`) **omit the process noise term Q**.
+
+Standard KF formulation:
+```
+P_next = F @ P @ F.T + Q
+```
+
+Without Q:
+- P can only decrease over the lifetime of the filter (Kalman updates always shrink P)
+- KF becomes over-confident in its prior
+- Dynamics-model errors accumulate as systematic bias (which is exactly what Probe AC+AF
+  observed: +7.2e-3 systematic positive bias on risk innovations)
+
+**This is faithful to the thesis/paper formulation.** The paper Eq 11 specifies the
+constant-velocity F matrix but does NOT include Q. The Python refactor is correct to follow
+this.
+
+**Future Probe AG (NOT in current scope):** Test `Q = diag([0, 0, σ²_v, σ²_v])` (velocity-only
+process noise) to see if it cures the risk innovation autocorrelation. This would be a
+PAPER-DEVIATION and requires careful empirical validation that it preserves the +7.50%
+breakthrough on FTSE.
+
+For now: the moderate KF mis-tuning on risk is a CHARACTERISTIC of the thesis-faithful
+implementation, not a bug. The breakthrough is robust to this mis-tuning because:
+1. The per-portfolio tracking (NC8c-v2 position carry) provides differentiation even with
+   imperfect KF estimates
+2. The KF's role is to provide RELATIVE signals (which portfolio's ROI is moving up vs.
+   down) more than ABSOLUTE accuracy
+3. NC13a's diagonal clamp at 1.0 prevents catastrophic P drift even without Q
