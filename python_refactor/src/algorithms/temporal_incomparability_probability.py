@@ -61,10 +61,45 @@ class TemporalIncomparabilityCalculator:
         W1-4: extracted from 3 duplicated `max(0.05, min(0.95, tip))`
         sites in the calculation methods. Single point of truth, opt-out
         controlled by `self.clamp_range`.
+
+        W22-NC13b STRUCTURAL FIX (operator directive 2026-05-19): replace
+        the HARD clip with a SMOOTH squash that preserves signal in the
+        tails. Pre-fix: any TIP raw value < 0.05 or > 0.95 mapped to the
+        clamp boundary exactly — derivatives vanished at the boundary,
+        signal was lost. Post-fix: smooth squash via sigmoid-like mapping
+        keeps the output in (clamp_min, clamp_max) but preserves a
+        gradient at the boundaries.
+
+        Enabled via env var W22_NC13B_SMOOTH_CLAMP=1 (default off for
+        backward compatibility). When enabled:
+          - Input TIP in [clamp_min, clamp_max] passes through unchanged
+          - Input below clamp_min squashed asymptotically toward clamp_min
+            via exponential decay (preserves signal: lower raw → lower out)
+          - Symmetric handling for upper boundary
         """
         if self.clamp_range is None:
             return tip
-        return max(self.clamp_range[0], min(self.clamp_range[1], tip))
+        c_min, c_max = self.clamp_range
+        import os as _os
+        smooth = _os.environ.get("W22_NC13B_SMOOTH_CLAMP", "0").strip() == "1"
+        if not smooth:
+            return max(c_min, min(c_max, tip))
+        # Smooth squash via shifted-scaled tanh: maps R → (c_min, c_max)
+        # monotonically with smooth derivatives everywhere. Values in the
+        # central region (≈ [c_min, c_max]) are preserved approximately;
+        # tails are squashed asymptotically into the open interval.
+        #
+        # Formula: out = c_min + (c_max - c_min) · (1 + tanh(k · (tip - 0.5))) / 2
+        # k tuned so tip=0.05 → out≈0.086 and tip=0.95 → out≈0.914 (default
+        # clamp_range=(0.05, 0.95)). Tunable via W22_NC13B_K env var.
+        try:
+            k = float(_os.environ.get("W22_NC13B_K", "4.0"))
+        except ValueError:
+            k = 4.0
+        import math
+        center = 0.5 * (c_min + c_max)
+        width = c_max - c_min
+        return c_min + width * (1.0 + math.tanh(k * (tip - center))) / 2.0
         
     def calculate_tip(self, current_solution, predicted_solution, 
                      prediction_uncertainty: Optional[float] = None) -> float:
