@@ -173,6 +173,45 @@ this baseline AND ideally adds marginal Δ vs it.
 
 ---
 
+### Entry 6: W22-9 FTSE NC27-deep n=10 paired — REGRESSION verdict (2026-05-21 ~00:00)
+
+```yaml
+- date: 2026-05-21
+  commit: (pending)
+  wave_unit: W22-9 (FTSE empirical confirmation)
+  type: empirical_critical_finding
+  nc_or_combo: [NC27_DEEP]
+  thesis_anchor: "§7.2.2 FTSE protocol; §6.2 Eq 6.7 Dirichlet posterior"
+  baseline_used: FTSE ASMS_mHDM_K3_v2both BASELINE (no opt-in env vars)
+  observation:
+    metric: paired Δ wealth Ŝ on FTSE 2015 ASMS n=10
+    value:
+      paired_mean_delta: "-1.11%"
+      wins: "6/10"
+      wilcoxon_p: 0.9219
+      tail_risk_losses: "seed 9 -16.20%, seed 10 -11.49%"
+      win_magnitudes: "all under +10%"
+      loss_magnitudes: "two over -10%"
+    n_seeds: 10
+    confidence: medium (n=10 paired)
+  attribution:
+    per_nc_marginal:
+      NC27_DEEP_FTSE: "-1.11% mean; tail-risk pattern (6 small wins offset by 2 large losses)"
+    method: paired Wilcoxon + per-seed magnitude pattern analysis
+  honest_scars:
+    - "OPPOSITE-SIGN translation from PO cross-instance (+4.15% avg) to FTSE (-1.11%)"
+    - "6/10 wins by count but losses dominate by magnitude → Wilcoxon p=0.9219 NS"
+    - "Synthetic-vs-empirical drift HOLDS on FTSE: synthetic 2.8x L2 claim translated to PO but NOT to real data"
+    - "Hypothesis: NC27-deep's aggressive Bayesian update over-commits to recent observations; FTSE has regime shifts that legacy exp-smoothing handles more gracefully"
+  ratification_verdict:
+    nc27_deep: "CANCEL W23-1 default flip (REVERSED from Entry 5 PROCEED)"
+    reasoning: |
+      FTSE is the production-relevant dataset. -1.11% mean regression with
+      tail-risk losses is unacceptable for a default. NC27_DEEP stays as
+      OPT-IN env var. Operator can revisit if regime-detection front-end
+      or tunable concentration_increment are added (W23-1b future unit).
+```
+
 ### Entry 5: W22 gap-fill chain — PO(16,1.0) seeds 6-10 + BASELINE seeds 11-20 (2026-05-20 night)
 
 ```yaml

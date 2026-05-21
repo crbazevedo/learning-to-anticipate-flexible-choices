@@ -37,7 +37,12 @@
     "W22-7": {
       "checkpoint_chain": [],
       "state": "DONE",
-      "note": "REVISED verdict: ALL 4 instances POSITIVE paired (PO8 +2.65%, PO16 +2.19%, PO03 +2.82%, sPO +8.93%); PO(16) -6.10% was unpaired artifact. W23-1: PROCEED."
+      "note": "REVISED verdict: ALL 4 PO instances POSITIVE paired (PO8 +2.65%, PO16 +2.19%, PO03 +2.82%, sPO +8.93%). Pending FTSE confirmation in W22-9."
+    },
+    "W22-9": {
+      "checkpoint_chain": [],
+      "state": "DONE",
+      "note": "FTSE n=10 paired: -1.11% REGRESSION (Wilcoxon p=0.9219; 6/10 wins by count but losses dominate by magnitude). PO→FTSE OPPOSITE-SIGN. W23-1 CANCEL."
     },
     "W22-7": {
       "checkpoint_chain": [],
