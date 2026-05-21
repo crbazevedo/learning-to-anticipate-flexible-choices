@@ -173,6 +173,57 @@ this baseline AND ideally adds marginal Δ vs it.
 
 ---
 
+### Entry 7: W22-8 NC36 λ^H trace investigation — FUNDAMENTAL FINDING (2026-05-21 04:00)
+
+```yaml
+- date: 2026-05-21
+  commit: (pending)
+  wave_unit: W22-8
+  type: empirical_mechanism_discovery
+  nc_or_combo: [NC36]
+  thesis_anchor: "Eq 12 TIP, Eq 13 λ^H, §6.1.5 multi-horizon — DEGENERACY at TIP=0.5"
+  baseline_used: same FTSE seed, same protocol, only W22_NC36_TIP_ANALYTICAL env var differs
+  observation:
+    metric: per-period λ^H statistics (n_obs=13,800 per mode)
+    value:
+      MC_lambda_h_mean: 6.78e-04
+      AN_lambda_h_mean: 3.24e-07  # 2093x SMALLER
+      MC_per_period_std: 9.60e-04
+      AN_per_period_std: 8.64e-07  # 1110x SMALLER
+      MC_TIP_std: 0.0162
+      AN_TIP_std: 0.0003  # 54x SMALLER
+      MC_TIP_below_0_5_rate: "48.5%"
+      AN_TIP_below_0_5_rate: "1.5%"
+    n_seeds: 1 (mechanism investigation; wealth not the primary metric)
+    confidence: high (3 orders of magnitude difference; consistent across 30 periods)
+  attribution:
+    finding: |
+      MC noise has been POWERING the anticipation mechanism, not aiding
+      exploration. Mechanism:
+        TIP_analytical = 0.5 (bivariate Gaussian symmetry at equal means)
+        → entropy(TIP) = 1.0 (maximum)
+        → λ^H = γ^h × (1 - entropy) = 0
+        → multi-horizon weight on z_{t+h} = 0
+        → anticipation mechanism is LATENT under analytical mode
+
+      MC sampling at 200 samples gives TIP = 0.5 ± 0.016 → entropy slightly
+      < 1 → λ^H slightly > 0 → anticipation activates.
+
+      The Eq 13 formula HAS A DEGENERACY at TIP=0.5 that MC noise bypasses
+      and analytical computation honestly exposes. Original Inspection 1
+      conclusion ("TIP=0.5 at equal means is analytical not bug") is
+      mathematically correct but masks this CODE PATH dependency on noise.
+  honest_scars:
+    - "Single-seed wealth (MC 4.97e-4; AN 5.27e-4 = +6.2%) contradicts n=10 mean; seed variance dominates wealth at n=1"
+    - "Hypothesis 'MC noise as exploration' was WRONG in detail (it's not GA exploration; it's TIP signal generation)"
+    - "ASMS anticipation mechanism in current codebase is partially powered by 200-sample MC noise — load-bearing artifact"
+    - "Inspection 1 found <1.5% delta between joint/conditional MC; that was for the SAME MC noise both modes; comparing MC vs analytical is a different question"
+  next_steps:
+    - "NC36-LITE: add calibrated noise injection (σ≈0.016) to analytical TIP"
+    - "Single-seed FTSE smoke confirms NC36-LITE recovers MC-equivalent wealth"
+    - "Reformulate λ^H to avoid degeneracy at TIP=0.5 (deeper theory work)"
+```
+
 ### Entry 6: W22-9 FTSE NC27-deep n=10 paired — REGRESSION verdict (2026-05-21 ~00:00)
 
 ```yaml

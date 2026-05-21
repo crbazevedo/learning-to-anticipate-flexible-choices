@@ -131,15 +131,22 @@ NC_CLAIMS_REGISTRY: list[NCClaim] = [
         synthetic_claim="Within ±0.05 of MC(10000); deterministic; ~10x faster — SAFE PARITY UPGRADE",
         synthetic_value=0.0,  # accuracy parity, not gain
         synthetic_metric="TIP value parity with MC",
-        empirical_value=-0.0613,  # paired n=5
+        empirical_value=-0.0613,  # paired n=5 PO; -1.11% n=10 FTSE
         empirical_metric="paired wealth Δ vs BASELINE on PO(8,1.0) ASMS n=5",
         empirical_p_value=0.312,
         notes=(
-            "OPPOSITE-SIGN SURPRISE: 'safe parity' claim FAILED. Paired n=5 = -6.13% "
-            "(2/5 wins). Hypothesis: MC noise in λ^H acts as beneficial EXPLORATION "
-            "for the GA; deterministic TIP removes it. NOT recommended for ratification."
+            "W22-8 MECHANISM FINDING (2026-05-21): MC noise was POWERING the anticipation "
+            "mechanism, not aiding exploration. Under analytical TIP, TIP=0.5 exactly "
+            "(bivariate Gaussian symmetry) → entropy=1 → λ^H=0 → anticipation DISABLED. "
+            "Per-period λ^H std MC=9.60e-4 vs AN=8.64e-7 (1110x ratio). "
+            "Original 'safe parity' claim was wrong: MC TIP and analytical TIP have the same "
+            "POINT ESTIMATE but their VARIANCE differs by 3 orders of magnitude, and the "
+            "Eq 13 λ^H formula has a DEGENERACY at TIP=0.5 that MC noise bypasses. "
+            "VERDICT: DISABLES_ANTICIPATION_MECHANISM. "
+            "Next step: NC36-LITE (calibrated noise injection σ≈0.016) to recover "
+            "anticipation while preserving ~10x speedup."
         ),
-        source="commit 448ba64 + smoke 20260520",
+        source="commits 448ba64 + W22-8 mechanism investigation 20260521",
     ),
     NCClaim(
         nc_name="NC13b_ALONE",

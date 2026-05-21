@@ -51,8 +51,8 @@
     },
     "W22-8": {
       "checkpoint_chain": [],
-      "state": "BLOCKED",
-      "note": "NC36 MC-noise investigation"
+      "state": "DONE",
+      "note": "FUNDAMENTAL FINDING: MC noise POWERS anticipation mechanism (not exploration). λ^H per-period std ratio MC/AN = 1110x. Analytical TIP at symmetric means → entropy=1 → λ^H=0 → anticipation LATENT. See docs/W22-8-NC36-MC-NOISE-VERDICT.md"
     },
     "W23-1": {"checkpoint_chain": [], "state": "BLOCKED"},
     "W23-2": {"checkpoint_chain": [], "state": "BLOCKED"},
