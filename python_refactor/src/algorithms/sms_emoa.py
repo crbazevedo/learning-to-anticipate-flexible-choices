@@ -262,6 +262,44 @@ class SMSEMOA:
         else:
             num_assets = data.get('num_assets', 3)
 
+        # W22-NC8c-v2 (2026-05-18): carry both POSITION (x[0:2]) AND velocity
+        # (x[2:4]) from prev period's AMFC KF state, not just velocity.
+        # Without position carry, NC8c was inert because prev_AMFC's velocity
+        # was always 0 (chicken-and-egg: first update has y = Z - x_init = 0
+        # if x_init = portfolio.ROI = Z; no learning; AMFC has zero velocity;
+        # NC8c carries zero forward).
+        #
+        # NC8c-v2 mechanism: carry position → first update at period t+1 has
+        # Z (current portfolio ROI) ≠ x_init (prev_AMFC.ROI) → non-zero
+        # innovation y = current.ROI - prev_AMFC.ROI → velocity learns this
+        # period-over-period change → KF prediction ≠ persistence going
+        # forward. Combined with NC8d (predict before first update) below.
+        from ..portfolio.portfolio import Portfolio
+        Portfolio.carried_velocity = None
+        Portfolio.carried_velocity_covariance = None
+        Portfolio.carried_position = None        # NC8c-v2 NEW
+        Portfolio.carried_position_covariance = None  # NC8c-v2 NEW
+        previous_kf_state = data.get("previous_kf_state") if data else None
+        if previous_kf_state is not None:
+            prev_x = getattr(previous_kf_state, "x", None)
+            prev_P = getattr(previous_kf_state, "P", None)
+            if prev_x is not None and prev_P is not None:
+                Portfolio.carried_velocity = np.array([
+                    float(prev_x[2]), float(prev_x[3])
+                ])
+                Portfolio.carried_velocity_covariance = np.array([
+                    [float(prev_P[2, 2]), float(prev_P[2, 3])],
+                    [float(prev_P[3, 2]), float(prev_P[3, 3])],
+                ])
+                # NC8c-v2: also carry position
+                Portfolio.carried_position = np.array([
+                    float(prev_x[0]), float(prev_x[1])
+                ])
+                Portfolio.carried_position_covariance = np.array([
+                    [float(prev_P[0, 0]), float(prev_P[0, 1])],
+                    [float(prev_P[1, 0]), float(prev_P[1, 1])],
+                ])
+
         self.population = []
         for _ in range(self.population_size):
             solution = Solution(num_assets=num_assets)
@@ -290,20 +328,99 @@ class SMSEMOA:
             self.function_evaluations += 1
     
     def _initialize_kalman_state(self, solution: Solution, data: Dict[str, Any]):
-        """Initialize Kalman filter state for solution."""
+        """Initialize Kalman filter state for solution.
+
+        W22-NC7 NOTE (2026-05-18): post-NC7-fix, the P matrix here is now
+        IDENTICAL to what create_kalman_params produces (both produce
+        diag([0.1, 0.1, 1000, 1000])). This method is retained because it
+        re-anchors the state vector x to the actual portfolio (ROI, risk)
+        instead of (initial_roi=0, initial_risk=0). The offspring path
+        (Solution.__init__ → Portfolio.initialize_kalman_filter) DOES pass
+        portfolio.ROI/risk to create_kalman_params, so post-NC7 the two
+        paths produce identical KalmanParams modulo numerical jitter.
+
+        Pre-W22-NC7 the P matrix here diverged from create_kalman_params
+        (1000 vs 0.1 on velocity components); Probe A diagnosed the
+        offspring-path P as the smoking gun for KF==persistence.
+
+        W22-NC8c (2026-05-18): if `data['previous_kf_state']` is provided
+        (passed from walk_forward.run_walk_forward when t > 0), CARRY
+        FORWARD the previous period's AMFC portfolio velocity components
+        (x[2:4]) AND the corresponding P[2:4, 2:4] block. Position
+        components (x[0:2], P[0:2, 0:2]) are reset per-portfolio to the
+        fresh values (so each portfolio in the new period reflects its
+        own weights' ROI/risk) — only velocity carries forward.
+
+        Mechanism: with velocity carried across periods, the first
+        kalman_update in `_evaluate_solution` has a NON-ZERO innovation
+        (current measurement vs predicted F·x_init with non-zero velocity)
+        → KF position estimate gets corrected meaningfully → KF
+        prediction x_next[0:2] = x[0:2] + x[2:4] reflects actual
+        period-over-period dynamics, not persistence.
+
+        Receipt for why this matters: docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY*.md
+        showed KF predictions bit-identical to persistence both pre- and
+        post-NC7. Root cause (NC8c): KF state is born/dies per period,
+        so velocity x[2:4] always init to 0, x_next = F·x = [x[0], x[1], 0, 0]
+        = persistence. With NC8c, x[2:4] carries forward = non-zero,
+        x_next becomes a meaningful prediction.
+        """
         # Initialize with current portfolio state
         kalman_state = solution.P.kalman_state
-        
+
         # State vector: [ROI, risk, ROI_velocity, risk_velocity]
         kalman_state.x = np.array([solution.P.ROI, solution.P.risk, 0.0, 0.0])
-        
-        # Initial covariance matrix
-        kalman_state.P = np.array([
-            [0.1, 0.0, 0.0, 0.0],
-            [0.0, 0.1, 0.0, 0.0],
-            [0.0, 0.0, 1000.0, 0.0],
-            [0.0, 0.0, 0.0, 1000.0]
-        ])
+
+        # Initial covariance matrix.
+        # W22-NC7 HARMONIZED: this value is now equal to what
+        # create_kalman_params produces — both paths share the same
+        # paper-canonical high-velocity-uncertainty prior.
+        kalman_state.P = np.diag([0.1, 0.1, 1000.0, 1000.0])
+
+        # W22-NC8c-v2 (2026-05-18): if previous_kf_state in data, carry
+        # POSITION (x[0:2]) and VELOCITY (x[2:4]) forward.
+        previous_kf_state = data.get("previous_kf_state") if data else None
+        if previous_kf_state is not None:
+            prev_x = getattr(previous_kf_state, "x", None)
+            prev_P = getattr(previous_kf_state, "P", None)
+            if prev_x is not None and prev_P is not None:
+                # Carry position components (indices 0, 1) — NC8c-v2.
+                # Override the freshly-set [portfolio.ROI, portfolio.risk]
+                # with prev_AMFC's position so first kalman_update has
+                # non-zero innovation y = current.ROI - prev_AMFC.ROI.
+                kalman_state.x[0] = float(prev_x[0])
+                kalman_state.x[1] = float(prev_x[1])
+                # Carry velocity components (indices 2, 3) from prior period
+                kalman_state.x[2] = float(prev_x[2])
+                kalman_state.x[3] = float(prev_x[3])
+                # Carry full P block (position + velocity + cross-terms)
+                kalman_state.P[0, 0] = float(prev_P[0, 0])
+                kalman_state.P[1, 1] = float(prev_P[1, 1])
+                kalman_state.P[0, 1] = float(prev_P[0, 1])
+                kalman_state.P[1, 0] = float(prev_P[1, 0])
+                kalman_state.P[2, 2] = float(prev_P[2, 2])
+                kalman_state.P[3, 3] = float(prev_P[3, 3])
+                kalman_state.P[2, 3] = float(prev_P[2, 3])
+                kalman_state.P[3, 2] = float(prev_P[3, 2])
+                # Also carry position-velocity cross terms (critical for K[2,0] gain)
+                kalman_state.P[0, 2] = float(prev_P[0, 2])
+                kalman_state.P[2, 0] = float(prev_P[2, 0])
+                kalman_state.P[1, 3] = float(prev_P[1, 3])
+                kalman_state.P[3, 1] = float(prev_P[3, 1])
+
+        # W22-NC8d (2026-05-18): run kalman_prediction-equivalent BEFORE
+        # the first kalman_update fires in _evaluate_solution. This sets
+        # x_next = F @ x and P_next = F @ P @ F^T, introducing the position
+        # ↔ velocity cross-terms in P_next that are required for the
+        # Kalman gain K[2, :] to be non-zero. Without this, the first
+        # kalman_update has K[2, :] = 0 (because P_next starts diagonal)
+        # → velocity NEVER learns from observations.
+        #
+        # This is the standard KF lifecycle: predict → update. Pre-NC8d
+        # the code did update-only (no predict), so cross-terms never
+        # developed and velocity was effectively unlearnable.
+        kalman_state.x_next = kalman_state.F @ kalman_state.x
+        kalman_state.P_next = kalman_state.F @ kalman_state.P @ kalman_state.F.T
         
         # State transition matrix (constant velocity model)
         kalman_state.F = np.array([
@@ -376,8 +493,18 @@ class SMSEMOA:
         # Gross ROI stays on portfolio.ROI for reporting; only the
         # objective vector (used by dominance + HV contribution)
         # uses ROI_net.
+        #
+        # W22 Probe I (2026-05-19): allow disabling transaction cost via
+        # env var W22_DISABLE_TXN_COST=1. Tests asymmetric impact
+        # hypothesis: if Probe G's chaotic AMFC (Jaccard 0.169 = 75% asset
+        # turnover per period) is HURTING ASMS more than SMS via txn cost,
+        # then setting cost=0 should narrow or reverse the ASMS-SMS gap.
+        # If gap WIDENS with cost=0, cost is asymmetrically penalizing
+        # ASMS; if NEUTRAL, cost is symmetric noise.
+        import os as _os
+        disable_txn_cost = (_os.environ.get("W22_DISABLE_TXN_COST", "0").strip() == "1")
         roi_objective = portfolio.ROI
-        if self.previous_weights is not None:
+        if self.previous_weights is not None and not disable_txn_cost:
             from ..portfolio.portfolio import Portfolio
             txn_cost = Portfolio.compute_thesis_transaction_cost(
                 weights_new=np.asarray(portfolio.investment, dtype=float),
@@ -579,22 +706,33 @@ class SMSEMOA:
         # Sort by ROI (ascending)
         solutions.sort(key=lambda s: s.P.ROI)
         
-        # Compute contributions
+        # W22-NC-AD-fix (2026-05-20): realign middle-branch rectangle to Eq 6.41.
+        # Per W22 Probe AD finding (commit `881d0f2`): the legacy formula
+        #   middle = (ROI_i − ROI_{i+1}) · (risk_{i−1} − risk_i)
+        # disagrees with Eq 6.41's
+        #   middle = (ROI_i − ROI_{i−1}) · (risk_{i+1} − risk_i)
+        # Both produce positive values on a sorted-by-ROI Pareto front with
+        # risk descending, but they are DIFFERENT rectangles. The stochastic
+        # Δ_S formula (Eq 6.41) subtracts within-solution Cov(ROI, risk)
+        # against the Eq 6.41 rectangle — so applying that correction to the
+        # legacy rectangle OVERSHOOTS (Probe AD: SCAR-pinned regression test).
+        # Realigning the deterministic to Eq 6.41 ensures the stochastic
+        # correction is consistent.
         for i, solution in enumerate(solutions):
             if i == 0:
-                # First solution
-                next_solution = solutions[i + 1]
+                # First solution: (ROI − R1) · (R2 − risk)
                 solution.hypervolume_contribution = (solution.P.ROI - self.R1) * (self.R2 - solution.P.risk)
             elif i == len(solutions) - 1:
-                # Last solution
+                # Last solution: (ROI − ROI_prev) · (R2 − risk)
                 prev_solution = solutions[i - 1]
                 solution.hypervolume_contribution = (solution.P.ROI - prev_solution.P.ROI) * (self.R2 - solution.P.risk)
             else:
-                # Middle solution
+                # Middle solution per Eq 6.41:
+                #   (ROI_i − ROI_{i−1}) · (risk_{i+1} − risk_i)
                 prev_solution = solutions[i - 1]
                 next_solution = solutions[i + 1]
-                solution.hypervolume_contribution = (solution.P.ROI - next_solution.P.ROI) * (prev_solution.P.risk - solution.P.risk)
-            
+                solution.hypervolume_contribution = (solution.P.ROI - prev_solution.P.ROI) * (next_solution.P.risk - solution.P.risk)
+
             # Apply stability factor (W21-1 INVERTED Reading-F: when
             # use_v2_stability_weighting=True, treat stability as the v2
             # effective no-op 1.0 instead of Python's depressing < 1.0
@@ -642,16 +780,17 @@ class SMSEMOA:
         state ROI↔risk covariance ``P[0,1]`` (matching how the C++ uses
         ``w_1->P.S.covar`` for the self-product term).
 
-        DETERMINISTIC-VS-STOCHASTIC RECTANGLE NOTE: the deterministic
-        ``_compute_hypervolume_contributions_class`` middle branch uses
-        rectangle ``(ROI_i − ROI_{i+1})(risk_{i−1} − risk_i)`` (legacy
-        Python convention, same as C++ deterministic). Eq 6.36/6.41
-        specify rectangle ``(ROI_i − ROI_{i−1})(risk_{i+1} − risk_i)``.
-        Both yield POSITIVE values on a sorted-by-ROI Pareto front (with
-        risk DESC), but they are different rectangles. We implement
-        Eq 6.41 LITERALLY (prev-on-ROI, next-on-risk) because that is
-        the equation the operator's audit cited. Operator may decide
-        whether the deterministic version should be re-aligned.
+        DETERMINISTIC-VS-STOCHASTIC RECTANGLE NOTE: as of W22-NC-AD-fix
+        (2026-05-20), the deterministic ``_compute_hypervolume_contributions_class``
+        middle branch has been REALIGNED to Eq 6.41:
+            middle = (ROI_i − ROI_{i−1}) · (risk_{i+1} − risk_i)
+        Pre-NC-AD-fix the deterministic used the legacy rectangle
+        ``(ROI_i − ROI_{i+1})(risk_{i−1} − risk_i)`` while the stochastic
+        used the Eq 6.41 rectangle. The mismatch caused the stochastic
+        ``- Cov`` correction to OVERSHOOT when subtracted from the legacy
+        rectangle (W22 Probe AD finding, commit ``881d0f2``, SCAR-pinned
+        regression test). Post-fix, both branches use the SAME rectangle
+        and the stochastic correction is mathematically consistent.
 
         Edge cases (|C| ∈ {1, 2}) use deterministic-style fallbacks since
         Eq 6.41 is undefined without both neighbors:

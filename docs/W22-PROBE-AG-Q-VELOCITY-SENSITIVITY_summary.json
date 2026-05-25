@@ -1,0 +1,107 @@
+[
+  {
+    "n_seeds": 100,
+    "T": 23,
+    "sigma_v": 0.001,
+    "Q_zero": {
+      "mse_obs_mean": 0.004282051751491686,
+      "mse_obs_std": 0.0016611657425713298,
+      "lag1_autocorr_ROI_mean": -0.15922016488612362,
+      "lag1_autocorr_ROI_std": 0.22427087857538697,
+      "lag1_autocorr_risk_mean": -0.1351766719610544,
+      "lag1_autocorr_risk_std": 0.20599896579167673
+    },
+    "Q_velocity": {
+      "mse_obs_mean": 0.004281974659260472,
+      "mse_obs_std": 0.0016606710613014176,
+      "lag1_autocorr_ROI_mean": -0.15922016600440178,
+      "lag1_autocorr_ROI_std": 0.22427087834113266,
+      "lag1_autocorr_risk_mean": -0.13616008652338824,
+      "lag1_autocorr_risk_std": 0.205778122308612
+    }
+  },
+  {
+    "n_seeds": 100,
+    "T": 23,
+    "sigma_v": 0.005,
+    "Q_zero": {
+      "mse_obs_mean": 0.005008660508407466,
+      "mse_obs_std": 0.002114933678112482,
+      "lag1_autocorr_ROI_mean": -0.06793168828884365,
+      "lag1_autocorr_ROI_std": 0.23504775617350787,
+      "lag1_autocorr_risk_mean": -0.06341282581530443,
+      "lag1_autocorr_risk_std": 0.22496754135898026
+    },
+    "Q_velocity": {
+      "mse_obs_mean": 0.004740988762836291,
+      "mse_obs_std": 0.0018193337827060061,
+      "lag1_autocorr_ROI_mean": -0.06793177467564546,
+      "lag1_autocorr_ROI_std": 0.23504773485797298,
+      "lag1_autocorr_risk_mean": -0.10116502657684784,
+      "lag1_autocorr_risk_std": 0.2133987557915257
+    }
+  },
+  {
+    "n_seeds": 100,
+    "T": 23,
+    "sigma_v": 0.01,
+    "Q_zero": {
+      "mse_obs_mean": 0.007351020913124414,
+      "mse_obs_std": 0.004740989511926278,
+      "lag1_autocorr_ROI_mean": 0.10412790208956003,
+      "lag1_autocorr_ROI_std": 0.2705777920560553,
+      "lag1_autocorr_risk_mean": 0.08906551658814423,
+      "lag1_autocorr_risk_std": 0.26597531317689377
+    },
+    "Q_velocity": {
+      "mse_obs_mean": 0.005441421389181507,
+      "mse_obs_std": 0.002063091919242936,
+      "lag1_autocorr_ROI_mean": 0.10412733703755567,
+      "lag1_autocorr_ROI_std": 0.2705776473608245,
+      "lag1_autocorr_risk_mean": -0.04712675231409425,
+      "lag1_autocorr_risk_std": 0.22362419454149807
+    }
+  },
+  {
+    "n_seeds": 100,
+    "T": 23,
+    "sigma_v": 0.05,
+    "Q_zero": {
+      "mse_obs_mean": 0.08345388249374891,
+      "mse_obs_std": 0.10023746723495945,
+      "lag1_autocorr_ROI_mean": 0.6741174710843176,
+      "lag1_autocorr_ROI_std": 0.18704978753983503,
+      "lag1_autocorr_risk_mean": 0.656519644435247,
+      "lag1_autocorr_risk_std": 0.19279874035268388
+    },
+    "Q_velocity": {
+      "mse_obs_mean": 0.011433425888714509,
+      "mse_obs_std": 0.004214958102889345,
+      "lag1_autocorr_ROI_mean": 0.6741124902103195,
+      "lag1_autocorr_ROI_std": 0.18705376379242164,
+      "lag1_autocorr_risk_mean": 0.14897703802715084,
+      "lag1_autocorr_risk_std": 0.22855247236992066
+    }
+  },
+  {
+    "n_seeds": 100,
+    "T": 23,
+    "sigma_v": 0.1,
+    "Q_zero": {
+      "mse_obs_mean": 0.3219924053267517,
+      "mse_obs_std": 0.39657721396747303,
+      "lag1_autocorr_ROI_mean": 0.7784893570407622,
+      "lag1_autocorr_ROI_std": 0.12087888933663239,
+      "lag1_autocorr_risk_mean": 0.7652135659193197,
+      "lag1_autocorr_risk_std": 0.12326024892559606
+    },
+    "Q_velocity": {
+      "mse_obs_mean": 0.021551573863674206,
+      "mse_obs_std": 0.008017518025201849,
+      "lag1_autocorr_ROI_mean": 0.7784881715976882,
+      "lag1_autocorr_ROI_std": 0.12088909336911396,
+      "lag1_autocorr_risk_mean": 0.18209615864296091,
+      "lag1_autocorr_risk_std": 0.21085116827199252
+    }
+  }
+]

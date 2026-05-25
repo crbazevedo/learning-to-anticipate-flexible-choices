@@ -27,36 +27,131 @@ class TestAnticipativeDistribution:
         )
     
     def test_anticipative_distribution_initialization(self):
-        """Test AnticipativeDistribution initialization."""
+        """Test AnticipativeDistribution initialization per paper Eq (15).
+
+        W22-NC12: pre-NC12 the formula was SUM (current + predicted), now
+        per Eq (15) it is weighted-sum-of-squared-weights with default
+        equal weights w_current = w_predicted = 0.5.
+        """
         assert np.array_equal(self.anticipative_dist.current_state, self.current_state)
         assert np.array_equal(self.anticipative_dist.predicted_state, self.predicted_state)
         assert np.array_equal(self.anticipative_dist.current_covariance, self.current_covariance)
         assert np.array_equal(self.anticipative_dist.predicted_covariance, self.predicted_covariance)
-        
-        # Check combined covariance
-        expected_combined_cov = self.current_covariance + self.predicted_covariance
-        assert np.array_equal(self.anticipative_dist.anticipative_covariance, expected_combined_cov)
-        
-        # Check anticipative mean
+
+        # Per paper Eq (15): Σ_anticipative = w_current² · Σ_current + w_predicted² · Σ_predicted
+        # With default w_current = 0.5, w_predicted = 0.5, this is
+        # 0.25 · (Σ_current + Σ_predicted).
+        expected_combined_cov = (
+            0.25 * self.current_covariance + 0.25 * self.predicted_covariance
+        )
+        np.testing.assert_array_almost_equal(
+            self.anticipative_dist.anticipative_covariance, expected_combined_cov
+        )
+
+        # Anticipative mean per Eq (15) with equal weights = arithmetic mean.
         expected_mean = (self.current_state + self.predicted_state) / 2.0
-        assert np.array_equal(self.anticipative_dist.anticipative_mean, expected_mean)
-    
+        np.testing.assert_array_almost_equal(
+            self.anticipative_dist.anticipative_mean, expected_mean
+        )
+
     def test_sample_anticipative_state(self):
         """Test sampling from anticipative distribution."""
         samples = self.anticipative_dist.sample_anticipative_state(num_samples=100)
-        
+
         assert samples.shape[0] == 4  # 4-dimensional state
         assert samples.shape[1] == 100  # 100 samples
-        
+
         # Check that samples are reasonable
         assert np.all(np.isfinite(samples))
-    
+
     def test_compute_anticipative_confidence(self):
         """Test anticipative confidence computation."""
         confidence = self.anticipative_dist.compute_anticipative_confidence()
-        
+
         assert 0.0 <= confidence <= 1.0
         assert np.isfinite(confidence)
+
+
+class TestW22NC12CovarianceFusion:
+    """W22-NC12 regression: anticipative_covariance must use paper Eq (15)
+    weighted-sum-of-squared-weights, NOT the naive sum.
+
+    Pre-NC12 the formula was `current + predicted` (a SUM); this caused
+    `_update_solution_state_anticipative` (line ~1412) to blend
+    kalman_state.P toward a value ≥ 2× the current P, growing P by factor
+    (1 + α) per generation. After ~30 generations P[0,0] grew from 0.0091
+    to ~542 (a 60,000× factor consistent with 1.5^28 = 88,000). Once
+    P[0,0] is large, TIP MC sampling becomes pure noise → TIP ≈ 0.5
+    (saturation), λ_combined ≈ 0.5 uniform across portfolios, anticipation
+    arm produces no per-portfolio differentiation.
+
+    Receipt:
+      - docs/W22-PROBE-A-KF-PREDICTIVE-ACCURACY-POST-NC7.md: kf_P_diag = [542, 542, 1000, 1000]
+      - W22 Probe B preliminary: TIP saturated near 0.5 in first 4 records.
+
+    Per paper Eq (15) / standard Bayesian convex combination of two
+    independent Gaussians ẑ = w_c · ẑ_c + w_p · ẑ_p:
+      E[ẑ] = w_c · E[ẑ_c] + w_p · E[ẑ_p]
+      Cov[ẑ] = w_c² · Cov[ẑ_c] + w_p² · Cov[ẑ_p]
+    """
+
+    def test_covariance_uses_squared_weights_not_sum(self):
+        """The cornerstone: pre-NC12 SUM ≠ post-NC12 squared-weight combo."""
+        from src.algorithms.anticipatory_learning import AnticipativeDistribution
+        current_cov = np.eye(4) * 0.01
+        predicted_cov = np.eye(4) * 0.02
+        ad = AnticipativeDistribution(
+            np.zeros(4), np.zeros(4), current_cov, predicted_cov,
+        )
+        # With default equal weights (0.5 each), expected = 0.25*(0.01 + 0.02)·I = 0.0075·I
+        expected = 0.25 * current_cov + 0.25 * predicted_cov
+        np.testing.assert_array_almost_equal(ad.anticipative_covariance, expected)
+        # The PRE-NC12 (wrong) SUM would have been 0.03·I.
+        # Verify we are NOT producing the broken value.
+        broken_sum = current_cov + predicted_cov
+        with np.testing.assert_raises(AssertionError):
+            np.testing.assert_array_almost_equal(ad.anticipative_covariance, broken_sum)
+
+    def test_extreme_weight_current_recovers_current_covariance(self):
+        """With weight_current=1.0, anticipative_covariance == current_covariance."""
+        from src.algorithms.anticipatory_learning import AnticipativeDistribution
+        current_cov = np.eye(4) * 0.5
+        predicted_cov = np.eye(4) * 100  # would explode under SUM
+        ad = AnticipativeDistribution(
+            np.zeros(4), np.zeros(4), current_cov, predicted_cov,
+            weight_current=1.0,
+        )
+        np.testing.assert_array_almost_equal(ad.anticipative_covariance, current_cov)
+
+    def test_extreme_weight_predicted_recovers_predicted_covariance(self):
+        """With weight_current=0.0, anticipative_covariance == predicted_covariance."""
+        from src.algorithms.anticipatory_learning import AnticipativeDistribution
+        current_cov = np.eye(4) * 100  # would explode under SUM
+        predicted_cov = np.eye(4) * 0.5
+        ad = AnticipativeDistribution(
+            np.zeros(4), np.zeros(4), current_cov, predicted_cov,
+            weight_current=0.0,
+        )
+        np.testing.assert_array_almost_equal(ad.anticipative_covariance, predicted_cov)
+
+    def test_anticipative_cov_never_exceeds_max_input_component(self):
+        """Eq (15) invariant: anticipative_covariance ≤ max(current, predicted) in any
+        scalar dimension, for any w_current ∈ [0, 1]. The SUM formula VIOLATED this."""
+        from src.algorithms.anticipatory_learning import AnticipativeDistribution
+        current_cov = np.eye(4) * 0.03
+        predicted_cov = np.eye(4) * 0.01
+        max_input = max(0.03, 0.01)  # 0.03
+        for w in (0.0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0):
+            ad = AnticipativeDistribution(
+                np.zeros(4), np.zeros(4), current_cov, predicted_cov,
+                weight_current=w,
+            )
+            diag_max = float(np.max(np.diag(ad.anticipative_covariance)))
+            assert diag_max <= max_input + 1e-12, (
+                f"NC12 REGRESSION: at w_current={w}, anticipative_cov max diag "
+                f"{diag_max:.6e} exceeds max input {max_input:.6e}; Eq (15) "
+                f"invariant violated (this is what the broken SUM did)"
+            )
 
 
 class TestDirichletPredictor:

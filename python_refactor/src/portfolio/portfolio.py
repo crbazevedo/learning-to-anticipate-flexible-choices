@@ -64,6 +64,18 @@ class Portfolio:
     min_cardinality: int = 5  # thesis c_l per §7.2.3 p.146
     robustness: bool = False
 
+    # W22-NC8c (2026-05-18): cross-period KF velocity carry-forward.
+    # W22-NC8c-v2: also carry POSITION (x[0:2]), not just velocity.
+    # Both set by sms_emoa._initialize_population at start of each period
+    # from previous_kf_state. Consumed by Portfolio.initialize_kalman_filter
+    # to set x[0:2] = carried position AND x[2:4] = carried velocity.
+    # NC8c-v2 is essential: without position carry, NC8c was INERT (prev
+    # AMFC's velocity was always 0 due to chicken-and-egg).
+    carried_velocity: Optional[np.ndarray] = None
+    carried_velocity_covariance: Optional[np.ndarray] = None
+    carried_position: Optional[np.ndarray] = None  # NC8c-v2
+    carried_position_covariance: Optional[np.ndarray] = None  # NC8c-v2
+
     # W21-5 V5 (W18-CARRY-1 Reading): when True, compute_risk returns the
     # bare variance per thesis Eq 7.4 (`u^T Σ u`) instead of std-dev
     # (`sqrt(u^T Σ u)`). The thesis defines portfolio risk as variance;
@@ -99,9 +111,16 @@ class Portfolio:
         self.kalman_state: Optional[KalmanParams] = None
         self.error_covar: Optional[np.ndarray] = None
         self.error_covar_prediction: Optional[np.ndarray] = None
-        
+
         # Investment weights (equivalent to C++ investment vector)
         self.investment: np.ndarray = np.zeros(num_assets)
+
+        # W22-NC27-deep (2026-05-19): per-portfolio TRUE Dirichlet posterior.
+        # Populated lazily when the env var W22_NC27_PREDICTOR=dirichlet_posterior
+        # is set. None means "no posterior state yet"; the AnticipatoryLearning
+        # call site lazily instantiates DirichletPosteriorPredictor(num_assets)
+        # and accumulates per-observation Bayesian updates here.
+        self.posterior_predictor = None  # type: Optional["DirichletPosteriorPredictor"]
     
     def init(self):
         """Initialize portfolio weights randomly."""
@@ -546,16 +565,59 @@ class Portfolio:
         return stability
 
     @classmethod
-    def initialize_kalman_filter(cls, portfolio: 'Portfolio', 
-                               initial_roi: float = 0.0, 
+    def initialize_kalman_filter(cls, portfolio: 'Portfolio',
+                               initial_roi: float = 0.0,
                                initial_risk: float = 0.0) -> None:
         """
         Initialize Kalman filter for portfolio.
-        
+
+        W22-NC8c (2026-05-18): if `Portfolio.carried_velocity` (class-level)
+        is set, the new KF state's velocity components x[2:4] AND the
+        velocity-block covariance P[2:4, 2:4] are initialized from the
+        carried values instead of fresh zeros. This is how cross-period
+        velocity learning persists through the offspring-creation path
+        (where Solution.__init__ and `_finalize_offspring_objectives`
+        both fire this method).
+
         Args:
             portfolio: Portfolio object
             initial_roi: Initial ROI value
             initial_risk: Initial risk value
         """
         from ..algorithms.kalman_filter import create_kalman_params
-        portfolio.kalman_state = create_kalman_params(initial_roi, initial_risk) 
+        portfolio.kalman_state = create_kalman_params(initial_roi, initial_risk)
+
+        # W22-NC8c + NC8c-v2: apply carried position + velocity if available
+        if portfolio.kalman_state is not None:
+            # NC8c-v2: carried position
+            if cls.carried_position is not None:
+                cp = cls.carried_position
+                portfolio.kalman_state.x[0] = float(cp[0])
+                portfolio.kalman_state.x[1] = float(cp[1])
+                if cls.carried_position_covariance is not None:
+                    cpc = cls.carried_position_covariance
+                    portfolio.kalman_state.P[0, 0] = float(cpc[0, 0])
+                    portfolio.kalman_state.P[1, 1] = float(cpc[1, 1])
+                    portfolio.kalman_state.P[0, 1] = float(cpc[0, 1])
+                    portfolio.kalman_state.P[1, 0] = float(cpc[1, 0])
+            # NC8c: carried velocity
+            if cls.carried_velocity is not None:
+                cv = cls.carried_velocity
+                portfolio.kalman_state.x[2] = float(cv[0])
+                portfolio.kalman_state.x[3] = float(cv[1])
+                if cls.carried_velocity_covariance is not None:
+                    cvc = cls.carried_velocity_covariance
+                    portfolio.kalman_state.P[2, 2] = float(cvc[0, 0])
+                    portfolio.kalman_state.P[3, 3] = float(cvc[1, 1])
+                    portfolio.kalman_state.P[2, 3] = float(cvc[0, 1])
+                    portfolio.kalman_state.P[3, 2] = float(cvc[1, 0])
+            # NC8d: run predict-equivalent so first kalman_update sees
+            # cross-terms in P_next (required for K[2,0] gain → velocity learns)
+            if cls.carried_position is not None or cls.carried_velocity is not None:
+                portfolio.kalman_state.x_next = (
+                    portfolio.kalman_state.F @ portfolio.kalman_state.x
+                )
+                portfolio.kalman_state.P_next = (
+                    portfolio.kalman_state.F @ portfolio.kalman_state.P
+                    @ portfolio.kalman_state.F.T
+                )

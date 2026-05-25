@@ -1,0 +1,32 @@
+{
+  "n_records": 2666,
+  "n_scenarios": 2,
+  "n_seeds": 5,
+  "n_periods": 23,
+  "anticipative_rate_default": 0.5,
+  "l1_dirichlet_mean": 1.3981810968872637,
+  "l1_persistence_mean": 1.2939338510305263,
+  "l1_dirichlet_median": 1.5122155313952166,
+  "l1_persistence_median": 1.5159759356339164,
+  "jaccard_dirichlet_mean": 0.26724183983625666,
+  "jaccard_persistence_mean": 0.28101808275225665,
+  "wilcoxon_l1_dirichlet_less_than_persistence_stat": 11574.5,
+  "wilcoxon_l1_dirichlet_less_than_persistence_pvalue": 0.999171706417883,
+  "dirichlet_beats_persistence": false,
+  "per_scenario": {
+    "ASMS_mHDM_K3_v2both": {
+      "n": 105,
+      "l1_dirichlet_mean": 1.284775065098619,
+      "l1_persistence_mean": 1.1251639752435425,
+      "l1_improvement_mean": -0.15961108985507647,
+      "fraction_dirichlet_better": 0.34285714285714286
+    },
+    "SMS_RDM_K0": {
+      "n": 105,
+      "l1_dirichlet_mean": 1.5115871286759084,
+      "l1_persistence_mean": 1.4627037268175098,
+      "l1_improvement_mean": -0.04888340185839835,
+      "fraction_dirichlet_better": 0.44761904761904764
+    }
+  }
+}

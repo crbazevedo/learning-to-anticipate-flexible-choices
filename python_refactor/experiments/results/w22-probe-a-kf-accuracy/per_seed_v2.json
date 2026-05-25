@@ -1,0 +1,38 @@
+[
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003626665624888274,
+    "grand_std": 0.00042907319993579793,
+    "wall_clock_s": 4.115017890930176
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003675951675878509,
+    "grand_std": 0.0004750939196950866,
+    "wall_clock_s": 4.386184930801392
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003419217196393133,
+    "grand_std": 0.00036869054909477515,
+    "wall_clock_s": 958.5494561195374
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0003359871691911251,
+    "grand_std": 0.0003641233332288296,
+    "wall_clock_s": 971.1249272823334
+  }
+]

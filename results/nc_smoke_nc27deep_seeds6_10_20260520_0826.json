@@ -1,0 +1,168 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-20T09:21:04.084436",
+    "configs": [
+      "NC27_DEEP"
+    ],
+    "seeds": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "scenarios": [
+      "ASMS_mHDM_K3_v2both",
+      "SMS_RDM_K0"
+    ],
+    "n_mc": 200,
+    "train_window_days": 378,
+    "step_days": 50,
+    "total_wall_seconds": 3291.991099834442
+  },
+  "raw_results": [
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 6,
+      "grand_mean": 0.0002626853973859638,
+      "wall": 2406.9603600502014,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 7,
+      "grand_mean": 0.0003607778698472886,
+      "wall": 2477.2968938350677,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 8,
+      "grand_mean": 0.0003480176262625362,
+      "wall": 2602.760365009308,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 9,
+      "grand_mean": 0.0002960306257222299,
+      "wall": 2532.745043992996,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 10,
+      "grand_mean": 0.0003121367761883044,
+      "wall": 880.5369770526886,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 6,
+      "grand_mean": 0.00037656988518033674,
+      "wall": 12.85607123374939,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 7,
+      "grand_mean": 0.00034650112089980507,
+      "wall": 9.99246883392334,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 8,
+      "grand_mean": 0.00029636063816673394,
+      "wall": 9.089516878128052,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 9,
+      "grand_mean": 0.0003222334296287549,
+      "wall": 11.21488904953003,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 10,
+      "grand_mean": 0.0003615399278246857,
+      "wall": 9.400387048721313,
+      "config": "NC27_DEEP",
+      "config_env": {
+        "W22_NC27_PREDICTOR": "dirichlet_posterior"
+      },
+      "wall_total": 3291.9899141788483
+    }
+  ],
+  "summary": {
+    "NC27_DEEP": {
+      "ASMS_mHDM_K3_v2both": {
+        "n_seeds": 5,
+        "mean": 0.00031592965908126456,
+        "std": 3.96431221635022e-05,
+        "min": 0.0002626853973859638,
+        "max": 0.0003607778698472886,
+        "raw": [
+          0.0002626853973859638,
+          0.0003607778698472886,
+          0.0003480176262625362,
+          0.0002960306257222299,
+          0.0003121367761883044
+        ]
+      },
+      "SMS_RDM_K0": {
+        "n_seeds": 5,
+        "mean": 0.00034064100034006324,
+        "std": 3.186526354253516e-05,
+        "min": 0.00029636063816673394,
+        "max": 0.00037656988518033674,
+        "raw": [
+          0.00037656988518033674,
+          0.00034650112089980507,
+          0.00029636063816673394,
+          0.0003222334296287549,
+          0.0003615399278246857
+        ]
+      }
+    }
+  },
+  "wilcoxon_tests": {}
+}

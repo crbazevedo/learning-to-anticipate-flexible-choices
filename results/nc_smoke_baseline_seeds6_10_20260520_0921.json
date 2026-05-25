@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-20T09:57:49.786755",
+    "configs": [
+      "BASELINE"
+    ],
+    "seeds": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "scenarios": [
+      "ASMS_mHDM_K3_v2both",
+      "SMS_RDM_K0"
+    ],
+    "n_mc": 200,
+    "train_window_days": 378,
+    "step_days": 50,
+    "total_wall_seconds": 2171.028473854065
+  },
+  "raw_results": [
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 6,
+      "grand_mean": 0.00029849088241179646,
+      "wall": 1490.8404710292816,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 7,
+      "grand_mean": 0.000325509271653493,
+      "wall": 1483.7838990688324,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 8,
+      "grand_mean": 0.00031330663464591374,
+      "wall": 1424.9943192005157,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 9,
+      "grand_mean": 0.00031399827536316154,
+      "wall": 1406.38094997406,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 10,
+      "grand_mean": 0.00032710827126726744,
+      "wall": 762.3830630779266,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 6,
+      "grand_mean": 0.00033644760918311327,
+      "wall": 6.371185064315796,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 7,
+      "grand_mean": 0.0003391128362121372,
+      "wall": 6.106910228729248,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 8,
+      "grand_mean": 0.00032630437451793535,
+      "wall": 5.564957857131958,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 9,
+      "grand_mean": 0.00030978251094099224,
+      "wall": 5.774806976318359,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 10,
+      "grand_mean": 0.0003636819918401544,
+      "wall": 6.704689264297485,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2171.0276820659637
+    }
+  ],
+  "summary": {
+    "BASELINE": {
+      "ASMS_mHDM_K3_v2both": {
+        "n_seeds": 5,
+        "mean": 0.0003156826670683265,
+        "std": 1.1523310658718693e-05,
+        "min": 0.00029849088241179646,
+        "max": 0.00032710827126726744,
+        "raw": [
+          0.00029849088241179646,
+          0.000325509271653493,
+          0.00031330663464591374,
+          0.00031399827536316154,
+          0.00032710827126726744
+        ]
+      },
+      "SMS_RDM_K0": {
+        "n_seeds": 5,
+        "mean": 0.00033506586453886645,
+        "std": 1.9705212611462055e-05,
+        "min": 0.00030978251094099224,
+        "max": 0.0003636819918401544,
+        "raw": [
+          0.00033644760918311327,
+          0.0003391128362121372,
+          0.00032630437451793535,
+          0.00030978251094099224,
+          0.0003636819918401544
+        ]
+      }
+    }
+  },
+  "wilcoxon_tests": {}
+}

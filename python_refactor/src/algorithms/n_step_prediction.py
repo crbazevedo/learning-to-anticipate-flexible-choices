@@ -16,44 +16,89 @@ class NStepPredictor:
     def __init__(self, max_horizon: int = 3):
         self.max_horizon = max_horizon
         
+    # W22-NC13a: clamp ceiling on predicted-covariance diagonal elements.
+    # Without a ceiling, h-step covariance propagation `F @ P @ F^T` grows
+    # the position component by P[velocity, velocity] each step. With NC7's
+    # high velocity prior (P[2,2] = 1000), after h steps the position
+    # covariance reaches ~h × 1000. TIP MC sampling from
+    # Normal([predicted_roi, predicted_risk], predicted_cov) then has
+    # std ≈ √(h × 1000) around means ≈ 0.001 — pure noise → mutual
+    # non-dominance ≈ 0.5 → TIP saturates regardless of NC12 fix
+    # (Probe B POST-NC12 still showed 99.87% TIP saturation).
+    #
+    # Rationale for clamp ceiling = 1.0: position covariance > 1.0 means
+    # the implied std > 1.0 (100% point swing) which dwarfs any realistic
+    # portfolio ROI/risk magnitude (typically O(0.001-0.1)). Beyond this
+    # ceiling, the predictive distribution is uninformative for TIP
+    # comparison. Effectively this is a "predict but don't claim more
+    # uncertainty than 100% std" rule.
+    #
+    # Predicted impact (to be validated by post-NC13a Probe B):
+    #   - TIP MC samples will have std ≤ 1.0 (vs current ~30) → samples
+    #     concentrate near means → mutual non-dominance probability depends
+    #     on means' relative dominance → TIP escapes 0.5 saturation
+    #   - Tradeoff: under-states true uncertainty when |F^h · P · F^{h.T}|
+    #     is genuinely large; but the alternative (pure noise TIP) is
+    #     worse — it actively destroys the anticipation signal.
+    _PREDICTED_COV_DIAG_CLAMP: float = 1.0
+
     def kalman_n_step_prediction(self, kalman_state, h: int) -> Dict:
         """
-        Perform n-step ahead prediction using Kalman filter
-        
+        Perform n-step ahead prediction using Kalman filter.
+
         Args:
             kalman_state: Current Kalman state
             h: Prediction horizon (1, 2, 3, ...)
-            
+
         Returns:
             Dict with predicted state and covariance for each step
+
+        W22-NC13a: covariance ceiling applied to diagonal elements to
+        prevent TIP MC saturation under unbounded h-step propagation.
         """
         if h > self.max_horizon:
             raise ValueError(f"Horizon {h} exceeds maximum {self.max_horizon}")
-            
+
         predictions = {}
         current_state = kalman_state.x.copy()
         current_cov = kalman_state.P.copy()
-        
+
         for step in range(1, h + 1):
             # Predict next state
             F = kalman_state.F  # State transition matrix
-            
+
             # State prediction
             predicted_state = F @ current_state
-            
+
             # Covariance prediction (without process noise Q)
             predicted_cov = F @ current_cov @ F.T
-            
+
+            # W22-NC13a: clamp diagonal of predicted_cov to a ceiling so
+            # downstream TIP MC sampling does not collapse into pure noise.
+            # The clamp ONLY affects predicted_cov returned to callers; the
+            # internal `current_cov` rolled forward to the next step is the
+            # UNCLAMPED true propagation (preserving Kalman invariants for
+            # multi-step compounding consistency).
+            clamped_cov = predicted_cov.copy()
+            diag = np.diag(clamped_cov)
+            if np.any(diag > self._PREDICTED_COV_DIAG_CLAMP):
+                # Scale-down: shrink all diagonals proportionally so the
+                # max diag = clamp, preserving the correlation structure.
+                # If only some exceed, use min(1, clamp / max_diag) factor.
+                max_diag = float(np.max(diag))
+                scale = self._PREDICTED_COV_DIAG_CLAMP / max_diag
+                clamped_cov = clamped_cov * scale
+
             predictions[f'step_{step}'] = {
                 'state': predicted_state.copy(),
-                'covariance': predicted_cov.copy(),
+                'covariance': clamped_cov,
                 'horizon': step
             }
-            
-            # Update for next iteration
+
+            # Update for next iteration with UNCLAMPED propagation
             current_state = predicted_state.copy()
             current_cov = predicted_cov.copy()
-            
+
         return predictions
     
     def dirichlet_n_step_prediction(self, dirichlet_params: np.ndarray, 

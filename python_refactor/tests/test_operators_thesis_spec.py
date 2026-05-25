@@ -157,5 +157,132 @@ class TestCardinalityBoundsHold(unittest.TestCase):
                                        f"cardinality {card} > c_u={THESIS_CARDINALITY_MAX}")
 
 
+class TestW22NC8bOffspringObjectivesFresh(unittest.TestCase):
+    """W22-NC8b regression: offspring's portfolio.ROI/risk MUST reflect its
+    ACTUAL weights, not the random initial weights from Solution.__init__.
+
+    Pre-NC8b (W15-2 regression): thesis_uniform_crossover and
+    thesis_dual_mode_mutation called `Solution(num_assets=n)` (which
+    compute_efficiency'd random initial weights from Portfolio.init()),
+    then OVERWROTE the weights without recomputing. Result: offspring's
+    portfolio.ROI/risk bore no relation to its weights — selection
+    downstream used STALE objectives.
+
+    The OLD `crossover`/`mutation` operators in this same file (lines 47-54,
+    170-175) DID recompute efficiency after weight assignment. The thesis
+    operators (W15-2 addition) silently dropped this discipline. NC8b is a
+    regression introduced by W15-2.
+
+    Receipt: W22 Probe A pre-NC7 verdict + post-NC7 verdict both showed
+    KF predictions bit-identical to persistence partly because BOTH
+    persistence_ROI (sol.P.ROI, stale) and kf.x_next[0] (init x[0], stale)
+    were the same random-weights value.
+
+    This test pins the post-NC8b invariant: after crossover OR mutation,
+    portfolio.ROI MUST equal what Portfolio.compute_efficiency would
+    compute on the offspring's actual weights.
+    """
+
+    def _init_portfolio_class_stats(self, n_assets: int = 8) -> None:
+        """Initialize Portfolio class-level statistics so compute_efficiency
+        fires. Without this, _finalize_offspring_objectives is a no-op."""
+        from src.portfolio.portfolio import Portfolio
+        rng = np.random.default_rng(42)
+        # 60 daily returns, n_assets columns, small positive drift
+        returns = rng.normal(loc=0.001, scale=0.01, size=(60, n_assets))
+        Portfolio.mean_ROI = Portfolio.estimate_assets_mean_ROI(returns)
+        Portfolio.median_ROI = Portfolio.estimate_assets_median_ROI(returns)
+        Portfolio.covariance = Portfolio.estimate_covariance(
+            Portfolio.mean_ROI, returns
+        )
+        Portfolio.robust_covariance = Portfolio.covariance
+
+    def test_crossover_offspring_roi_matches_actual_weights(self):
+        """After thesis_uniform_crossover, child.P.ROI must equal the ROI
+        computed from child.P.investment (NOT from random-init weights)."""
+        from src.portfolio.portfolio import Portfolio
+        n = 8
+        self._init_portfolio_class_stats(n_assets=n)
+
+        rng = np.random.default_rng(1)
+        # Two parents with deterministic concentrated allocations
+        p1 = _mk_solution(np.array([0.2, 0.2, 0.2, 0.2, 0.2, 0.0, 0.0, 0.0]))
+        Portfolio.compute_efficiency(p1.P)
+        p2 = _mk_solution(np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.3, 0.3]))
+        Portfolio.compute_efficiency(p2.P)
+
+        c1, c2 = thesis_uniform_crossover(p1, p2, p=0.5, rng=rng)
+
+        # For each child: re-compute efficiency on its actual weights and
+        # check that the operator's output already produced that result
+        # (i.e. operator finalized objectives, not left stale ones).
+        for child in (c1, c2):
+            expected_ROI = float(np.dot(child.P.investment, Portfolio.mean_ROI))
+            actual_ROI = float(child.P.ROI)
+            # Allow modest tolerance for compute_efficiency internals
+            self.assertAlmostEqual(
+                actual_ROI, expected_ROI, places=6,
+                msg=(f"NC8b STALE-OBJECTIVES REGRESSION: "
+                     f"crossover child has portfolio.ROI={actual_ROI:.6e} "
+                     f"but actual-weights ROI is {expected_ROI:.6e}. "
+                     f"Operator did not recompute objectives after weight "
+                     f"assignment — selection sees stale data.")
+            )
+
+    def test_mutation_offspring_roi_matches_actual_weights(self):
+        """After thesis_dual_mode_mutation, mutated.P.ROI must equal the ROI
+        computed from mutated.P.investment."""
+        from src.portfolio.portfolio import Portfolio
+        n = 8
+        self._init_portfolio_class_stats(n_assets=n)
+
+        rng = np.random.default_rng(2)
+        parent = _mk_solution(np.array([0.2, 0.2, 0.2, 0.2, 0.2, 0.0, 0.0, 0.0]))
+        Portfolio.compute_efficiency(parent.P)
+
+        for _ in range(10):  # multiple draws to cover both mutation modes
+            mutated = thesis_dual_mode_mutation(parent, rng=rng)
+            expected_ROI = float(np.dot(mutated.P.investment, Portfolio.mean_ROI))
+            actual_ROI = float(mutated.P.ROI)
+            self.assertAlmostEqual(
+                actual_ROI, expected_ROI, places=6,
+                msg=(f"NC8b STALE-OBJECTIVES REGRESSION: "
+                     f"mutated portfolio.ROI={actual_ROI:.6e} != "
+                     f"actual-weights ROI {expected_ROI:.6e}")
+            )
+
+    def test_crossover_offspring_kalman_state_matches_actual_roi(self):
+        """After NC8b finalize, child.P.kalman_state.x[0:2] MUST equal
+        child.P.ROI/risk (not random-weights values)."""
+        from src.portfolio.portfolio import Portfolio
+        n = 8
+        self._init_portfolio_class_stats(n_assets=n)
+
+        rng = np.random.default_rng(3)
+        p1 = _mk_solution(np.array([0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
+        Portfolio.compute_efficiency(p1.P)
+        p2 = _mk_solution(np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5]))
+        Portfolio.compute_efficiency(p2.P)
+
+        c1, c2 = thesis_uniform_crossover(p1, p2, p=0.5, rng=rng)
+
+        for child in (c1, c2):
+            self.assertIsNotNone(child.P.kalman_state,
+                                 "kalman_state missing on offspring after NC8b finalize")
+            kf_x = child.P.kalman_state.x
+            self.assertAlmostEqual(
+                float(kf_x[0]), float(child.P.ROI), places=6,
+                msg=(f"NC8b STALE-KF REGRESSION: "
+                     f"kalman_state.x[0]={kf_x[0]:.6e} != "
+                     f"portfolio.ROI={child.P.ROI:.6e}")
+            )
+            self.assertAlmostEqual(
+                float(kf_x[1]), float(child.P.risk), places=6,
+                msg=(f"NC8b STALE-KF REGRESSION: "
+                     f"kalman_state.x[1]={kf_x[1]:.6e} != "
+                     f"portfolio.risk={child.P.risk:.6e}")
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

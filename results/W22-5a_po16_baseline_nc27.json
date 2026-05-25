@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-20T15:05:30.285120",
+    "configs": [
+      "BASELINE",
+      "NC27_DEEP"
+    ],
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "scenarios": [
+      "ASMS_mHDM_K3_v2both",
+      "SMS_RDM_K0"
+    ],
+    "n_mc": 200,
+    "train_window_days": 378,
+    "step_days": 50,
+    "total_wall_seconds": 14400.219324111938
+  },
+  "raw_results": [],
+  "summary": {},
+  "wilcoxon_tests": {}
+}

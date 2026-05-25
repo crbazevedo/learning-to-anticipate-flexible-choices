@@ -1,0 +1,182 @@
+[
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004770914943366022,
+    "grand_std": 0.0005929227032297385,
+    "wall_clock_s": 845.9375109672546
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00046437306984020146,
+    "grand_std": 0.0005824001637281974,
+    "wall_clock_s": 943.7209842205048
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 3,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00047500240048398634,
+    "grand_std": 0.0005713118878254268,
+    "wall_clock_s": 986.6057939529419
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 4,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00046044528586966944,
+    "grand_std": 0.0005693622905453779,
+    "wall_clock_s": 940.5800440311432
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 5,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004066530220623994,
+    "grand_std": 0.000535702877047904,
+    "wall_clock_s": 1046.5864698886871
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 6,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.000503523152299562,
+    "grand_std": 0.0005891256931132401,
+    "wall_clock_s": 1342.1748268604279
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 8,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004269098901159422,
+    "grand_std": 0.0004993847940534599,
+    "wall_clock_s": 1332.3288431167603
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 7,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0005136764622836866,
+    "grand_std": 0.0005760175736484851,
+    "wall_clock_s": 1708.0924911499023
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 9,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.000423125409357567,
+    "grand_std": 0.0005528662433370678,
+    "wall_clock_s": 1868.0792450904846
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00045632284090629593,
+    "grand_std": 0.0005278597459116984,
+    "wall_clock_s": 23.77445888519287
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 2,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00042356159531174936,
+    "grand_std": 0.0006358741774585936,
+    "wall_clock_s": 17.328672885894775
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 3,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004503262743371604,
+    "grand_std": 0.0006836657663302973,
+    "wall_clock_s": 19.511280059814453
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 4,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004015442262686017,
+    "grand_std": 0.0005167562873014178,
+    "wall_clock_s": 22.030202865600586
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 5,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004002815424223033,
+    "grand_std": 0.0005531299692636857,
+    "wall_clock_s": 15.013260126113892
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 6,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00046431273321572217,
+    "grand_std": 0.0006130743913723939,
+    "wall_clock_s": 20.261178970336914
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 7,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00044020964655225986,
+    "grand_std": 0.0006079524100944772,
+    "wall_clock_s": 33.919008016586304
+  },
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 10,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004977670771705795,
+    "grand_std": 0.0005814440388858354,
+    "wall_clock_s": 2004.996747970581
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 8,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00040849553399769056,
+    "grand_std": 0.000474247362103945,
+    "wall_clock_s": 25.137211799621582
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 9,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004483041101391882,
+    "grand_std": 0.0005404952620912905,
+    "wall_clock_s": 26.860769987106323
+  },
+  {
+    "scenario": "SMS_RDM_K0",
+    "seed": 10,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.00045537929534661463,
+    "grand_std": 0.0005195133388649696,
+    "wall_clock_s": 27.947548866271973
+  }
+]

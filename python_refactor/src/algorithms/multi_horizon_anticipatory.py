@@ -138,28 +138,51 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
         """
         if len(predicted_states) != len(lambda_rates):
             raise ValueError("Number of predicted states must match number of lambda rates")
-        
+
         if len(predicted_states) == 0:
             return current_state.copy()
-        
-        # Calculate sum of lambda rates
+
+        # W22-NC29 STRUCTURAL FIX (operator directive 2026-05-19): preserve a
+        # MINIMUM weight on the current observation z_t.
+        #
+        # Pre-fix: when Σλ > 1.0, the soft normalization set every λ_h to
+        # λ_h / Σλ, making w_0 = 1 - Σλ → 0. This is the "runaway
+        # anticipation" degeneracy from W22 Inspection 5: the current
+        # observation gets ZERO weight and the anticipatory state becomes
+        # pure prediction. The operator flagged degeneracies should not
+        # happen — this fix enforces w_0 ≥ W22_NC29_MIN_W0 (default 0.2)
+        # so the current observation always contributes meaningfully.
+        #
+        # Mechanism: enforce Σλ ≤ (1 - MIN_W0); if Σλ exceeds that cap, scale
+        # all λ_h by (1 - MIN_W0) / Σλ. Result: w_0 = MIN_W0 regardless of
+        # how aggressive the λ_h's wanted to be.
+        import os as _os
+        try:
+            min_w0 = float(_os.environ.get("W22_NC29_MIN_W0", "0.2"))
+        except ValueError:
+            min_w0 = 0.2
+        min_w0 = max(0.0, min(0.99, min_w0))  # safety: keep min_w0 in (0, 1)
+        max_lambda_sum = 1.0 - min_w0
+
         lambda_sum = sum(lambda_rates)
-        
-        # Ensure lambda_sum doesn't exceed 1.0
-        if lambda_sum > 1.0:
-            logger.warning(f"Lambda sum {lambda_sum} > 1.0, normalizing")
-            lambda_rates = [rate / lambda_sum for rate in lambda_rates]
-            lambda_sum = 1.0
-        
-        # First term: (1 - Σλ) z_t
+        if lambda_sum > max_lambda_sum:
+            logger.debug(
+                f"NC29: capping Σλ={lambda_sum:.4f} to {max_lambda_sum:.4f} "
+                f"(preserving w_0 ≥ {min_w0:.2f})"
+            )
+            scale = max_lambda_sum / lambda_sum
+            lambda_rates = [rate * scale for rate in lambda_rates]
+            lambda_sum = max_lambda_sum
+
+        # First term: (1 - Σλ) z_t — guaranteed ≥ min_w0 after the cap above
         anticipatory_state = (1 - lambda_sum) * current_state
-        
+
         # Second term: Σλ ẑ_{t+h}
         for predicted_state, lambda_h in zip(predicted_states, lambda_rates):
             anticipatory_state += lambda_h * predicted_state
-        
-        logger.debug(f"Applied anticipatory learning rule: lambda_sum={lambda_sum:.4f}")
-        
+
+        logger.debug(f"Applied anticipatory learning rule: lambda_sum={lambda_sum:.4f}, w_0={1-lambda_sum:.4f}")
+
         return anticipatory_state
     
     def calculate_multi_horizon_lambda_rates(self, solution: Solution,
@@ -212,12 +235,32 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
             current_time=current_time,
         )
 
+        # W22-NC29a STRUCTURAL FIX (operator directive 2026-05-19): geometric
+        # discount γ^h replaces the flat (1/(H-1)) prefactor.
+        # Pre-fix: λ^H_h = (1/(H-1)) · (1 − entropy(TIP_h)) — SAME prefactor
+        #   for every horizon h. The only h-variation came from TIP_h, which
+        #   itself is clamped to [0.05, 0.95] and often saturated. Net: in
+        #   saturated regimes, every horizon got the same weight ("no real
+        #   discount" — W22 Inspection 5 degeneracy).
+        # Post-fix: λ^H_h = γ^h · (1 − entropy(TIP_h)) — explicit h-decay
+        #   that puts more weight on near-term predictions (where the KF
+        #   is most reliable; covariance lower; linear-quadratic approximation
+        #   tighter). γ default = 0.9; tunable via W22_NC29A_GAMMA env var.
+        # Both pre-fix and post-fix preserve the clamp to [0, 0.5] per λ^H.
+        import os as _os
+        try:
+            gamma = float(_os.environ.get("W22_NC29A_GAMMA", "0.9"))
+        except ValueError:
+            gamma = 0.9
+        gamma = max(0.01, min(0.999, gamma))  # safety: γ in (0, 1)
+
         lambda_rates = []
         for h in range(1, prediction_horizon):
-            # λ^H per Eq 6.6: TIP-entropy across horizon h
+            # λ^H per Eq 6.6 with NC29a geometric prefactor:
+            #   λ^H_h = γ^h · (1 − entropy(TIP_h))
             tip = self._calculate_tip_for_horizon(solution, h)
             entropy = self.tip_calculator.binary_entropy(tip)
-            lambda_h = (1.0 / (prediction_horizon - 1)) * (1.0 - entropy)
+            lambda_h = (gamma ** h) * (1.0 - entropy)
             lambda_h = max(0.0, min(0.5, lambda_h))
 
             # W17-5-CARRY-1: combine per Eq 7.16 verbatim
@@ -230,6 +273,37 @@ class MultiHorizonAnticipatoryLearning(TIPIntegratedAnticipatoryLearning):
                 lambda_combined = 1.0 - tip
             else:
                 lambda_combined = 0.5 * (lambda_h + lambda_k)
+
+            # W22-NC15 (2026-05-19): per-portfolio λ shrinkage by
+            # KF position-block uncertainty. Even when TIP is saturated
+            # (→ uniform λ ≈ 0.5 under v2_anticipative_rate), we can
+            # still differentiate per-portfolio anticipation rates by
+            # shrinking λ for portfolios with HIGH KF prediction
+            # uncertainty (don't trust predictions when we're uncertain).
+            #
+            # Shrinkage factor: λ_eff = λ_combined / (1 + α · trace(P[:2,:2]))
+            # where α = NC15_SHRINK_ALPHA (env-var, default 1.0).
+            #   - trace(P[:2,:2]) ≈ 0.1 (low unc.) → shrink ≈ 0.91 → λ_eff ≈ 0.45
+            #   - trace(P[:2,:2]) ≈ 1.0 (high unc.) → shrink ≈ 0.5 → λ_eff ≈ 0.25
+            #
+            # Mechanism: portfolios with stable KF state get FULL anticipation;
+            # portfolios with noisy KF state get DAMPENED anticipation. This
+            # provides per-portfolio λ differentiation even with saturated TIP.
+            #
+            # Enabled via env var W22_NC15_LAMBDA_SHRINKAGE=1 (default off
+            # for backward compatibility). Tunable via W22_NC15_SHRINK_ALPHA
+            # (default 1.0).
+            import os as _os
+            if _os.environ.get("W22_NC15_LAMBDA_SHRINKAGE", "0").strip() == "1":
+                try:
+                    shrink_alpha = float(_os.environ.get("W22_NC15_SHRINK_ALPHA", "1.0"))
+                except ValueError:
+                    shrink_alpha = 1.0
+                kf = getattr(solution.P, "kalman_state", None)
+                if kf is not None and getattr(kf, "P", None) is not None:
+                    pos_trace = float(kf.P[0, 0] + kf.P[1, 1])
+                    shrink = 1.0 / (1.0 + shrink_alpha * max(0.0, pos_trace))
+                    lambda_combined = lambda_combined * shrink
 
             # Trace row per horizon (consumed by W16-4 flush_lambda_trace_csv)
             self._lambda_trace_rows.append({

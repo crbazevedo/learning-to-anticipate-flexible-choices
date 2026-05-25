@@ -117,6 +117,13 @@ SCENARIOS: dict[str, dict[str, Any]] = {
         "learning": _BASELINE_MYOPIC,
         "dm": "RDM",
     },
+    # W22 Probe H: pop=30, gens=40 mid-step (thesis spec is pop=200, gens=500)
+    "SMS_RDM_K0_pop30gen40": {
+        "name": "SMS/RDM K=0 with pop=30, gens=40 (Probe H param sweep)",
+        "learning": _BASELINE_MYOPIC,
+        "dm": "RDM",
+        "algorithm_overrides": {"population_size": 30, "generations": 40},
+    },
     "SMS_mHDM_K0": {
         "name": "SMS/mHDM K=0 — myopic baseline + max-Hypv DM",
         "learning": _BASELINE_MYOPIC,
@@ -192,6 +199,17 @@ SCENARIOS: dict[str, dict[str, Any]] = {
         "name": "ASMS/mHDM K=3 + v2 rate AND v2 stability (Reading-F combined experiment)",
         "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True),
         "algorithm_overrides": {"use_v2_stability_weighting": True},
+        "dm": "mHDM",
+    },
+    # W22 Probe H: pop=30, gens=40 mid-step toward thesis spec (pop=200, gens=500)
+    "ASMS_mHDM_K3_v2both_pop30gen40": {
+        "name": "ASMS/mHDM K=3 v2both with pop=30, gens=40 (Probe H param sweep)",
+        "learning": _asms_learning_config(K=3, use_v2_anticipative_rate=True),
+        "algorithm_overrides": {
+            "use_v2_stability_weighting": True,
+            "population_size": 30,
+            "generations": 40,
+        },
         "dm": "mHDM",
     },
     # W21-1 / Reading-F isolated variant: v2 stability ONLY (no v2 rate).

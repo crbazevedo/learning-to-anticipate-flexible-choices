@@ -1,0 +1,11 @@
+[
+  {
+    "scenario": "ASMS_mHDM_K3_v2both",
+    "seed": 1,
+    "n_periods_ok": 23,
+    "n_periods_total": 23,
+    "grand_mean": 0.0004965852725747095,
+    "grand_std": 0.0005800677040051017,
+    "wall_clock_s": 1241.499212026596
+  }
+]

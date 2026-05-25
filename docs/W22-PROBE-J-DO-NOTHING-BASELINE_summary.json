@@ -1,0 +1,36 @@
+{
+  "n_records": 1839,
+  "n_scenarios": 2,
+  "n_seeds": 5,
+  "n_periods": 23,
+  "dm_aggregate": {
+    "amfc": {
+      "n_periods": 220,
+      "mean": 0.000172830230648114,
+      "median": 0.0,
+      "std": 0.00033892697874454583
+    },
+    "do_nothing": {
+      "n_periods": 220,
+      "mean": 0.00014406867434202335,
+      "median": 0.0,
+      "std": 0.00029714563472719015
+    }
+  },
+  "fraction_do_nothing_better": 0.16818181818181818,
+  "mean_l1_closest_match": 1.3041354487798618,
+  "per_scenario": {
+    "ASMS_mHDM_K3_v2both": {
+      "n": 110,
+      "amfc_mean": 0.00018314691230325553,
+      "do_nothing_mean": 0.0001528501240474008,
+      "fraction_dn_better": 0.17272727272727273
+    },
+    "SMS_RDM_K0": {
+      "n": 110,
+      "amfc_mean": 0.00016251354899297248,
+      "do_nothing_mean": 0.00013528722463664598,
+      "fraction_dn_better": 0.16363636363636364
+    }
+  }
+}

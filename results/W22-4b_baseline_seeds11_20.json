@@ -1,0 +1,253 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-20T19:23:33.193701",
+    "configs": [
+      "BASELINE"
+    ],
+    "seeds": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "scenarios": [
+      "ASMS_mHDM_K3_v2both",
+      "SMS_RDM_K0"
+    ],
+    "n_mc": 200,
+    "train_window_days": 378,
+    "step_days": 50,
+    "total_wall_seconds": 2507.6020209789276
+  },
+  "raw_results": [
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 11,
+      "grand_mean": 0.0002874332445838942,
+      "wall": 893.0160989761353,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 12,
+      "grand_mean": 0.00030845049424963757,
+      "wall": 927.4345278739929,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 13,
+      "grand_mean": 0.00033809916959558423,
+      "wall": 928.2596929073334,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 14,
+      "grand_mean": 0.0003711361224526053,
+      "wall": 919.965137720108,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 15,
+      "grand_mean": 0.00029493937287605466,
+      "wall": 937.2704520225525,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 16,
+      "grand_mean": 0.0003426344935631316,
+      "wall": 929.6506679058075,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 17,
+      "grand_mean": 0.0002995791858322038,
+      "wall": 957.0141599178314,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 18,
+      "grand_mean": 0.0002695346662930932,
+      "wall": 888.8217868804932,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 19,
+      "grand_mean": 0.00038777122950263095,
+      "wall": 689.0701160430908,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 20,
+      "grand_mean": 0.0002880474637752845,
+      "wall": 640.9563739299774,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 11,
+      "grand_mean": 0.00027219068964606547,
+      "wall": 5.3569159507751465,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 12,
+      "grand_mean": 0.0003102468617455954,
+      "wall": 4.728968858718872,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 13,
+      "grand_mean": 0.00035002245624382025,
+      "wall": 4.066910028457642,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 14,
+      "grand_mean": 0.00034039021207044236,
+      "wall": 4.306704759597778,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 15,
+      "grand_mean": 0.0003411090054584723,
+      "wall": 3.9513750076293945,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 16,
+      "grand_mean": 0.0003241542341991066,
+      "wall": 4.014243841171265,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 17,
+      "grand_mean": 0.00031251883653135674,
+      "wall": 4.509009838104248,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 18,
+      "grand_mean": 0.00033150833846655984,
+      "wall": 4.5866477489471436,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 19,
+      "grand_mean": 0.0003141345477063353,
+      "wall": 4.624269962310791,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 20,
+      "grand_mean": 0.00034724791414922205,
+      "wall": 4.62424898147583,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 2507.5972652435303
+    }
+  ],
+  "summary": {
+    "BASELINE": {
+      "ASMS_mHDM_K3_v2both": {
+        "n_seeds": 10,
+        "mean": 0.00031876254427241197,
+        "std": 3.9213339059546084e-05,
+        "min": 0.0002695346662930932,
+        "max": 0.00038777122950263095,
+        "raw": [
+          0.0002874332445838942,
+          0.00030845049424963757,
+          0.00033809916959558423,
+          0.0003711361224526053,
+          0.00029493937287605466,
+          0.0003426344935631316,
+          0.0002995791858322038,
+          0.0002695346662930932,
+          0.00038777122950263095,
+          0.0002880474637752845
+        ]
+      },
+      "SMS_RDM_K0": {
+        "n_seeds": 10,
+        "mean": 0.00032435230962169767,
+        "std": 2.3420423872983157e-05,
+        "min": 0.00027219068964606547,
+        "max": 0.00035002245624382025,
+        "raw": [
+          0.00027219068964606547,
+          0.0003102468617455954,
+          0.00035002245624382025,
+          0.00034039021207044236,
+          0.0003411090054584723,
+          0.0003241542341991066,
+          0.00031251883653135674,
+          0.00033150833846655984,
+          0.0003141345477063353,
+          0.00034724791414922205
+        ]
+      }
+    }
+  },
+  "wilcoxon_tests": {}
+}

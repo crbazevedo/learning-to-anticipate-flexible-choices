@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-20T06:49:07.881323",
+    "configs": [
+      "BASELINE"
+    ],
+    "seeds": [
+      1
+    ],
+    "scenarios": [
+      "ASMS_mHDM_K3_v2both",
+      "SMS_RDM_K0"
+    ],
+    "n_mc": 100,
+    "train_window_days": 378,
+    "step_days": 50,
+    "total_wall_seconds": 853.7174067497253
+  },
+  "raw_results": [
+    {
+      "scenario": "ASMS_mHDM_K3_v2both",
+      "seed": 1,
+      "grand_mean": 0.00034274327219500195,
+      "wall": 851.236897945404,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 853.716784954071
+    },
+    {
+      "scenario": "SMS_RDM_K0",
+      "seed": 1,
+      "grand_mean": 0.00033378364227651115,
+      "wall": 4.95032811164856,
+      "config": "BASELINE",
+      "config_env": {},
+      "wall_total": 853.716784954071
+    }
+  ],
+  "summary": {
+    "BASELINE": {
+      "ASMS_mHDM_K3_v2both": {
+        "n_seeds": 1,
+        "mean": 0.00034274327219500195,
+        "std": NaN,
+        "min": 0.00034274327219500195,
+        "max": 0.00034274327219500195,
+        "raw": [
+          0.00034274327219500195
+        ]
+      },
+      "SMS_RDM_K0": {
+        "n_seeds": 1,
+        "mean": 0.00033378364227651115,
+        "std": NaN,
+        "min": 0.00033378364227651115,
+        "max": 0.00033378364227651115,
+        "raw": [
+          0.00033378364227651115
+        ]
+      }
+    }
+  },
+  "wilcoxon_tests": {}
+}

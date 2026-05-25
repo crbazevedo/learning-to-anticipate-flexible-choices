@@ -100,11 +100,89 @@ def _select_amfc_index(per_portfolio_efhv: np.ndarray) -> int:
     return int(np.argmax(per_portfolio_efhv))
 
 
+def _select_close_to_prev_amfc_index(
+    per_portfolio_efhv: np.ndarray,
+    weights: list,
+    previous_weights,
+    lambda_balance: float = 0.5,
+) -> int:
+    """W22-NC18 (2026-05-18): transaction-cost-aware AMFC selector.
+
+    Hybrid score balancing expected HV against composition continuity:
+        score_i = lambda_balance * efhv_norm_i
+                + (1 - lambda_balance) * jaccard(weights_i, previous_weights)
+
+    where:
+      - efhv_norm_i = (per_portfolio_efhv[i] - min) / (max - min)
+        normalized to [0, 1]
+      - jaccard(w, prev) = |active(w) ∩ active(prev)| / |active(w) ∪ active(prev)|
+        ∈ [0, 1]; 1 = identical asset set, 0 = disjoint sets
+
+    Period 0 / no `previous_weights`: falls back to standard AMFC (just argmax EFHV).
+
+    Receipt: W22 Probe G found mean Jaccard between consecutive AMFC weights
+    = 0.169 (chaotic; < 0.2 threshold), with 17 asset switches per period
+    out of ~12 active (nearly total turnover). Chaotic AMFC trajectory:
+      1. Incurs full transaction cost each period (per thesis §7.2.2 model)
+      2. Makes NC8c-v2 cross-period KF carry meaningless (prev_AMFC's
+         (ROI, risk) belongs to a totally different portfolio)
+      3. Adds noise to the "implemented portfolio" track u*_{t-1}
+
+    NC18 mitigation: at AMFC selection time, prefer Pareto-front portfolios
+    whose composition is closer to the previous AMFC (high Jaccard), while
+    still rewarding high expected HV. With default lambda_balance=0.5,
+    the two factors are equally weighted.
+
+    Args:
+        per_portfolio_efhv: array of expected future HV per Pareto-front portfolio
+        weights: list of weight vectors (one per portfolio), parallel to per_portfolio_efhv
+        previous_weights: previous period's AMFC weights (or None for period 0)
+        lambda_balance: ∈ [0, 1]; weight on EFHV (vs Jaccard stability).
+            1.0 = pure AMFC (no stability penalty);
+            0.0 = pure stability (ignore EFHV).
+            Default 0.5 = equal weighting.
+
+    Returns:
+        Selected portfolio index.
+    """
+    if per_portfolio_efhv.size == 0:
+        return 0
+    if previous_weights is None or len(weights) == 0:
+        return _select_amfc_index(per_portfolio_efhv)
+
+    # Normalize EFHV to [0, 1] (handles all-equal case gracefully)
+    efhv = np.asarray(per_portfolio_efhv, dtype=float)
+    efhv = np.where(np.isfinite(efhv), efhv, 0.0)
+    efhv_min = float(np.min(efhv))
+    efhv_max = float(np.max(efhv))
+    efhv_range = efhv_max - efhv_min
+    if efhv_range < 1e-12:
+        efhv_norm = np.zeros_like(efhv)
+    else:
+        efhv_norm = (efhv - efhv_min) / efhv_range
+
+    # Compute Jaccard of each portfolio's active set vs previous AMFC's
+    prev_w = np.asarray(previous_weights, dtype=float)
+    prev_active = set(np.flatnonzero(np.abs(prev_w) > 1e-12).tolist())
+    jaccards = np.zeros(len(weights))
+    for i, w in enumerate(weights):
+        w = np.asarray(w, dtype=float)
+        curr_active = set(np.flatnonzero(np.abs(w) > 1e-12).tolist())
+        union = prev_active | curr_active
+        inter = prev_active & curr_active
+        jaccards[i] = float(len(inter) / len(union)) if union else 1.0
+
+    # Combined score
+    scores = lambda_balance * efhv_norm + (1.0 - lambda_balance) * jaccards
+    return int(np.argmax(scores))
+
+
 def _train_and_extract_pareto(scenario: str, seed: int,
                                train_returns: pd.DataFrame,
                                previous_weights: np.ndarray | None = None,
+                               previous_kf_state=None,
                                lambda_trace_csv_path: str | None = None,
-                               ) -> tuple[list[np.ndarray], int]:
+                               ) -> tuple[list[np.ndarray], int, list, list]:
     """Train SMS-EMOA on the train window; extract Pareto weights.
 
     Mirrors oos_report._run_one_scenario_seed but takes the pre-sliced
@@ -115,6 +193,19 @@ def _train_and_extract_pareto(scenario: str, seed: int,
     Table 7.1 transaction costs from the ROI objective per §7.2
     Eqs (7.4)-(7.5). On period 1 / no prior portfolio, pass None →
     no cost subtraction.
+
+    W22-NC8c (2026-05-18): optional ``previous_kf_state`` carries the
+    previous period's AMFC portfolio KF state forward. When set,
+    sms_emoa._initialize_population uses this as the initial KF state
+    for the new period's portfolios (specifically: copies the velocity
+    components x[2:4] and the P[2:4, 2:4] block per portfolio, allowing
+    velocity learning to persist across walk-forward periods).
+
+    Returns:
+        (weights, n_assets, probe_a_records, pareto_kf_states)
+        - pareto_kf_states: list of KalmanParams snapshots, one per
+          Pareto-front portfolio (parallel to weights). For NC8c
+          downstream consumption by run_walk_forward.
     """
     from experiments.validation_matrix import build_experiment_config
     from src.experiments.experiment_manager import ExperimentManager
@@ -136,12 +227,21 @@ def _train_and_extract_pareto(scenario: str, seed: int,
     # algorithm setter can call set_previous_weights post-init).
     if previous_weights is not None:
         data["previous_weights"] = np.asarray(previous_weights, dtype=float)
+    # W22-NC8c: thread previous period's AMFC KF state for cross-period
+    # velocity learning persistence.
+    if previous_kf_state is not None:
+        data["previous_kf_state"] = previous_kf_state
     # W16-4: thread λ trace CSV path; ExperimentManager flushes per-period.
     if lambda_trace_csv_path is not None:
         data["lambda_trace_csv_path"] = str(lambda_trace_csv_path)
     results = mgr._run_algorithm(config, data)
     pareto = results.get("pareto_front", [])
     weights: list[np.ndarray] = []
+    pareto_kf_states: list = []
+    # W22 Probe A: optionally also extract per-portfolio KF state +
+    # current-period (ROI, risk) for the persistence baseline.
+    from src.diagnostics import probe_a_kf_prediction_log as _probe_a
+    probe_a_records: list[dict] = []
     for sol in pareto:
         w = getattr(sol.P, "investment", None)
         if w is None:
@@ -149,7 +249,24 @@ def _train_and_extract_pareto(scenario: str, seed: int,
         w_arr = np.asarray(w, dtype=float)
         if w_arr.shape == (n_assets,):
             weights.append(w_arr)
-    return weights, n_assets
+            # W22-NC8c: capture KF state per Pareto portfolio so
+            # run_walk_forward can pick AMFC's KF state for next period.
+            kf_for_carry = getattr(sol.P, "kalman_state", None)
+            pareto_kf_states.append(kf_for_carry)
+            if _probe_a.is_enabled():
+                kf = kf_for_carry
+                if kf is not None:
+                    # x_next post-final-predict = KF's t+1 prediction
+                    # ROI is x[0], risk is x[1] per paper Eq 11
+                    probe_a_records.append({
+                        "weights": w_arr.copy(),
+                        "kf_predicted_ROI_t_plus_1": float(kf.x_next[0]),
+                        "kf_predicted_risk_t_plus_1": float(kf.x_next[1]),
+                        "persistence_ROI_t": float(sol.P.ROI),
+                        "persistence_risk_t": float(sol.P.risk),
+                        "kf_P_diag": [float(kf.P[i, i]) for i in range(kf.P.shape[0])],
+                    })
+    return weights, n_assets, probe_a_records, pareto_kf_states
 
 
 def run_walk_forward(scenario: str,
@@ -186,13 +303,18 @@ def run_walk_forward(scenario: str,
     # argmax-EFHV (or first if EFHV not yet computed) from the
     # previous period's Pareto front. None on period 1 (no prior).
     previous_weights: np.ndarray | None = None
+    # W22-NC8c (2026-05-18): carry the AMFC portfolio's KF state across
+    # walk-forward periods so velocity learning persists across t boundaries
+    # (vs being reset to zero at each fresh period init).
+    previous_kf_state = None
     for p in periods:
         train = full_returns.iloc[p["train_start"]:p["train_end"]]
         oos = full_returns.iloc[p["oos_start"]:p["oos_end"]]
         try:
-            weights, n_assets = _train_and_extract_pareto(
+            weights, n_assets, probe_a_records, pareto_kf_states = _train_and_extract_pareto(
                 scenario, seed, train,
                 previous_weights=previous_weights,
+                previous_kf_state=previous_kf_state,
                 lambda_trace_csv_path=lambda_trace_csv_path,
             )
         except Exception as exc:
@@ -210,6 +332,37 @@ def run_walk_forward(scenario: str,
                               "efhv_mean": float("nan"), "efhv_std": float("nan"),
                               "error": "oos_window_too_short"})
             continue
+
+        # W22 Probe A: for each portfolio in the Pareto front, compute
+        # the ACTUAL t+1 ROI/risk by evaluating its weights under the
+        # OOS period's MLE (μ̂_{t+1}, Σ̂_{t+1}), then log the
+        # (KF prediction, persistence baseline, actual) triple.
+        from src.diagnostics import probe_a_kf_prediction_log as _probe_a
+        if _probe_a.is_enabled() and probe_a_records:
+            oos_arr = oos.values if hasattr(oos, "values") else np.asarray(oos)
+            if oos_arr.shape[0] >= 2:
+                mu_oos = oos_arr.mean(axis=0)
+                cov_oos = np.cov(oos_arr, rowvar=False, ddof=1)
+                if cov_oos.ndim == 0:
+                    cov_oos = np.array([[float(cov_oos)]])
+                for i, rec in enumerate(probe_a_records):
+                    w = rec["weights"]
+                    actual_roi = float(mu_oos @ w)
+                    actual_risk = float(w @ cov_oos @ w)
+                    _probe_a.log_period_kf_prediction(
+                        scenario=scenario,
+                        seed=seed,
+                        period_t=int(p["period"]),
+                        portfolio_idx=i,
+                        weights=w.tolist(),
+                        kf_predicted_ROI_t_plus_1=rec["kf_predicted_ROI_t_plus_1"],
+                        kf_predicted_risk_t_plus_1=rec["kf_predicted_risk_t_plus_1"],
+                        persistence_ROI_t=rec["persistence_ROI_t"],
+                        persistence_risk_t=rec["persistence_risk_t"],
+                        actual_ROI_t_plus_1=actual_roi,
+                        actual_risk_t_plus_1=actual_risk,
+                        kf_P_diag=rec["kf_P_diag"],
+                    )
         efhv = compute_oos_efhv(
             pareto_weights=weights,
             oos_returns=oos,
@@ -242,8 +395,31 @@ def run_walk_forward(scenario: str,
                               or use_closed_form_expectation_efhv
                               or use_v2_per_front_efhv),
         )
-        u_star_idx = _select_amfc_index(per_portfolio_efhv)
+        # W22-NC18 (2026-05-18): allow env-var-driven choice of DM selector.
+        # W22_DM_SELECTOR=amfc (default) → standard argmax-EFHV (W17-4)
+        # W22_DM_SELECTOR=close_to_prev → transaction-cost-aware (NC18)
+        # W22_DM_SELECTOR_LAMBDA=<0..1> → balance for close_to_prev (default 0.5)
+        import os as _os
+        dm_selector = _os.environ.get("W22_DM_SELECTOR", "amfc").strip().lower()
+        if dm_selector == "close_to_prev":
+            try:
+                lam = float(_os.environ.get("W22_DM_SELECTOR_LAMBDA", "0.5"))
+            except ValueError:
+                lam = 0.5
+            u_star_idx = _select_close_to_prev_amfc_index(
+                per_portfolio_efhv, weights, previous_weights, lambda_balance=lam,
+            )
+        else:
+            u_star_idx = _select_amfc_index(per_portfolio_efhv)
         previous_weights = weights[u_star_idx]
+        # W22-NC8c: carry the AMFC portfolio's KF state to next period.
+        # pareto_kf_states[u_star_idx] is the same Solution-shaped KF state;
+        # _initialize_population will use it as initial state for new period.
+        if (0 <= u_star_idx < len(pareto_kf_states)
+                and pareto_kf_states[u_star_idx] is not None):
+            import copy as _copy
+            previous_kf_state = _copy.deepcopy(pareto_kf_states[u_star_idx])
+        # If AMFC has no KF state (shouldn't happen post-NC7), keep prior.
         results.append({
             **p,
             "n_pareto": len(weights),

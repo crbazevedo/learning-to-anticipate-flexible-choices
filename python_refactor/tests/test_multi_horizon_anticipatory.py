@@ -105,19 +105,28 @@ class TestMultiHorizonAnticipatoryLearning(unittest.TestCase):
         np.testing.assert_array_equal(result, current_state)
         
     def test_apply_anticipatory_learning_rule_lambda_sum_exceeds_one(self):
-        """Test anticipatory learning rule when lambda sum exceeds 1.0."""
+        """Test anticipatory learning rule when lambda sum exceeds the NC29 cap.
+
+        W22-NC29 STRUCTURAL FIX (2026-05-19): Σλ is now hard-capped at
+        (1 - MIN_W0), where MIN_W0 defaults to 0.2. Pre-NC29 the soft
+        normalization scaled λ → λ/Σλ giving w_0 = 0 (runaway anticipation
+        degeneracy). Post-NC29: scale all λ by (1 - MIN_W0) / Σλ to
+        preserve w_0 ≥ MIN_W0.
+
+        For λ = [1.5], MIN_W0 = 0.2:
+          - Σλ_post = 0.8; new λ = [1.5 * 0.8/1.5] = [0.8]
+          - Result = 0.2 * [0.1, 0.05] + 0.8 * [0.12, 0.06] = [0.116, 0.058]
+        """
         current_state = np.array([0.1, 0.05])
         predicted_states = [np.array([0.12, 0.06])]
-        lambda_rates = [1.5]  # Exceeds 1.0
-        
+        lambda_rates = [1.5]  # Exceeds NC29 cap of 0.8
+
         result = self.multi_horizon_learning.apply_anticipatory_learning_rule(
             current_state, predicted_states, lambda_rates
         )
-        
-        # Should normalize lambda rates
-        # Normalized lambda = 1.5 / 1.5 = 1.0
-        # Result = (1 - 1.0) * [0.1, 0.05] + 1.0 * [0.12, 0.06] = [0.12, 0.06]
-        expected = np.array([0.12, 0.06])
+
+        # Post-NC29 expected: w_0 = 0.2, Σλ_scaled = 0.8
+        expected = 0.2 * current_state + 0.8 * predicted_states[0]
         np.testing.assert_array_almost_equal(result, expected, decimal=3)
         
     def test_calculate_multi_horizon_lambda_rates(self):
